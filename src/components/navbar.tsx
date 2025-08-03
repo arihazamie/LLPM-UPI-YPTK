@@ -26,14 +26,14 @@ const aboutLinks = [
 ];
 
 // Tambahkan data untuk dropdown "Info & Berita" di bawah `aboutLinks`
-const infoBeritaLinks = [
-  { title: "Berita", href: "/berita" },
-  { title: "Info Webinar", href: "/info-webinar" },
-  { title: "Pengumuman", href: "/pengumuman" },
-  { title: "Konferensi", href: "/konferensi" },
-  { title: "Artikel", href: "/artikel" },
-  { title: "Agenda LPPM", href: "/agenda-lppm" },
-];
+// const infoBeritaLinks = [
+//   { title: "Berita", href: "/berita" },
+//   { title: "Info Webinar", href: "/info-webinar" },
+//   { title: "Pengumuman", href: "/pengumuman" },
+//   { title: "Konferensi", href: "/konferensi" },
+//   { title: "Artikel", href: "/artikel" },
+//   { title: "Agenda LPPM", href: "/agenda-lppm" },
+// ];
 
 export function Navbar() {
   return (
