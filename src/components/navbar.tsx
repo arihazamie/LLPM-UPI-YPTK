@@ -21,6 +21,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 // Data untuk dropdown "Tentang LPPM"
 const aboutLinks = [
@@ -42,6 +43,14 @@ const aboutLinks = [
 // ];
 
 export function Navbar() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Menutup sheet saat klik, hanya jika di mobile
+  const handleMobileNavClick = () => {
+    if (window.innerWidth < 768) {
+      setIsOpen(false);
+    }
+  };
   return (
     <div className="sticky top-6 z-50 mx-5 px-0 md:mx-15 md:px-15">
       <header className="container mx-auto flex h-16 items-center justify-between bg-gray-200/80 backdrop-blur-md shadow-2xl rounded-2xl px-2 md:px-10 border border-gray-300">
@@ -142,7 +151,9 @@ export function Navbar() {
             </Link>
           </Button>
         </div>
-        <Sheet>
+        <Sheet
+          open={isOpen}
+          onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
             <Button
               variant="ghost"
@@ -157,6 +168,7 @@ export function Navbar() {
             className="bg-white/90 backdrop-blur-lg">
             <Link
               href="/"
+              onClick={handleMobileNavClick}
               className="flex items-center gap-2 py-4">
               <Image
                 src="/logo.png"
@@ -172,6 +184,7 @@ export function Navbar() {
             <div className="grid gap-4 py-6">
               <Link
                 href="/"
+                onClick={handleMobileNavClick}
                 className="flex w-full items-center py-2 text-lg font-semibold text-gray-800 hover:text-red-600">
                 Beranda
               </Link>
@@ -181,49 +194,31 @@ export function Navbar() {
                 collapsible
                 className="w-full">
                 <AccordionItem value="tentang-lppm">
-                  <AccordionTrigger className="flex w-full items-center justify-between py-2 text-lg font-semibold text-gray-800 hover:text-red-600">
+                  <AccordionTrigger className="...">
                     Tentang LPPM
                   </AccordionTrigger>
                   <AccordionContent>
                     <ul className="grid gap-2 pl-4">
                       {aboutLinks.map((link) => (
-                        <li key={link.href}>
-                          <Link
-                            href={link.href}
-                            className="block py-1 text-base text-gray-700 hover:text-red-500">
-                            {link.title}
-                          </Link>
-                        </li>
+                        <Link
+                          href={link.href}
+                          key={link.href}
+                          onClick={handleMobileNavClick}
+                          className="block py-1 text-base text-gray-700 hover:text-red-500">
+                          {link.title}
+                        </Link>
                       ))}
                     </ul>
                   </AccordionContent>
                 </AccordionItem>
-
-                {/* <AccordionItem value="info-berita">
-                  <AccordionTrigger className="flex w-full items-center justify-between py-2 text-lg font-semibold text-gray-800 hover:text-red-600">
-                    Info & Berita
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="grid gap-2 pl-4">
-                      {infoBeritaLinks.map((link) => (
-                        <li key={link.href}>
-                          <Link
-                            href={link.href}
-                            className="block py-1 text-base text-gray-700 hover:text-red-500">
-                            {link.title}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem> */}
               </Accordion>
 
               <Button
                 asChild
-                className="h-12 w-full rounded-xl bg-gradient-to-r from-red-600 to-yellow-500 text-lg font-bold text-white shadow-md transition-all hover:from-red-700 hover:to-yellow-600 hover:shadow-lg">
+                className="h-12 w-full rounded-xl ...">
                 <Link
                   href="/login"
+                  onClick={handleMobileNavClick}
                   className="flex items-center justify-center">
                   <LogIn className="mr-2 h-5 w-5" />
                   Login
