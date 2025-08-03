@@ -14,6 +14,12 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 
 // Data untuk dropdown "Tentang LPPM"
@@ -25,7 +31,7 @@ const aboutLinks = [
   { title: "Staff LPPM", href: "/staf" },
 ];
 
-// Tambahkan data untuk dropdown "Info & Berita" di bawah `aboutLinks`
+// Tambahkan data untuk dropdown "Info & Berita"
 // const infoBeritaLinks = [
 //   { title: "Berita", href: "/berita" },
 //   { title: "Info Webinar", href: "/info-webinar" },
@@ -37,12 +43,12 @@ const aboutLinks = [
 
 export function Navbar() {
   return (
-    <div className="sticky top-6 z-50 mx-15 px-15">
-      <header className="container mx-auto flex h-16 items-center justify-between bg-gray-200/80 backdrop-blur-md shadow-2xl rounded-2xl px-10 border border-gray-300">
+    <div className="sticky top-6 z-50 mx-5 px-0 md:mx-15 md:px-15">
+      <header className="container mx-auto flex h-16 items-center justify-between bg-gray-200/80 backdrop-blur-md shadow-2xl rounded-2xl px-2 md:px-10 border border-gray-300">
         <div className="flex items-center space-x-4">
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-yellow-500 rounded-3xl blur opacity-50"></div>
-            <div className="relative bg-white rounded-3xl p-1 shadow-2xl">
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-red-500 to-yellow-500 opacity-50 blur"></div>
+            <div className="relative rounded-3xl bg-white p-1 shadow-2xl">
               <Image
                 src="/logo.png"
                 alt="UPI YPTK Padang Logo"
@@ -53,10 +59,10 @@ export function Navbar() {
             </div>
           </div>
           <div>
-            <h3 className="text-xl font-black bg-gradient-to-r from-red-400 to-yellow-400 bg-clip-text text-transparent">
+            <h3 className="bg-gradient-to-r from-red-400 to-yellow-400 bg-clip-text text-xl font-black text-transparent">
               LPPM
             </h3>
-            <p className="text-gray-800 font-semibold">UPI YPTK Padang</p>
+            <p className="font-semibold text-gray-800">UPI YPTK Padang</p>
           </div>
         </div>
         <NavigationMenu className="hidden md:flex">
@@ -65,18 +71,17 @@ export function Navbar() {
               <NavigationMenuLink asChild>
                 <Link
                   href="/"
-                  className="group inline-flex h-10 w-max items-center justify-center rounded-xl bg-white px-6 py-2 text-sm font-medium transition-colors hover:bg-gray-400 focus:bg-gray-400 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-400 data-[state=open]:bg-gray-400 text-gray-800 hover:text-gray-900">
+                  className="group inline-flex h-10 w-max items-center justify-center rounded-xl bg-white px-6 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-400 hover:text-gray-900 focus:bg-gray-400 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-400 data-[state=open]:bg-gray-400">
                   Beranda
                 </Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
-
             {/* Navigation Menu untuk Tentang LPPM */}
             <NavigationMenuItem>
-              <NavigationMenuTrigger className="group inline-flex h-10 w-max items-center justify-center rounded-xl bg-white px-6 py-2 text-sm font-medium transition-colors hover:bg-gray-100 focus:bg-gray-100 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100 data-[state=open]:bg-gray-100 text-gray-800 hover:text-gray-900">
+              <NavigationMenuTrigger className="group inline-flex h-10 w-max items-center justify-center rounded-xl bg-white px-6 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100 data-[state=open]:bg-gray-100">
                 Tentang LPPM
               </NavigationMenuTrigger>
-              <NavigationMenuContent className="bg-white/90 backdrop-blur-lg shadow-lg border border-gray-100 rounded-xl">
+              <NavigationMenuContent className="rounded-xl border border-gray-100 bg-white/90 shadow-lg backdrop-blur-lg">
                 <ul className="grid w-[200px] gap-3 p-4">
                   {aboutLinks.map((link) => (
                     <li key={link.href}>
@@ -96,13 +101,12 @@ export function Navbar() {
                 </ul>
               </NavigationMenuContent>
             </NavigationMenuItem>
-
-            {/* Pastikan untuk menambahkan ini di dalam <NavigationMenuList> */}
+            {/* Navigation Menu for Info & Berita */}
             {/* <NavigationMenuItem>
-              <NavigationMenuTrigger className="group inline-flex h-10 w-max items-center justify-center rounded-xl bg-white px-6 py-2 text-sm font-medium transition-colors hover:bg-gray-100 focus:bg-gray-100 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100 data-[state=open]:bg-gray-100 text-gray-800 hover:text-gray-900">
+              <NavigationMenuTrigger className="group inline-flex h-10 w-max items-center justify-center rounded-xl bg-white px-6 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100 data-[state=open]:bg-gray-100">
                 Info & Berita
               </NavigationMenuTrigger>
-              <NavigationMenuContent className="bg-white/90 backdrop-blur-lg shadow-lg border border-gray-100 rounded-xl">
+              <NavigationMenuContent className="rounded-xl border border-gray-100 bg-white/90 shadow-lg backdrop-blur-lg">
                 <ul className="grid w-[200px] gap-3 p-4">
                   {infoBeritaLinks.map((link) => (
                     <li key={link.href}>
@@ -124,22 +128,20 @@ export function Navbar() {
             </NavigationMenuItem> */}
           </NavigationMenuList>
         </NavigationMenu>
-
         {/* Right-aligned buttons for Desktop */}
-        <div className="hidden md:flex items-center space-x-2">
+        <div className="hidden items-center space-x-2 md:flex">
           <Button
             asChild
             size="lg"
-            className="h-10 px-6 bg-gradient-to-r from-red-600 to-yellow-500 hover:from-red-700 hover:to-yellow-600 text-white font-bold text-sm rounded-full shadow-md hover:shadow-lg transition-all hover:scale-105">
+            className="h-10 rounded-full bg-gradient-to-r from-red-600 to-yellow-500 px-6 text-sm font-bold text-white shadow-md transition-all hover:scale-105 hover:from-red-700 hover:to-yellow-600 hover:shadow-lg">
             <Link
               href="/login"
               className="flex items-center">
-              <LogIn className="h-4 w-4 mr-2" />
+              <LogIn className="mr-2 h-4 w-4" />
               Login
             </Link>
           </Button>
         </div>
-
         <Sheet>
           <SheetTrigger asChild>
             <Button
@@ -173,48 +175,57 @@ export function Navbar() {
                 className="flex w-full items-center py-2 text-lg font-semibold text-gray-800 hover:text-red-600">
                 Beranda
               </Link>
-              <Link
-                href="/profil-lembaga"
-                className="flex w-full items-center py-2 text-lg font-semibold text-gray-800 hover:text-red-600">
-                Tentang LPPM
-              </Link>
-              <Link
-                href="/berita"
-                className="flex w-full items-center py-2 text-lg font-semibold text-gray-800 hover:text-red-600">
-                Berita
-              </Link>
-              <Link
-                href="/info-webinar"
-                className="flex w-full items-center py-2 text-lg font-semibold text-gray-800 hover:text-red-600">
-                Info Webinar
-              </Link>
-              <Link
-                href="/pengumuman"
-                className="flex w-full items-center py-2 text-lg font-semibold text-gray-800 hover:text-red-600">
-                Pengumuman
-              </Link>
-              <Link
-                href="/konferensi"
-                className="flex w-full items-center py-2 text-lg font-semibold text-gray-800 hover:text-red-600">
-                Konferensi
-              </Link>
-              <Link
-                href="/artikel"
-                className="flex w-full items-center py-2 text-lg font-semibold text-gray-800 hover:text-red-600">
-                Artikel
-              </Link>
-              <Link
-                href="/agenda-lppm"
-                className="flex w-full items-center py-2 text-lg font-semibold text-gray-800 hover:text-red-600">
-                Agenda LPPM
-              </Link>
+
+              <Accordion
+                type="single"
+                collapsible
+                className="w-full">
+                <AccordionItem value="tentang-lppm">
+                  <AccordionTrigger className="flex w-full items-center justify-between py-2 text-lg font-semibold text-gray-800 hover:text-red-600">
+                    Tentang LPPM
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ul className="grid gap-2 pl-4">
+                      {aboutLinks.map((link) => (
+                        <li key={link.href}>
+                          <Link
+                            href={link.href}
+                            className="block py-1 text-base text-gray-700 hover:text-red-500">
+                            {link.title}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* <AccordionItem value="info-berita">
+                  <AccordionTrigger className="flex w-full items-center justify-between py-2 text-lg font-semibold text-gray-800 hover:text-red-600">
+                    Info & Berita
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ul className="grid gap-2 pl-4">
+                      {infoBeritaLinks.map((link) => (
+                        <li key={link.href}>
+                          <Link
+                            href={link.href}
+                            className="block py-1 text-base text-gray-700 hover:text-red-500">
+                            {link.title}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem> */}
+              </Accordion>
+
               <Button
                 asChild
-                className="w-full h-12 bg-gradient-to-r from-red-600 to-yellow-500 hover:from-red-700 hover:to-yellow-600 text-white font-bold text-lg rounded-xl shadow-md hover:shadow-lg transition-all">
+                className="h-12 w-full rounded-xl bg-gradient-to-r from-red-600 to-yellow-500 text-lg font-bold text-white shadow-md transition-all hover:from-red-700 hover:to-yellow-600 hover:shadow-lg">
                 <Link
                   href="/login"
                   className="flex items-center justify-center">
-                  <LogIn className="h-5 w-5 mr-2" />
+                  <LogIn className="mr-2 h-5 w-5" />
                   Login
                 </Link>
               </Button>
