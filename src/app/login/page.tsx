@@ -1,5 +1,7 @@
 "use client";
 
+import { signIn, getSession } from "next-auth/react";
+
 import type React from "react";
 import {
   Card,
@@ -13,18 +15,43 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LogIn, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const router = useRouter();
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // Handle login logic here
+
     const formData = new FormData(event.currentTarget);
-    const email = formData.get("email");
-    const password = formData.get("password");
-    console.log("Login attempt:", { email, password });
-    alert(
-      "Login functionality is not implemented yet. Check console for details."
-    );
+    const name = formData.get("name") as string;
+    const password = formData.get("password") as string;
+
+    const res = await signIn("credentials", {
+      redirect: false,
+      name,
+      password,
+    });
+
+    if (res?.ok) {
+      const session = await getSession();
+
+      switch (session?.user.role) {
+        case "ADMIN":
+          router.push("/dashboard/admin");
+          break;
+        case "PIMPINAN":
+          router.push("/dashboard/pimpinan");
+          break;
+        case "DOSEN":
+          router.push("/dashboard/dosen");
+          break;
+        default:
+          router.push("/");
+      }
+    } else {
+      alert("Nama atau password salah");
+    }
   };
 
   return (
@@ -92,13 +119,12 @@ export default function LoginPage() {
                 onSubmit={handleSubmit}
                 className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="name">Nama</Label>
                   <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="nama@example.com"
-                    required
+                    id="name"
+                    name="name"
+                    type="text"
+                    placeholder="Nama lengkap"
                     className="h-12 rounded-xl border-gray-300 focus:border-red-500 focus:ring-red-500"
                   />
                 </div>
