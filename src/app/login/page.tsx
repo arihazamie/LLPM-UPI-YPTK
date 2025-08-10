@@ -1,7 +1,6 @@
 "use client";
 
-import { signIn, getSession } from "next-auth/react";
-
+import { signIn, getSession, useSession } from "next-auth/react";
 import type React from "react";
 import {
   Card,
@@ -13,15 +12,40 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogIn, Sparkles } from "lucide-react";
+import { LogIn, Sparkles, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { AuthMessage } from "@/components/message";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+
+  const { status } = useSession();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/");
+    }
+  }, [status, router]);
+
+  if (status === "loading" || status === "authenticated") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <Loader2 className="h-10 w-10 animate-spin text-red-500" />
+      </div>
+    );
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setLoading(true);
+    setMessage(null); // Clear previous messages
 
     const formData = new FormData(event.currentTarget);
     const name = formData.get("name") as string;
@@ -34,8 +58,8 @@ export default function LoginPage() {
     });
 
     if (res?.ok) {
+      setMessage({ type: "success", message: "Login berhasil!" });
       const session = await getSession();
-
       switch (session?.user.role) {
         case "ADMIN":
           router.push("/dashboard/admin");
@@ -50,8 +74,9 @@ export default function LoginPage() {
           router.push("/");
       }
     } else {
-      alert("Nama atau password salah");
+      setMessage({ type: "error", message: "Nama atau password salah" });
     }
+    setLoading(false);
   };
 
   return (
@@ -93,7 +118,6 @@ export default function LoginPage() {
           </div>
         </div>
       </section>
-
       {/* Login Form Section */}
       <section className="py-20 bg-gray-50 flex items-center justify-center">
         <Card className="w-full max-w-md mx-auto relative overflow-hidden border-0 shadow-2xl rounded-3xl bg-white/80 backdrop-blur-lg">
@@ -115,6 +139,14 @@ export default function LoginPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
+              {message && (
+                <div className="mb-6">
+                  <AuthMessage
+                    type={message.type}
+                    message={message.message}
+                  />
+                </div>
+              )}
               <form
                 onSubmit={handleSubmit}
                 className="space-y-6">
@@ -126,6 +158,7 @@ export default function LoginPage() {
                     type="text"
                     placeholder="Nama lengkap"
                     className="h-12 rounded-xl border-gray-300 focus:border-red-500 focus:ring-red-500"
+                    disabled={loading}
                   />
                 </div>
                 <div className="space-y-2">
@@ -137,12 +170,21 @@ export default function LoginPage() {
                     placeholder="********"
                     required
                     className="h-12 rounded-xl border-gray-300 focus:border-red-500 focus:ring-red-500"
+                    disabled={loading}
                   />
                 </div>
                 <Button
                   type="submit"
-                  className="w-full h-14 bg-gradient-to-r from-red-600 to-yellow-500 hover:from-red-700 hover:to-yellow-600 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-red-500/25 transition-all duration-300 hover:scale-105">
-                  Masuk
+                  className="w-full h-14 bg-gradient-to-r from-red-600 to-yellow-500 hover:from-red-700 hover:to-yellow-600 text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-red-500/25 transition-all duration-300 hover:scale-105"
+                  disabled={loading}>
+                  {loading ? (
+                    <span className="flex items-center">
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Memuat...
+                    </span>
+                  ) : (
+                    "Masuk"
+                  )}
                 </Button>
                 <div className="text-center text-sm text-gray-600">
                   Belum punya akun?{" "}
