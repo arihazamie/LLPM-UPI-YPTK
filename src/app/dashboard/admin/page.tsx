@@ -1,102 +1,161 @@
+"use client";
+
+import { useState } from "react";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Sparkles, Settings } from "lucide-react";
-import { getSession } from "@/lib/authRoute";
+  Home,
+  FileText,
+  Newspaper,
+  Megaphone,
+  Calendar,
+  Video,
+  Menu,
+  X,
+  User,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { HomeTab } from "@/components/dashboardAdmin/home-tab";
+import { ArtikelTab } from "@/components/dashboardAdmin/artikel-tab";
+import { BeritaTab } from "@/components/dashboardAdmin/berita-tab";
+import { PengumumanTab } from "@/components/dashboardAdmin/pengumuman-tab";
+import { AgendaTab } from "@/components/dashboardAdmin/agenda-tab";
+import { WebinarTab } from "@/components/dashboardAdmin/webinar-tab";
+import { ProfileTab } from "@/components/dashboardAdmin/profile-tab";
+import Image from "next/image";
+import Link from "next/link";
 
-export default async function AdminDashboardPage() {
-  // Check if the user is authenticated
-  await getSession({
-    allowedRoles: ["ADMIN"],
-    redirectTo: "/",
-  });
+type TabType =
+  | "home"
+  | "artikel"
+  | "berita"
+  | "pengumuman"
+  | "agenda"
+  | "webinar"
+  | "profile";
+
+export default function AdminDashboard() {
+  const [activeTab, setActiveTab] = useState<TabType>("home");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const renderActiveTab = () => {
+    switch (activeTab) {
+      case "home":
+        return <HomeTab />;
+      case "artikel":
+        return <ArtikelTab />;
+      case "berita":
+        return <BeritaTab />;
+      case "pengumuman":
+        return <PengumumanTab />;
+      case "agenda":
+        return <AgendaTab />;
+      case "webinar":
+        return <WebinarTab />;
+      case "profile":
+        return <ProfileTab />;
+      default:
+        return <HomeTab />;
+    }
+  };
+
+  const menuItems = [
+    { id: "home", label: "Home", icon: Home },
+    { id: "artikel", label: "Artikel", icon: FileText },
+    { id: "berita", label: "Berita", icon: Newspaper },
+    { id: "pengumuman", label: "Pengumuman", icon: Megaphone },
+    { id: "agenda", label: "Agenda", icon: Calendar },
+    { id: "webinar", label: "Webinar", icon: Video },
+    { id: "profile", label: "Profile", icon: User },
+  ];
+
   return (
-    <main className="flex-1">
-      {/* Hero Section for Admin Dashboard */}
-      <section className="relative py-24 md:py-32 flex items-center justify-center overflow-hidden">
-        {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-red-600 via-red-500 to-yellow-500">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]"></div>
-          <div className="absolute top-0 left-0 w-full h-full">
-            <div className="absolute top-20 left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-            <div className="absolute bottom-20 right-20 w-96 h-96 bg-yellow-300/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-            <div
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-red-400/10 to-yellow-400/10 rounded-full blur-3xl animate-spin"
-              style={{ animationDuration: "20s" }}></div>
-          </div>
-        </div>
-        <div className="relative container mx-auto px-6 py-16 text-center">
-          <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm rounded-full px-6 py-3 text-white/90 text-sm font-medium mb-8">
-            <Sparkles className="h-4 w-4" />
-            <span>Manajemen • Operasional • Kontrol</span>
-          </div>
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-tight mb-4">
-            <span className="bg-gradient-to-r from-yellow-300 via-yellow-200 to-white bg-clip-text text-transparent">
-              Dashboard
-            </span>{" "}
-            <span className="bg-gradient-to-r from-red-300 via-red-200 to-white bg-clip-text text-transparent">
-              Admin
-            </span>
-          </h1>
-          <p className="text-xl text-white/90 max-w-3xl mx-auto leading-relaxed">
-            Kelola pengguna, konten, dan pengaturan sistem LPPM dengan mudah.
-          </p>
-        </div>
-      </section>
-
-      {/* Content Section for Admin Dashboard */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-red-100 to-yellow-100 rounded-full px-6 py-3 text-red-600 text-sm font-bold mb-4">
-              <Settings className="h-4 w-4" />
-              <span>Area Kerja Admin</span>
-            </div>
-            <h2 className="text-4xl font-black text-gray-900 mb-6">
-              Selamat Datang,
-              <span className="bg-gradient-to-r from-red-600 to-yellow-600 bg-clip-text text-transparent">
-                {" "}
-                Admin
-              </span>
-            </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Di sini Anda dapat mengelola data, pengguna, dan konfigurasi
-              sistem.
-            </p>
+    <div className="flex min-h-screen bg-background">
+      <div
+        className={`${
+          sidebarCollapsed ? "w-16" : "w-64"
+        } bg-sidebar border-r border-sidebar-border transition-all duration-300 flex flex-col fixed left-0 top-0 h-full z-50`}>
+        <div className="p-4 flex-shrink-0">
+          <div className="flex items-center justify-between mb-8">
+            <Link
+              href="/"
+              className={`flex items-center gap-3 ${
+                sidebarCollapsed ? "justify-center" : ""
+              }`}>
+              <div className="w-10 h-10 relative flex-shrink-0">
+                <Image
+                  src="/logo.png"
+                  alt="UPI YPTK Logo"
+                  width={40}
+                  height={40}
+                  className="object-contain"
+                />
+              </div>
+              {!sidebarCollapsed && (
+                <div className="min-w-0">
+                  <h1 className="font-playfair font-bold text-lg text-sidebar-foreground truncate">
+                    LPPM
+                  </h1>
+                  <p className="text-sm text-muted-foreground truncate">
+                    UPI YPTK
+                  </p>
+                </div>
+              )}
+            </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="text-sidebar-foreground hover:bg-sidebar-accent flex-shrink-0 z-10">
+              {sidebarCollapsed ? <Menu size={20} /> : <X size={20} />}
+            </Button>
           </div>
 
-          <Card className="group relative overflow-hidden border-0 shadow-xl bg-white/80 backdrop-blur-lg p-8 text-center">
-            <CardHeader className="p-0 mb-4">
-              <CardTitle className="text-2xl font-black text-gray-900">
-                Fitur Dashboard Admin
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <CardDescription className="text-gray-600 leading-relaxed text-left">
-                <>
-                  Sebagai Admin, Anda memiliki akses untuk:
-                  <ul className="list-disc list-inside mt-4 space-y-2">
-                    <li>Mengelola akun pengguna (Dosen, Pimpinan, Staff).</li>
-                    <li>
-                      Menambahkan, mengedit, atau menghapus berita, pengumuman,
-                      dan artikel.
-                    </li>
-                    <li>
-                      Mengelola data penelitian dan pengabdian masyarakat.
-                    </li>
-                    <li>Memantau aktivitas sistem dan log pengguna.</li>
-                    <li>Mengatur konfigurasi umum situs web.</li>
-                  </ul>
-                </>
-              </CardDescription>
-            </CardContent>
-          </Card>
+          <nav className="space-y-2">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id as TabType)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                    activeTab === item.id
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  } ${sidebarCollapsed ? "justify-center" : ""}`}
+                  title={sidebarCollapsed ? item.label : undefined}>
+                  <Icon
+                    size={20}
+                    className="flex-shrink-0"
+                  />
+                  {!sidebarCollapsed && (
+                    <span className="font-medium truncate">{item.label}</span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
         </div>
-      </section>
-    </main>
+      </div>
+
+      <div
+        className={`flex-1 flex flex-col ${
+          sidebarCollapsed ? "ml-16" : "ml-64"
+        } transition-all duration-300`}>
+        <div className="flex-1 h-screen overflow-hidden">
+          <div className="h-full p-6 overflow-y-auto custom-scrollbar">
+            {renderActiveTab()}
+          </div>
+        </div>
+      </div>
+
+      {sidebarCollapsed && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setSidebarCollapsed(false)}
+          className="fixed top-4 left-4 z-40 bg-background border-2 shadow-lg hover:shadow-xl transition-all duration-200">
+          <Menu size={20} />
+        </Button>
+      )}
+    </div>
   );
 }

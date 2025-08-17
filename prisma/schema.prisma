@@ -21,4 +21,37 @@ model User {
   role      Role
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+   posts     Post[] 
+}
+
+// Enum untuk jenis konten
+enum PostType {
+  AGENDA
+  ARTIKEL
+  BERITA
+  PENGUMUMAN
+  WEBINAR
+}
+
+model Post {
+  id        String   @id @default(cuid()) // ID unik konten
+  type      PostType // Jenis konten: Agenda, Artikel, Berita, Pengumuman, Webinar
+  title     String   // Judul konten
+  content   String   // Isi utama konten (HTML atau Markdown)
+  thumbnail String?  // Gambar utama / cover konten (opsional)
+
+  // Khusus untuk tipe Agenda & Webinar
+  location  String?    // Lokasi acara (opsional)
+  startDate DateTime?  // Tanggal mulai acara (opsional)
+  endDate   DateTime?  // Tanggal selesai acara (opsional)
+
+  authorId  String   // ID penulis konten
+  author    User     @relation(fields: [authorId], references: [id]) // Relasi ke tabel User
+
+  createdAt DateTime @default(now())   // Waktu pembuatan konten
+  updatedAt DateTime @updatedAt        // Waktu terakhir update konten
+
+  @@index([type])      // Index untuk mempercepat query berdasarkan tipe konten
+  @@index([createdAt]) // Index untuk mempercepat query berdasarkan tanggal dibuat
 }

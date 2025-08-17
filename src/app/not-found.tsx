@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function NotFound() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center">
@@ -5,6 +7,11 @@ export default function NotFound() {
       <p className="text-gray-600">
         Maaf, halaman yang Anda cari tidak tersedia.
       </p>
+      <Link
+        href="/"
+        className="underline text-blue-500">
+        Kembali
+      </Link>
     </div>
   );
 }

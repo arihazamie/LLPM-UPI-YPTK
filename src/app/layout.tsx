@@ -2,7 +2,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import ClientWrapper from "@/components/ClientWrapper"; // hanya 1 import client
+import ClientWrapper from "@/components/navbar/ClientWrapper";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,6 +23,7 @@ export default function RootLayout({
       suppressHydrationWarning>
       <body className={inter.className}>
         <ClientWrapper>{children}</ClientWrapper>
+        <Toaster />
       </body>
     </html>
   );
