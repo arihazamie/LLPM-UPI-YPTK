@@ -100,7 +100,7 @@ export default function WebinarDetailPage() {
               </Badge>
               <div className="flex items-center text-sm text-gray-500">
                 <Calendar className="h-4 w-4 mr-1" />
-                {formatDate(post.createdAt)}
+                {formatDate(post.createdAt.toString())}
               </div>
             </div>
 

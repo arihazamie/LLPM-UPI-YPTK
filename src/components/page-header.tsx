@@ -1,15 +1,21 @@
-import type React from "react"
-import { Sparkles } from "lucide-react"
+import type React from "react";
+import { Sparkles } from "lucide-react";
 
 interface PageHeaderProps {
-  title: string
-  subtitle: string
-  description: string
-  badge: string
-  icon: React.ReactNode
+  title: string;
+  subtitle: string;
+  description: string;
+  badge: string;
+  icon: React.ReactNode;
 }
 
-export function PageHeader({ title, subtitle, description, badge, icon }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  subtitle,
+  description,
+  badge,
+  icon,
+}: PageHeaderProps) {
   return (
     <>
       {/* Hero Section */}
@@ -22,8 +28,7 @@ export function PageHeader({ title, subtitle, description, badge, icon }: PageHe
             <div className="absolute bottom-20 right-20 w-96 h-96 bg-yellow-300/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
             <div
               className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-red-400/10 to-yellow-400/10 rounded-full blur-3xl animate-spin"
-              style={{ animationDuration: "20s" }}
-            ></div>
+              style={{ animationDuration: "20s" }}></div>
           </div>
         </div>
         <div className="relative container mx-auto px-6 py-16 text-center">
@@ -39,7 +44,9 @@ export function PageHeader({ title, subtitle, description, badge, icon }: PageHe
               {subtitle}
             </span>
           </h1>
-          <p className="text-xl text-white/90 max-w-3xl mx-auto leading-relaxed">{description}</p>
+          <p className="text-xl text-white/90 max-w-3xl mx-auto leading-relaxed">
+            {description}
+          </p>
         </div>
       </section>
 
@@ -58,10 +65,12 @@ export function PageHeader({ title, subtitle, description, badge, icon }: PageHe
                 {title}
               </span>
             </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">{description}</p>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              {description}
+            </p>
           </div>
         </div>
       </section>
     </>
-  )
+  );
 }

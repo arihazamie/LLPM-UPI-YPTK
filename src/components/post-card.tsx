@@ -44,7 +44,7 @@ export function PostCard({ post, basePath }: PostCardProps) {
           </Badge>
           <div className="flex items-center text-sm text-muted-foreground">
             <Calendar className="h-4 w-4 mr-1" />
-            {formatDate(post.createdAt)}
+            {formatDate(post.createdAt.toString())}
           </div>
         </div>
         <CardTitle className="text-xl font-bold group-hover:text-red-600 transition-colors line-clamp-2">

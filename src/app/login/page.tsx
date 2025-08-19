@@ -16,15 +16,12 @@ import { LogIn, Sparkles, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { AuthMessage } from "@/components/message";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function LoginPage() {
+  const { toast } = useToast();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{
-    type: "success" | "error";
-    message: string;
-  } | null>(null);
 
   const { status } = useSession();
 
@@ -45,7 +42,6 @@ export default function LoginPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
-    setMessage(null); // Clear previous messages
 
     const formData = new FormData(event.currentTarget);
     const name = formData.get("name") as string;
@@ -58,7 +54,10 @@ export default function LoginPage() {
     });
 
     if (res?.ok) {
-      setMessage({ type: "success", message: "Login berhasil!" });
+      toast({
+        title: "Login berhasil 🎉",
+        description: "Selamat datang kembali!",
+      });
       const session = await getSession();
       switch (session?.user.role) {
         case "ADMIN":
@@ -74,7 +73,10 @@ export default function LoginPage() {
           router.push("/");
       }
     } else {
-      setMessage({ type: "error", message: "Nama atau password salah" });
+      toast({
+        title: "Login gagal ❌",
+        description: "Nama atau password salah",
+      });
     }
     setLoading(false);
   };
@@ -121,11 +123,9 @@ export default function LoginPage() {
       {/* Login Form Section */}
       <section className="py-20 bg-gray-50 flex items-center justify-center">
         <Card className="w-full max-w-md mx-auto relative overflow-hidden border-0 shadow-2xl rounded-3xl bg-white/80 backdrop-blur-lg">
-          {/* Gradient Border */}
           <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-yellow-500 p-[2px] rounded-3xl">
             <div className="bg-white rounded-3xl h-full w-full"></div>
           </div>
-          {/* Content */}
           <div className="relative p-8">
             <CardHeader className="p-0 mb-6 text-center">
               <div className="w-20 h-20 rounded-3xl bg-gradient-to-r from-red-500 to-yellow-500 flex items-center justify-center mx-auto mb-4 shadow-lg">
@@ -139,14 +139,6 @@ export default function LoginPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
-              {message && (
-                <div className="mb-6">
-                  <AuthMessage
-                    type={message.type}
-                    message={message.message}
-                  />
-                </div>
-              )}
               <form
                 onSubmit={handleSubmit}
                 className="space-y-6">
@@ -198,7 +190,7 @@ export default function LoginPage() {
             </CardContent>
           </div>
         </Card>
-      </section>
+      </section>w
     </main>
   );
 }

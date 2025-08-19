@@ -1,8 +1,8 @@
 export enum PostType {
   ARTIKEL = "ARTIKEL",
-  AGENDA = "AGENDA",
   BERITA = "BERITA",
   PENGUMUMAN = "PENGUMUMAN",
+  AGENDA = "AGENDA",
   WEBINAR = "WEBINAR",
 }
 
@@ -13,20 +13,62 @@ export interface Post {
   content: string;
   thumbnail?: string | null;
   location?: string | null;
-  startDate?: string | null;
-  endDate?: string | null;
+  startDate?: Date | null;
+  endDate?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
   authorId: string;
-  author?: {
+  author: {
     id: string;
-    name: string;
-    email?: string;
-  } | null;
-  createdAt: string;
-  updatedAt: string;
+    name: string | null;
+    email: string;
+  };
 }
 
-export interface ApiResponse<T = unknown> {
+export interface ApiResponse<T> {
   message: string;
   data?: T;
-  error?: string;
+  meta?: {
+    total: number;
+    take: number;
+    skip: number;
+  };
+}
+
+export interface CreatePostData {
+  type: PostType;
+  title: string;
+  content: string;
+  thumbnail?: File | null;
+  location?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface UpdatePostData extends Partial<CreatePostData> {
+  id: string;
+}
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      email: string;
+      name?: string | null;
+      role: string;
+    };
+  }
+
+  interface User {
+    id: string;
+    email: string;
+    name?: string | null;
+    role: string;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    role: string;
+  }
 }
