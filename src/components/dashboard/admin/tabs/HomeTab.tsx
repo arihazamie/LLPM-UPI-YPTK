@@ -104,7 +104,7 @@ export default function HomeTab() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">
-          Selamat Datang di Dashboard
+          Selamat Datang di Dashboard ADMIN
         </h1>
         <p className="text-gray-600 mt-2">
           Kelola konten dan informasi dengan mudah

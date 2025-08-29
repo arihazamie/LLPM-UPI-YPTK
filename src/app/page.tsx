@@ -116,7 +116,7 @@ const Home = () => {
       {/* Header */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-red-600 via-red-500 to-yellow-500">
+        <div className="absolute inset-0 bg-gradient-to-br from-red-600/50 via-red-500 to-yellow-500">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]"></div>
           <div className="absolute top-0 left-0 w-full h-full">
             <div className="absolute top-20 left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
@@ -179,25 +179,25 @@ const Home = () => {
               {[
                 {
                   icon: BookOpen,
-                  number: "150+",
+                  number: "-",
                   label: "Penelitian",
                   color: "from-white to-yellow-200",
                 },
                 {
                   icon: Users,
-                  number: "50+",
+                  number: "-",
                   label: "Peneliti",
                   color: "from-yellow-200 to-white",
                 },
                 {
                   icon: Award,
-                  number: "25+",
+                  number: "-",
                   label: "Penghargaan",
                   color: "from-white to-red-200",
                 },
                 {
                   icon: Users,
-                  number: "100+",
+                  number: "-",
                   label: "Program",
                   color: "from-red-200 to-white",
                 },

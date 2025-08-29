@@ -67,7 +67,7 @@ export default function LoginPage() {
           router.push("/dashboard/pimpinan");
           break;
         case "DOSEN":
-          router.push("/dashboard/dosen");
+          router.push("/");
           break;
         default:
           router.push("/");
@@ -190,7 +190,7 @@ export default function LoginPage() {
             </CardContent>
           </div>
         </Card>
-      </section>w
+      </section>
     </main>
   );
 }

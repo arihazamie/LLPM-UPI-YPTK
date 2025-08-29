@@ -71,13 +71,12 @@ export default function StrukturOrganisasiPage() {
           {/* Placeholder for Org Chart Image */}
           <div className="relative w-full max-w-5xl mx-auto h-[400px] md:h-[600px] rounded-3xl overflow-hidden shadow-2xl border border-gray-200 bg-gray-100 flex items-center justify-center">
             <Image
-              src="/images/struktur-organisasi-chart.png" // Updated src
+              src="/Struktur_LPPM.jpg" // Updated src
               alt="Struktur Organisasi LPPM"
               layout="fill"
               objectFit="contain"
-              className="p-4"
+              className="w-full h-full"
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-yellow-500/5 backdrop-blur-sm"></div>
             <div className="absolute bottom-4 right-4 text-gray-500 text-sm">
               <LayoutDashboard className="inline-block h-4 w-4 mr-1" /> Bagan
               Organisasi (Placeholder)

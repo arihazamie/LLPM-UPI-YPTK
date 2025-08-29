@@ -50,34 +50,19 @@ export default function VisiMisiPage() {
       </section>
 
       {/* Visi Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-white text-center items-center">
         <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid items-center">
             <div className="space-y-6">
               <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-red-100 to-yellow-100 rounded-full px-6 py-3 text-red-600 text-sm font-bold mb-4">
                 <Eye className="h-4 w-4" />
                 <span>Visi Kami</span>
               </div>
-              <h2 className="text-4xl font-black text-gray-900 mb-4">
-                Menjadi Pusat Keunggulan
-                <span className="bg-gradient-to-r from-red-600 to-yellow-600 bg-clip-text text-transparent">
-                  {" "}
-                  Penelitian
-                </span>{" "}
-                dan Pengabdian Masyarakat
+              <h2 className="text-4xl font-black text-gray-900 mb-4 text-center">
+                Menjadi Universitas yang unggul dan kompetitif dalam
+                menghasilkan Sumber Daya Manusia yang berkarakter didasari
+                kecerdasan intelektual, emosional dan spiritual pada tahun 2024
               </h2>
-              <p className="text-lg text-gray-700 leading-relaxed">
-                LPPM UPI YPTK Padang bercita-cita menjadi lembaga terdepan yang
-                diakui secara nasional dan internasional dalam menghasilkan
-                penelitian inovatif dan memberikan kontribusi nyata bagi
-                pembangunan berkelanjutan. Kami berkomitmen untuk menciptakan
-                ekosistem akademik yang kondusif bagi peneliti dan pengabdi
-                untuk berkarya.
-              </p>
-            </div>
-            <div className="relative w-full h-80 rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-red-100 to-yellow-100 flex items-center justify-center">
-              <Sparkles className="h-24 w-24 text-red-400 opacity-30 animate-pulse" />
-              <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-yellow-500/10 backdrop-blur-sm"></div>
             </div>
           </div>
         </div>
@@ -106,33 +91,33 @@ export default function VisiMisiPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                title: "Meningkatkan Kualitas Penelitian",
+                title: "-",
                 description:
-                  "Mendorong penelitian yang relevan, inovatif, dan berdampak tinggi melalui fasilitas dan dukungan.",
+                  "Menyelenggarakan pendidikan tinggi berbasis teknologi informasi yang berkualitas serta menjadikan 12 prinsip dasar UPI-YPTK sebagai nilai-nilai berprilaku dalam rangka meningkatkan daya saing bangsa",
                 gradient: "from-red-500 to-red-600",
               },
               {
-                title: "Mengembangkan Pengabdian Masyarakat",
+                title: "-",
                 description:
-                  "Melaksanakan program pengabdian yang memberdayakan masyarakat dan mengatasi masalah sosial.",
+                  "Menciptakan suasana akademik dalam mengintegrasikan kecerdasan intelektual, emosional dan spiritual",
                 gradient: "from-yellow-500 to-yellow-600",
               },
               {
-                title: "Meningkatkan Publikasi Ilmiah",
+                title: "-",
                 description:
-                  "Memfasilitasi publikasi hasil penelitian di jurnal nasional dan internasional bereputasi.",
+                  "Menyelenggarakan Tri Dharma Perguruan Tinggi sesuai dengan kebutuhan sekarang dan masa yang akan datang",
                 gradient: "from-red-600 to-yellow-500",
               },
               {
-                title: "Membangun Jaringan Kemitraan",
+                title: "-",
                 description:
-                  "Menjalin kolaborasi strategis dengan berbagai pihak untuk sinergi dan pengembangan bersama.",
+                  "Menyelenggarakan kerjasama dengan berbagai instansi baik di dalam maupun di luar negeri",
                 gradient: "from-yellow-600 to-red-500",
               },
               {
-                title: "Mengembangkan Sumber Daya Manusia",
+                title: "-",
                 description:
-                  "Meningkatkan kompetensi peneliti dan pengabdi melalui pelatihan dan pengembangan profesional.",
+                  "Mengembangkan organisasi institusi sesuai dengan perubahan yang terjadi",
                 gradient: "from-red-500 to-yellow-500",
               },
             ].map((item, index) => (

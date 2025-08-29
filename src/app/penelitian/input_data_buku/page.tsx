@@ -5,18 +5,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Sparkles, GraduationCap } from "lucide-react";
-import { getSession } from "@/lib/authRoute";
+import { Sparkles, Library } from "lucide-react";
 
-export default async function DosenDashboardPage() {
-  await getSession({
-    allowedRoles: ["DOSEN"],
-    redirectTo: "/",
-  });
+export default function PusatStudiPage() {
   return (
     <main className="flex-1">
-      {/* Hero Section for Dosen Dashboard */}
-      <section className="relative py-24 md:py-32 flex items-center justify-center overflow-hidden">
+      {/* Hero Section for Pusat Studi */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-red-600 via-red-500 to-yellow-500">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]"></div>
@@ -31,70 +26,54 @@ export default async function DosenDashboardPage() {
         <div className="relative container mx-auto px-6 py-16 text-center">
           <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm rounded-full px-6 py-3 text-white/90 text-sm font-medium mb-8">
             <Sparkles className="h-4 w-4" />
-            <span>Penelitian • Pengabdian • Akademik</span>
+            <span>Fokus • Disiplin • Keahlian</span>
           </div>
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-tight mb-4">
             <span className="bg-gradient-to-r from-yellow-300 via-yellow-200 to-white bg-clip-text text-transparent">
-              Dashboard
+              Pusat
             </span>{" "}
             <span className="bg-gradient-to-r from-red-300 via-red-200 to-white bg-clip-text text-transparent">
-              Dosen
+              Studi
             </span>
           </h1>
           <p className="text-xl text-white/90 max-w-3xl mx-auto leading-relaxed">
-            Akses cepat ke informasi dan alat yang relevan untuk kegiatan
-            penelitian dan pengabdian Anda.
+            Mengenal berbagai pusat studi yang berfokus pada disiplin ilmu
+            tertentu di LPPM.
           </p>
         </div>
       </section>
 
-      {/* Content Section for Dosen Dashboard */}
+      {/* Content Section for Pusat Studi */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-red-100 to-yellow-100 rounded-full px-6 py-3 text-red-600 text-sm font-bold mb-4">
-              <GraduationCap className="h-4 w-4" />
-              <span>Area Kerja Dosen</span>
+              <Library className="h-4 w-4" />
+              <span>Area Keahlian</span>
             </div>
             <h2 className="text-4xl font-black text-gray-900 mb-6">
-              Selamat Datang,
+              Berbagai
               <span className="bg-gradient-to-r from-red-600 to-yellow-600 bg-clip-text text-transparent">
                 {" "}
-                Dosen
+                Pusat Studi
               </span>
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Di sini Anda dapat mengelola proyek penelitian, pengabdian, dan
-              melihat status publikasi.
+              LPPM memiliki pusat studi yang mendalami berbagai bidang ilmu
+              untuk riset yang lebih terfokus.
             </p>
           </div>
 
           <Card className="group relative overflow-hidden border-0 shadow-xl bg-white/80 backdrop-blur-lg p-8 text-center">
             <CardHeader className="p-0 mb-4">
               <CardTitle className="text-2xl font-black text-gray-900">
-                Fitur Dashboard Dosen
+                Informasi Pusat Studi
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <CardDescription className="text-gray-600 leading-relaxed text-left">
-                <>
-                  Sebagai Dosen, Anda dapat:
-                  <ul className="list-disc list-inside mt-4 space-y-2">
-                    <li>
-                      Mengelola proposal penelitian dan pengabdian masyarakat.
-                    </li>
-                    <li>
-                      Mengunggah laporan kemajuan dan laporan akhir proyek.
-                    </li>
-                    <li>Melihat status publikasi ilmiah Anda.</li>
-                    <li>
-                      Mengakses informasi hibah dan pendanaan yang tersedia.
-                    </li>
-                    <li>
-                      Berinteraksi dengan sesama peneliti dan anggota tim.
-                    </li>
-                  </ul>
-                </>
+              <CardDescription className="text-gray-600 leading-relaxed">
+                Detail mengenai pusat-pusat studi akan segera ditambahkan di
+                sini.
               </CardDescription>
             </CardContent>
           </Card>

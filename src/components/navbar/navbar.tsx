@@ -3,51 +3,117 @@
 import React from "react";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import { ChevronDown, LogIn, LogOut, Menu, X } from "lucide-react";
+import {
+  ChevronDown,
+  LogIn,
+  LogOut,
+  Menu,
+  X,
+  BookOpen,
+  Trophy,
+  Lightbulb,
+  Building2,
+  Eye,
+  Users,
+  Crown,
+  UserCheck,
+  Newspaper,
+  Video,
+  Megaphone,
+  FileText,
+  Calendar,
+  Heart,
+  Layers,
+  Shrub as Hub,
+  Search,
+  Layers3,
+  BookOpenCheck,
+  FileBarChart,
+  GraduationCap,
+  Microscope,
+  Settings,
+  List,
+  Home,
+} from "lucide-react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import { UserProfileModal } from "../userModal";
+import { toast } from "sonner";
 
 // Define the navigation links for the dropdowns
 const aboutLinks = [
-  { title: "Profil Lembaga", href: "/tentang/profil-lembaga" },
-  { title: "Visi dan Misi", href: "/tentang/visi-misi" },
-  { title: "Struktur Organisasi", href: "/tentang/struktur-organisasi" },
-  { title: "Pimpinan", href: "/tentang/pimpinan" },
-  { title: "Staff LPPM", href: "/tentang/staf" },
+  { title: "Profil Lembaga", href: "/tentang/profil-lembaga", icon: Building2 },
+  { title: "Visi dan Misi", href: "/tentang/visi-misi", icon: Eye },
+  {
+    title: "Struktur Organisasi",
+    href: "/tentang/struktur-organisasi",
+    icon: Users,
+  },
+  { title: "Pimpinan", href: "/tentang/pimpinan", icon: Crown },
+  { title: "Tim LPPM", href: "/tentang/tim", icon: UserCheck },
 ];
 
 const beritaLinks = [
-  { title: "Berita", href: "/berita/berita" },
-  { title: "Webinar", href: "/berita/webinar" },
-  { title: "Pengumuman", href: "/berita/pengumuman" },
-  { title: "Artikel", href: "/berita/artikel" },
-  { title: "Agenda LPPM", href: "/berita/agenda" },
+  { title: "Berita", href: "/berita/berita", icon: Newspaper },
+  { title: "Webinar", href: "/berita/webinar", icon: Video },
+  { title: "Pengumuman", href: "/berita/pengumuman", icon: Megaphone },
+  { title: "Artikel", href: "/berita/artikel", icon: FileText },
+  { title: "Agenda LPPM", href: "/berita/agenda", icon: Calendar },
 ];
 
 const pengabdianLinks = [
-  { title: "Pusat Pengabdian", href: "/pengabdian/pusat-pengabdian" },
-  { title: "Skema Pengabdian", href: "/pengabdian/skema-pengabdian" },
-  { title: "UPI YPTK HUB", href: "/pengabdian/upi-yptk-hub" },
+  {
+    title: "Pusat Pengabdian",
+    href: "/pengabdian/pusat-pengabdian",
+    icon: Heart,
+  },
+  {
+    title: "Skema Pengabdian",
+    href: "/pengabdian/skema-pengabdian",
+    icon: Layers,
+  },
+  { title: "UPI YPTK HUB", href: "/pengabdian/upi-yptk-hub", icon: Hub },
 ];
 
 const penelitianLinks = [
-  { title: "Pusat Penelitian", href: "/penelitian/pusat-penelitian" },
-  { title: "Skema Penelitian", href: "/penelitian/skema-penelitian" },
+  {
+    title: "Pusat Penelitian",
+    href: "/penelitian/pusat-penelitian",
+    icon: Search,
+  },
+  {
+    title: "Skema Penelitian",
+    href: "/penelitian/skema-penelitian",
+    icon: Layers3,
+  },
   {
     title: "Rencana Induk Penelitian",
     href: "/penelitian/rencana-induk-penelitian",
+    icon: BookOpenCheck,
   },
-  { title: "Buku Panduan", href: "/penelitian/buku-panduan" },
-  { title: "Pusat Studi", href: "/penelitian/pusat-studi" },
+  {
+    title: "Buku Panduan",
+    href: "/penelitian/buku-panduan",
+    icon: FileBarChart,
+  },
+  {
+    title: "Pusat Studi",
+    href: "/penelitian/pusat-studi",
+    icon: GraduationCap,
+  },
 ];
 
-const jurnalLinks = [
-  { title: "PLP", href: "/jurnal/plp" },
-  { title: "PPJS", href: "/jurnal/ppjs" },
+const layananLinks = [
+  { title: "PLP", href: "/layanan/plp", icon: Microscope },
+  { title: "PPJS", href: "/layanan/ppjs", icon: Settings },
   {
-    title: "Daftar Jurnal",
-    href: "/jurnal/daftar-jurnal",
+    title: "Daftar Layanan",
+    href: "/layanan/daftar-layanan",
+    icon: List,
   },
+  { title: "PKM", href: "/pkm", icon: BookOpen, dosenOnly: true },
+  { title: "Prototype", href: "/prototype", icon: Lightbulb, dosenOnly: true },
+  { title: "Prestasi", href: "/prestasi", icon: Trophy, dosenOnly: true },
 ];
 
 // Custom Dropdown Component (without shadcn/ui)
@@ -57,7 +123,7 @@ const CustomDropdown = ({
   triggerOnHover = false,
   className = "",
   onLinkClick,
-  mobileMode = false, // New prop for mobile behavior
+  mobileMode = false,
 }: {
   title: string;
   children: React.ReactNode;
@@ -87,7 +153,6 @@ const CustomDropdown = ({
       }
     };
 
-    // Only add click outside listener if not in mobileMode or if not hover-triggered on desktop
     if (!mobileMode && (!triggerOnHover || !isDesktop)) {
       document.addEventListener("mousedown", handleClickOutside);
     }
@@ -131,14 +196,14 @@ const CustomDropdown = ({
             ? undefined
             : toggleDropdown
         }
-        className={`flex items-center gap-1 px-3 py-2 xl:text-[14px] 2xl:text-lg rounded-full text-gray-800 hover:bg-gray-100 focus:outline-none transition-colors ${className} ${
+        className={`flex items-center gap-1 px-4 py-2.5 xl:text-[14px] 2xl:text-lg rounded-full text-gray-800 hover:bg-white/20 hover:backdrop-blur-sm focus:outline-none transition-all duration-300 font-medium ${className} ${
           mobileMode ? "text-white hover:bg-white/20" : ""
         }`}
         aria-haspopup="true"
         aria-expanded={isOpen}>
         {title}
         <ChevronDown
-          className={`h-4 w-4 transition-transform duration-200 ${
+          className={`h-4 w-4 transition-transform duration-300 ${
             isOpen ? "rotate-180" : ""
           }`}
         />
@@ -147,9 +212,9 @@ const CustomDropdown = ({
         <div
           className={`${
             mobileMode
-              ? "relative mt-2 w-full rounded-lg bg-white/10 p-2" // Inline for mobile
-              : "absolute top-full left-0 mt-2 w-48 rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10" // Absolute for desktop
-          } overflow-hidden`}>
+              ? "relative mt-2 w-full rounded-xl bg-white/10 backdrop-blur-sm p-3 border border-white/20"
+              : "absolute top-full left-0 mt-2 w-52 rounded-xl shadow-2xl bg-white/60 backdrop-blur-md ring-1 ring-black/10 focus:outline-none z-10 border border-white/20"
+          } overflow-hidden animate-in fade-in-0 zoom-in-95 duration-200`}>
           {React.Children.map(children, (child) => {
             if (React.isValidElement(child) && child.type === Link) {
               const element = child as React.ReactElement<{
@@ -186,119 +251,176 @@ export function Navbar() {
     setIsMobileMenuOpen(false);
   };
 
+  const getFilteredLayananLinks = () => {
+    if (role === "DOSEN") {
+      return layananLinks;
+    }
+    return layananLinks.filter((link) => !link.dosenOnly);
+  };
+
   return (
-    <nav className="sticky top-4 z-10 flex items-center justify-between px-4 py-3 md:px-8 md:py-4 lg:px-10 rounded-[32px] bg-white/30 backdrop-blur-sm shadow-lg mx-auto my-4 w-[calc(100%-80px)]">
+    <nav className="sticky top-4 z-50 flex items-center justify-between px-6 py-4 md:px-8 md:py-5 lg:px-12 rounded-[32px] bg-white/20 backdrop-blur-xl shadow-xl border border-white/30 mx-auto my-4 w-[calc(100%-40px)] md:w-[calc(100%-80px)] transition-all duration-300 hover:shadow-2xl">
       {/* Logo and Title */}
       <div className="flex items-center gap-3 md:gap-4">
-        <div className="relative w-12 h-12 xl:w-12 xl:h-12 2xl:w-16 2xl:h-16 rounded-full bg-white flex items-center justify-center shadow-md">
-          <Image
-            src="/logo.png"
-            alt="LPPM Logo"
-            width={40}
-            height={40}
-            className="object-contain"
-          />
-        </div>
-        <div className="flex flex-col">
-          <h1 className="xl:text-md 2xl:text-2xl font-bold text-yellow-600 leading-none">
-            LPPM
-          </h1>
-          <p className="text-gray-700 text-xs xl:text-md 2xl:text-lg mt-1">
-            UPI YPTK Padang
-          </p>
+        <div className="relative rounded-full flex items-center justify-center gap-3 md:gap-4">
+          <div className="relative group">
+            <Image
+              src="/yptk.png"
+              alt="LPPM Logo"
+              width={50}
+              height={50}
+              className="object-contain rounded-full transition-transform duration-300 group-hover:scale-110"
+            />
+          </div>
+          <div className="relative group">
+            <Image
+              src="/logo.png"
+              alt="LPPM Logo"
+              width={50}
+              height={50}
+              className="object-contain transition-transform duration-300 group-hover:scale-110"
+            />
+          </div>
+          <div className="relative group">
+            <Image
+              src="/tut_wuri.png"
+              alt="LPPM Logo"
+              width={50}
+              height={50}
+              className="object-contain transition-transform duration-300 group-hover:scale-110"
+            />
+          </div>
+          <div className="relative group">
+            <Image
+              src="/kampus_berdampak.png"
+              alt="LPPM Logo"
+              width={50}
+              height={50}
+              className="object-contain rounded-full transition-transform duration-300 group-hover:scale-110"
+            />
+          </div>
         </div>
       </div>
 
       {/* Desktop Navigation Links */}
-      <div className="hidden md:flex items-center gap-4">
+      <div className="hidden md:flex items-center gap-2">
         <Link
           href="/"
-          className="px-3 py-2 xl:text-[14px] 2xl:text-lg rounded-full  text-gray-800 font-medium hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors">
+          className="flex items-center gap-2 px-4 py-2.5 xl:text-[14px] 2xl:text-lg rounded-full text-gray-800 font-semibold hover:bg-white/20 hover:backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-300">
+          <Home className="h-4 w-4" />
           Beranda
         </Link>
         <CustomDropdown
           title="Tentang LPPM"
           triggerOnHover={true}>
-          {aboutLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100">
-              {link.title}
-            </Link>
-          ))}
+          {aboutLinks.map((link) => {
+            const IconComponent = link.icon;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="flex items-center gap-3 px-4 py-3 text-sm text-gray-800 hover:bg-gray-100/80 rounded-lg transition-colors duration-200 font-medium">
+                <IconComponent className="h-4 w-4" />
+                {link.title}
+              </Link>
+            );
+          })}
         </CustomDropdown>
         <CustomDropdown
-          title="Info & Berita"
+          title="Informasi"
           triggerOnHover={true}>
-          {beritaLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100">
-              {link.title}
-            </Link>
-          ))}
+          {beritaLinks.map((link) => {
+            const IconComponent = link.icon;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="flex items-center gap-3 px-4 py-3 text-sm text-gray-800 hover:bg-gray-100/80 rounded-lg transition-colors duration-200 font-medium">
+                <IconComponent className="h-4 w-4" />
+                {link.title}
+              </Link>
+            );
+          })}
         </CustomDropdown>
         <CustomDropdown
           title="Penelitian"
           triggerOnHover={true}>
-          {penelitianLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100">
-              {link.title}
-            </Link>
-          ))}
+          {penelitianLinks.map((link) => {
+            const IconComponent = link.icon;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="flex items-center gap-3 px-4 py-3 text-sm text-gray-800 hover:bg-gray-100/80 rounded-lg transition-colors duration-200 font-medium">
+                <IconComponent className="h-4 w-4" />
+                {link.title}
+              </Link>
+            );
+          })}
         </CustomDropdown>
         <CustomDropdown
           title="Pengabdian"
           triggerOnHover={true}>
-          {pengabdianLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100">
-              {link.title}
-            </Link>
-          ))}
+          {pengabdianLinks.map((link) => {
+            const IconComponent = link.icon;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="flex items-center gap-3 px-4 py-3 text-sm text-gray-800 hover:bg-gray-100/80 rounded-lg transition-colors duration-200 font-medium">
+                <IconComponent className="h-4 w-4" />
+                {link.title}
+              </Link>
+            );
+          })}
         </CustomDropdown>
         <CustomDropdown
-          title="Jurnal"
+          title="Layanan"
           triggerOnHover={true}>
-          {jurnalLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100">
-              {link.title}
-            </Link>
-          ))}
+          {getFilteredLayananLinks().map((link) => {
+            const IconComponent = link.icon;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="flex items-center gap-3 px-4 py-3 text-sm text-gray-800 hover:bg-gray-100/80 rounded-lg transition-colors duration-200 font-medium">
+                {IconComponent && <IconComponent className="h-4 w-4" />}
+                {link.title}
+              </Link>
+            );
+          })}
         </CustomDropdown>
       </div>
 
       {/* Desktop Login/Dashboard/Logout Button */}
-      <div className="hidden md:flex items-center gap-2">
+      <div className="hidden md:flex items-center gap-3">
         {isLoggedIn ? (
           <>
-            <Link
-              href={`/dashboard/${role.toLowerCase()}`}
-              className="flex items-center xl:px-3 xl:py-2 2xl:px-4 2xl:py-2 gap-2 xl:text-[12px] 2xl:text-lg rounded-full bg-yellow-500 text-white hover:bg-yellow-600 font-bold transition-all">
-              Dashboard
-            </Link>
-            <button
-              onClick={() => signOut()}
-              className="flex items-center xl:px-4 xl:py-2 2xl:px-4 2xl:py-2 gap-2 xl:text-[12px] 2xl:text-lg rounded-full bg-red-500 text-white hover:bg-red-600 font-bold transition-all">
-              <LogOut className="h-5 w-5" />
-              Logout
-            </button>
+            {role === "ADMIN" && (
+              <Link
+                href={`/dashboard/${role.toLowerCase()}`}
+                className="flex items-center xl:px-4 xl:py-2.5 2xl:px-5 2xl:py-3 gap-2 xl:text-[12px] 2xl:text-lg rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:from-yellow-600 hover:to-orange-600 font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                Dashboard
+              </Link>
+            )}
+            {role === "DOSEN" && (
+              <UserProfileModal
+                user={{
+                  name: session?.user?.name || "-",
+                  email: session?.user?.email || "-",
+                  role: session?.user?.role || "-",
+                }}
+                onLogout={() => {
+                  toast.success("Logout berhasil");
+                }}
+              />
+            )}
           </>
         ) : (
           <Link
             href="/login"
-            className="flex items-center xl:px-3 xl:py-1 2xl:px-4 2xl:py-2 gap-2 xl:text-[12px] 2xl:text-lg rounded-full bg-yellow-500 text-white hover:bg-yellow-600 font-bold transition-all">
-            <LogIn className="h-5 w-5" />
+            className="flex items-center xl:px-4 xl:py-2.5 2xl:px-5 2xl:py-3 gap-2 xl:text-[12px] 2xl:text-lg rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:from-yellow-600 hover:to-orange-600 font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+            <LogIn className="h-4 w-4" />
             Login
           </Link>
         )}
@@ -306,7 +428,7 @@ export function Navbar() {
 
       {/* Mobile Menu Button */}
       <button
-        className="md:hidden p-2 rounded-full bg-white text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
+        className="md:hidden p-3 rounded-full bg-white/30 backdrop-blur-sm text-gray-800 shadow-lg focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-300 hover:bg-white/40 transform hover:scale-110"
         onClick={() => setIsMobileMenuOpen(true)}
         aria-label="Open mobile menu">
         <Menu className="h-6 w-6" />
@@ -314,103 +436,122 @@ export function Navbar() {
 
       {/* Mobile Menu Overlay */}
       <div
-        className={`fixed inset-0  text-white z-50 flex flex-col items-center p-4 md:hidden transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-0 text-white z-50 flex flex-col items-center p-4 md:hidden transition-all duration-500 ease-in-out ${
           isMobileMenuOpen
             ? "translate-x-0 opacity-100"
             : "translate-x-full opacity-0"
         }`}
         style={{ pointerEvents: isMobileMenuOpen ? "auto" : "none" }}>
         <button
-          className="absolute top-4 right-4 p-2 rounded-full bg-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white"
+          className="absolute top-6 right-6 p-3 rounded-full bg-white/20 backdrop-blur-sm text-white focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-300 hover:bg-white/30 transform hover:scale-110"
           onClick={() => setIsMobileMenuOpen(false)}
           aria-label="Close mobile menu">
           <X className="h-6 w-6" />
         </button>
 
-        <div className="flex flex-col items-center gap-6 w-full max-w-sm pt-24 bg-gradient-to-br from-red-500 to-orange-500 p-14 rounded-2xl">
-          {" "}
-          {/* Added overflow-y-auto and pb-16 */}
+        <div className="flex flex-col items-center gap-6 w-full max-w-sm pt-24 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 p-8 rounded-3xl shadow-2xl backdrop-blur-xl border border-white/20 overflow-y-auto max-h-[80vh]">
           <Link
             href="/"
-            className="text-md font-medium text-white hover:text-yellow-300 transition-colors py-2"
+            className="flex items-center gap-2 text-lg font-semibold text-white hover:text-yellow-300 transition-all duration-300 py-2 transform hover:scale-105"
             onClick={handleMobileLinkClick}>
+            <Home className="h-5 w-5" />
             Beranda
           </Link>
           <CustomDropdown
             title="Tentang LPPM"
             mobileMode={true}
-            className="w-full justify-center text-md py-1"
+            className="w-full justify-center text-lg py-2"
             onLinkClick={handleMobileLinkClick}>
-            {aboutLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="block px-4 py-3 text-md text-white hover:bg-white/20 rounded-md">
-                {link.title}
-              </Link>
-            ))}
+            {aboutLinks.map((link) => {
+              const IconComponent = link.icon;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-white/20 rounded-lg transition-all duration-200 font-medium">
+                  <IconComponent className="h-4 w-4" />
+                  {link.title}
+                </Link>
+              );
+            })}
           </CustomDropdown>
           <CustomDropdown
             title="Info & Berita"
             mobileMode={true}
-            className="w-full justify-center text-md py-2"
+            className="w-full justify-center text-lg py-2"
             onLinkClick={handleMobileLinkClick}>
-            {beritaLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="block px-4 py-3 text-md text-white hover:bg-white/20 rounded-md">
-                {link.title}
-              </Link>
-            ))}
+            {beritaLinks.map((link) => {
+              const IconComponent = link.icon;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-white/20 rounded-lg transition-all duration-200 font-medium">
+                  <IconComponent className="h-4 w-4" />
+                  {link.title}
+                </Link>
+              );
+            })}
           </CustomDropdown>
           <CustomDropdown
             title="Penelitian"
             mobileMode={true}
-            className="w-full justify-center text-md py-2"
+            className="w-full justify-center text-lg py-2"
             onLinkClick={handleMobileLinkClick}>
-            {penelitianLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="block px-4 py-3 text-md text-white hover:bg-white/20 rounded-md">
-                {link.title}
-              </Link>
-            ))}
+            {penelitianLinks.map((link) => {
+              const IconComponent = link.icon;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-white/20 rounded-lg transition-all duration-200 font-medium">
+                  <IconComponent className="h-4 w-4" />
+                  {link.title}
+                </Link>
+              );
+            })}
           </CustomDropdown>
           <CustomDropdown
             title="Pengabdian"
             mobileMode={true}
-            className="w-full justify-center text-md py-2"
+            className="w-full justify-center text-lg py-2"
             onLinkClick={handleMobileLinkClick}>
-            {pengabdianLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="block px-4 py-3 text-md text-white hover:bg-white/20 rounded-md">
-                {link.title}
-              </Link>
-            ))}
+            {pengabdianLinks.map((link) => {
+              const IconComponent = link.icon;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-white/20 rounded-lg transition-all duration-200 font-medium">
+                  <IconComponent className="h-4 w-4" />
+                  {link.title}
+                </Link>
+              );
+            })}
           </CustomDropdown>
           <CustomDropdown
-            title="Jurnal"
+            title="Layanan"
             mobileMode={true}
-            className="w-full justify-center text-md py-2"
+            className="w-full justify-center text-lg py-2"
             onLinkClick={handleMobileLinkClick}>
-            {jurnalLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="block px-4 py-3 text-md text-white hover:bg-white/20 rounded-md">
-                {link.title}
-              </Link>
-            ))}
+            {getFilteredLayananLinks().map((link) => {
+              const IconComponent = link.icon;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-white/20 rounded-lg transition-all duration-200 font-medium">
+                  {IconComponent && <IconComponent className="h-4 w-4" />}
+                  {link.title}
+                </Link>
+              );
+            })}
           </CustomDropdown>
           {isLoggedIn ? (
             <>
               <Link
                 href={`/dashboard/${role.toLowerCase()}`}
-                className="flex items-center gap-2 px-8 py-3 rounded-full bg-yellow-500 text-white font-semibold shadow-lg hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50 transition-all w-full justify-center"
+                className="flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold shadow-lg hover:from-yellow-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all duration-300 w-full justify-center transform hover:scale-105"
                 onClick={handleMobileLinkClick}>
                 Dashboard
               </Link>
@@ -419,7 +560,7 @@ export function Navbar() {
                   signOut();
                   handleMobileLinkClick();
                 }}
-                className="flex items-center gap-2 px-8 py-3 rounded-full bg-red-500 text-white font-semibold shadow-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition-all w-full justify-center">
+                className="flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-white font-semibold shadow-lg hover:from-red-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all duration-300 w-full justify-center transform hover:scale-105">
                 <LogOut className="h-5 w-5" />
                 Logout
               </button>
@@ -427,7 +568,7 @@ export function Navbar() {
           ) : (
             <Link
               href="/login"
-              className="flex items-center gap-2 px-8 py-3 rounded-full bg-yellow-500 text-white font-semibold shadow-lg hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50 transition-all w-full justify-center"
+              className="flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold shadow-lg hover:from-yellow-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all duration-300 w-full justify-center transform hover:scale-105"
               onClick={handleMobileLinkClick}>
               <LogIn className="h-5 w-5" />
               Login

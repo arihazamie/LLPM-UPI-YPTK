@@ -13,6 +13,7 @@ enum Role {
   DOSEN
 }
 
+// Model User
 model User {
   id        String   @id
   name      String   @unique
@@ -22,10 +23,15 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-   posts     Post[] 
+  posts       Post[]
+  publikasi   Publikasi[]
+  prototypes  Prototype[]
+  buku        Buku[]
+  hki         HKI[]
+  prestasi    Prestasi[]
+  pkm         PKM[]
 }
 
-// Enum untuk jenis konten
 enum PostType {
   AGENDA
   ARTIKEL
@@ -34,6 +40,7 @@ enum PostType {
   WEBINAR
 }
 
+// Model Post
 model Post {
   id        String   @id @default(cuid()) // ID unik konten
   type      PostType // Jenis konten: Agenda, Artikel, Berita, Pengumuman, Webinar
@@ -54,4 +61,147 @@ model Post {
 
   @@index([type])      // Index untuk mempercepat query berdasarkan tipe konten
   @@index([createdAt]) // Index untuk mempercepat query berdasarkan tanggal dibuat
+}
+
+enum KategoriJurnal {
+  OJS
+  SINTA
+  INTERNASIONAL
+  WOS
+  SCOPUS
+}
+
+
+model Publikasi {
+  id              String          @id @default(cuid())
+  author          String[]
+  judul           String
+  namaJurnal      String
+  publisher       String
+
+  kategori        KategoriJurnal  // contoh: "SINTA" atau "SCOPUS"
+  level           String?         // contoh: "1" untuk Sinta 1, "Q1" untuk Scopus Q1
+
+  pkmId           String?
+  pkm             PKM?            @relation(fields: [pkmId], references: [id])
+
+  createdById     String
+  createdBy       User            @relation(fields: [createdById], references: [id])
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+enum JenisPrototype {
+  ALAT
+  APLIKASI
+  ALGORITMA
+  MODUL
+  PSEUDOCODE
+  METODE
+}
+
+// Model Prototype
+model Prototype {
+    id                String   @id @default(cuid())
+
+    author            String[]
+    namaPrototype     String
+    fungsiPrototype   String
+    penggunaUtama     String
+    jenisPrototype    String[]
+    link              String
+
+    createdById     String
+    createdBy       User     @relation(fields: [createdById], references: [id])
+
+    createdAt         DateTime @default(now())
+    updatedAt         DateTime @updatedAt
+}
+
+enum JenisBuku {
+  BUKU_AJAR
+  REFERENSI
+}
+
+// Model Buku
+model Buku {
+    id                String   @id @default(cuid())
+
+    author            String[]
+    judulBuku         String
+    penerbit          String
+    isbn              String
+    tahun             Int
+    jenisBuku         JenisBuku
+    linkBuku          String
+
+  pkmId     String?
+  pkm       PKM?     @relation(fields: [pkmId], references: [id])
+
+
+    createdById     String
+    createdBy       User     @relation(fields: [createdById], references: [id])
+
+    createdAt         DateTime @default(now())
+    updatedAt         DateTime @updatedAt
+}
+
+// Model HKI
+model HKI {
+  id                String   @id @default(cuid())
+
+  author            String[]
+  nomorPenciptaan   String
+  tanggalPermohonan DateTime
+  jenisCiptaan      String
+  judulCiptaan      String
+  linkSertifikat    String
+
+    pkmId     String?
+  pkm       PKM?     @relation(fields: [pkmId], references: [id])
+
+
+  createdById     String
+  createdBy       User     @relation(fields: [createdById], references: [id])
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// Model PKM
+model PKM {
+  id          String   @id @default(cuid())
+  proposal    String   // wajib
+  laporan     String   // wajib
+
+  // Relasi luaran (opsional)
+  publikasi Publikasi[]
+  hki       HKI[]
+  buku      Buku[]
+
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Model Prestasi
+model Prestasi {
+  id                String   @id @default(cuid())
+
+  namaPrestasi      String
+  jenisPretasi      String
+  peringkatJuara    String
+  tingkat           String
+  tanggal           DateTime
+  penyelenggara     String
+  linkSertifikat    String
+
+  createdById     String
+  createdBy       User     @relation(fields: [createdById], references: [id])
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
