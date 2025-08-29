@@ -59,9 +59,11 @@ export default function VisiMisiPage() {
                 <span>Visi Kami</span>
               </div>
               <h2 className="text-4xl font-black text-gray-900 mb-4 text-center">
-                Menjadi Universitas yang unggul dan kompetitif dalam
-                menghasilkan Sumber Daya Manusia yang berkarakter didasari
-                kecerdasan intelektual, emosional dan spiritual pada tahun 2024
+                Menjadi lembaga penelitian dan pengabdian kepada masyarakat yang
+                mandiri, inovatif, terkemuka di tingkat nasional maupun
+                internasional, menjadi pelopor dalam pengembangan penelitian dan
+                pengabdian kepada masyarakat yang berkarakter berdasarkan
+                kecerdasan intelektual, emosional dan spiritual.
               </h2>
             </div>
           </div>
@@ -93,31 +95,31 @@ export default function VisiMisiPage() {
               {
                 title: "-",
                 description:
-                  "Menyelenggarakan pendidikan tinggi berbasis teknologi informasi yang berkualitas serta menjadikan 12 prinsip dasar UPI-YPTK sebagai nilai-nilai berprilaku dalam rangka meningkatkan daya saing bangsa",
+                  "Meningkatkan kemampuan dan kualitas sumber daya dosen, mahasiswa dan staf administrasi dalam kegiatan penelitian dan pengabdian kepada masyarakat dengan cara mengembangkan aspek LRAISE++",
                 gradient: "from-red-500 to-red-600",
               },
               {
                 title: "-",
                 description:
-                  "Menciptakan suasana akademik dalam mengintegrasikan kecerdasan intelektual, emosional dan spiritual",
+                  "Meningkatkan kuantitas dan kualitas penelitian dan pengabdian kepada masyarakat yang relevan dengan program penjaminan mutu universitas roadmap penelitian dan pengabdian kepada masyarakat universitas",
                 gradient: "from-yellow-500 to-yellow-600",
               },
               {
                 title: "-",
                 description:
-                  "Menyelenggarakan Tri Dharma Perguruan Tinggi sesuai dengan kebutuhan sekarang dan masa yang akan datang",
+                  "Meningkatkan relevansi IPTEKS terapan yang inovatif yang mampu membangun jiwa kewirausahaan masyarakat luas",
                 gradient: "from-red-600 to-yellow-500",
               },
               {
                 title: "-",
                 description:
-                  "Menyelenggarakan kerjasama dengan berbagai instansi baik di dalam maupun di luar negeri",
+                  "MMenghasilkan produk dan jasa yang berbasis IPTEKS agar dapat dimanfaatkan secara optimal untuk kepentingan masyarakat",
                 gradient: "from-yellow-600 to-red-500",
               },
               {
                 title: "-",
                 description:
-                  "Mengembangkan organisasi institusi sesuai dengan perubahan yang terjadi",
+                  "Meningkatkan kuantitas dan kualitas penelitian dan pengabdian kepada masyarakat dengan instansi pemerintah dan swasta untuk menunjang pelaksanaan otonomi daerah dan pembangunan nasional; mengupayakan kemandirian dalam kegiatan penelitian dan pengabdian kepada masyarakat melalui kelembagaan manajemenyang berorientasi mutu dan kemampuan bersaing secara internasional yang berkarakter berdasarkan kecerdasan spiritual, emosional dan spiritual",
                 gradient: "from-red-500 to-yellow-500",
               },
             ].map((item, index) => (

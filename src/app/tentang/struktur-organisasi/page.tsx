@@ -76,6 +76,7 @@ export default function StrukturOrganisasiPage() {
               layout="fill"
               objectFit="contain"
               className="w-full h-full"
+              priority
             />
             <div className="absolute bottom-4 right-4 text-gray-500 text-sm">
               <LayoutDashboard className="inline-block h-4 w-4 mr-1" /> Bagan
