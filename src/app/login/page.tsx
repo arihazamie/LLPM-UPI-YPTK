@@ -16,10 +16,9 @@ import { LogIn, Sparkles, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 export default function LoginPage() {
-  const { toast } = useToast();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -54,9 +53,8 @@ export default function LoginPage() {
     });
 
     if (res?.ok) {
-      toast({
-        title: "Login berhasil 🎉",
-        description: "Selamat datang kembali!",
+      toast.success("Login berhasil 🎉", {
+        description: "Selamat datang di LPPM UPI YPTK Padang",
       });
       const session = await getSession();
       switch (session?.user.role) {
@@ -73,10 +71,7 @@ export default function LoginPage() {
           router.push("/");
       }
     } else {
-      toast({
-        title: "Login gagal ❌",
-        description: "Nama atau password salah",
-      });
+      toast.error("Login gagal", { description: res?.error });
     }
     setLoading(false);
   };

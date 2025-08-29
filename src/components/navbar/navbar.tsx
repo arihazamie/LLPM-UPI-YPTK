@@ -196,7 +196,7 @@ const CustomDropdown = ({
             ? undefined
             : toggleDropdown
         }
-        className={`flex items-center gap-1 px-4 py-2.5 xl:text-[14px] 2xl:text-lg rounded-full text-gray-800 hover:bg-white/20 hover:backdrop-blur-sm focus:outline-none transition-all duration-300 font-medium ${className} ${
+        className={`flex items-center gap-1 px-4 py-2.5 xl:text-[14px] 2xl:text-lg rounded-full text-black hover:bg-white/20 hover:backdrop-blur-sm focus:outline-none transition-all duration-300 font-medium ${className} ${
           mobileMode ? "text-white hover:bg-white/20" : ""
         }`}
         aria-haspopup="true"
@@ -213,7 +213,7 @@ const CustomDropdown = ({
           className={`${
             mobileMode
               ? "relative mt-2 w-full rounded-xl bg-white/10 backdrop-blur-sm p-3 border border-white/20"
-              : "absolute top-full left-0 mt-2 w-52 rounded-xl shadow-2xl bg-white/60 backdrop-blur-md ring-1 ring-black/10 focus:outline-none z-10 border border-white/20"
+              : "absolute top-full left-0 mt-2 w-52 rounded-xl shadow-2xl bg-white/80 backdrop-blur-md ring-1 ring-black/10 text-black focus:outline-none z-10 border border-white/20"
           } overflow-hidden animate-in fade-in-0 zoom-in-95 duration-200`}>
           {React.Children.map(children, (child) => {
             if (React.isValidElement(child) && child.type === Link) {
@@ -419,7 +419,7 @@ export function Navbar() {
         ) : (
           <Link
             href="/login"
-            className="flex items-center xl:px-4 xl:py-2.5 2xl:px-5 2xl:py-3 gap-2 xl:text-[12px] 2xl:text-lg rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:from-yellow-600 hover:to-orange-600 font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+            className="flex items-center xl:px-4 xl:py-2.5 2xl:px-5 2xl:py-2 gap-2 xl:text-[12px] 2xl:text-lg bg-white rounded-2xl drop-shadow-lg hover:drop-shadow-2xl">
             <LogIn className="h-4 w-4" />
             Login
           </Link>

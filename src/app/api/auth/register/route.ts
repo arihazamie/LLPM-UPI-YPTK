@@ -10,7 +10,6 @@ function generateCustomId() {
 function validatePassword(password: unknown): string | null {
   if (typeof password !== "string") return "Password harus berupa teks.";
   if (password.length < 8) return "Password minimal 8 karakter.";
-  // Tambah aturan lain jika perlu
   return null;
 }
 

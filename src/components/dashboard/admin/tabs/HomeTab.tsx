@@ -12,6 +12,7 @@ import { usePosts } from "@/hooks/use-posts";
 import { PostType } from "@/types/post-type";
 import { useMemo } from "react";
 
+
 export default function HomeTab() {
   const { posts: allPosts } = usePosts();
 

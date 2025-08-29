@@ -13,7 +13,7 @@ export default function VisiMisiPage() {
       {/* Hero Section for Visi dan Misi */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-red-600 via-red-500 to-yellow-500">
+        <div className="absolute inset-0 bg-gradient-to-br from-red-600/50 via-red-500 to-yellow-500">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]"></div>
           <div className="absolute top-0 left-0 w-full h-full">
             <div className="absolute top-20 left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
@@ -58,12 +58,18 @@ export default function VisiMisiPage() {
                 <Eye className="h-4 w-4" />
                 <span>Visi Kami</span>
               </div>
-              <h2 className="text-4xl font-black text-gray-900 mb-4 text-center">
-                Menjadi lembaga penelitian dan pengabdian kepada masyarakat yang
-                mandiri, inovatif, terkemuka di tingkat nasional maupun
-                internasional, menjadi pelopor dalam pengembangan penelitian dan
-                pengabdian kepada masyarakat yang berkarakter berdasarkan
-                kecerdasan intelektual, emosional dan spiritual.
+              <h2 className="text-4xl font-black text-gray-900 mb-4 text-center leading-tight">
+                Menjadi lembaga penelitian dan pengabdian kepada masyarakat yang{" "}
+                <span className="bg-gradient-to-r from-red-600 to-yellow-600 bg-clip-text text-transparent">
+                  mandiri, inovatif, terkemuka
+                </span>{" "}
+                di tingkat nasional maupun internasional, menjadi pelopor dalam
+                pengembangan penelitian dan pengabdian kepada masyarakat yang
+                berkarakter berdasarkan{" "}
+                <span className="bg-gradient-to-r from-yellow-600 to-red-600 bg-clip-text text-transparent">
+                  kecerdasan intelektual, emosional dan spiritual
+                </span>
+                .
               </h2>
             </div>
           </div>
@@ -93,34 +99,52 @@ export default function VisiMisiPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                title: "-",
+                number: "01",
+                title: "Pengembangan SDM",
                 description:
-                  "Meningkatkan kemampuan dan kualitas sumber daya dosen, mahasiswa dan staf administrasi dalam kegiatan penelitian dan pengabdian kepada masyarakat dengan cara mengembangkan aspek LRAISE++",
+                  "Meningkatkan kemampuan dan kualitas sumber daya dosen, mahasiswa dan staf administrasi dalam kegiatan penelitian dan pengabdian kepada masyarakat dengan cara mengembangkan aspek LRAISE++.",
                 gradient: "from-red-500 to-red-600",
+                icon: "👥",
               },
               {
-                title: "-",
+                number: "02",
+                title: "Peningkatan Kualitas",
                 description:
-                  "Meningkatkan kuantitas dan kualitas penelitian dan pengabdian kepada masyarakat yang relevan dengan program penjaminan mutu universitas roadmap penelitian dan pengabdian kepada masyarakat universitas",
+                  "Meningkatkan kuantitas dan kualitas penelitian dan pengabdian kepada masyarakat yang relevan dengan program penjaminan mutu universitas roadmap penelitian dan pengabdian kepada masyarakat universitas.",
                 gradient: "from-yellow-500 to-yellow-600",
+                icon: "📈",
               },
               {
-                title: "-",
+                number: "03",
+                title: "IPTEKS Inovatif",
                 description:
-                  "Meningkatkan relevansi IPTEKS terapan yang inovatif yang mampu membangun jiwa kewirausahaan masyarakat luas",
+                  "Meningkatkan relevansi IPTEKS terapan yang inovatif yang mampu membangun jiwa kewirausahaan masyarakat luas.",
                 gradient: "from-red-600 to-yellow-500",
+                icon: "💡",
               },
               {
-                title: "-",
+                number: "04",
+                title: "Produk & Jasa",
                 description:
-                  "MMenghasilkan produk dan jasa yang berbasis IPTEKS agar dapat dimanfaatkan secara optimal untuk kepentingan masyarakat",
+                  "Menghasilkan produk dan jasa yang berbasis IPTEKS agar dapat dimanfaatkan secara optimal untuk kepentingan masyarakat.",
                 gradient: "from-yellow-600 to-red-500",
+                icon: "🛠️",
               },
               {
-                title: "-",
+                number: "05",
+                title: "Kerjasama Institusi",
                 description:
-                  "Meningkatkan kuantitas dan kualitas penelitian dan pengabdian kepada masyarakat dengan instansi pemerintah dan swasta untuk menunjang pelaksanaan otonomi daerah dan pembangunan nasional; mengupayakan kemandirian dalam kegiatan penelitian dan pengabdian kepada masyarakat melalui kelembagaan manajemenyang berorientasi mutu dan kemampuan bersaing secara internasional yang berkarakter berdasarkan kecerdasan spiritual, emosional dan spiritual",
+                  "Meningkatkan kuantitas dan kualitas penelitian dan pengabdian kepada masyarakat dengan instansi pemerintah dan swasta untuk menunjang pelaksanaan otonomi daerah dan pembangunan nasional.",
                 gradient: "from-red-500 to-yellow-500",
+                icon: "🤝",
+              },
+              {
+                number: "06",
+                title: "Kemandirian Lembaga",
+                description:
+                  "Mengupayakan kemandirian dalam kegiatan penelitian dan pengabdian kepada masyarakat melalui kelembagaan manajemen yang berorientasi mutu dan kemampuan bersaing secara internasional yang berkarakter berdasarkan kecerdasan spiritual, emosional dan spiritual.",
+                gradient: "from-yellow-500 to-red-600",
+                icon: "🎯",
               },
             ].map((item, index) => (
               <Card
@@ -129,12 +153,19 @@ export default function VisiMisiPage() {
                 <div
                   className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}></div>
                 <CardHeader className="relative pb-4">
-                  <CardTitle className="text-2xl font-black text-gray-900 group-hover:text-red-600 transition-colors">
+                  <div className="flex items-center justify-between mb-4">
+                    <div
+                      className={`w-12 h-12 rounded-full bg-gradient-to-r ${item.gradient} flex items-center justify-center text-white font-bold text-lg shadow-lg`}>
+                      {item.number}
+                    </div>
+                    <div className="text-2xl">{item.icon}</div>
+                  </div>
+                  <CardTitle className="text-xl font-black text-gray-900 group-hover:text-red-600 transition-colors">
                     {item.title}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="relative">
-                  <CardDescription className="text-gray-600 leading-relaxed">
+                  <CardDescription className="text-gray-600 leading-relaxed text-sm">
                     {item.description}
                   </CardDescription>
                 </CardContent>
