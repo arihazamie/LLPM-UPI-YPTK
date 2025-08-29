@@ -27,7 +27,6 @@ const PrototypeSchema = z
   })
   .strict();
 
-// ✅ Membuat data Prototype baru
 export async function POST(req: Request) {
   try {
     const body = await req.json();

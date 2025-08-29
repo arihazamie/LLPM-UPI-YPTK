@@ -203,7 +203,7 @@ export default function PrototypePage() {
         throw new Error(result.message || "Failed to delete prototype");
       }
     } catch (error) {
-      toast.error("Gagal menghapus prototype", {
+      toast.error("", {
         description: error instanceof Error ? error.message : undefined,
       });
     } finally {
