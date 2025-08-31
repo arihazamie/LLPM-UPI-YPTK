@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, XCircle, Shield, Users, UserCheck, Lock } from "lucide-react";
+import { CheckCircle, XCircle, Shield, Users, UserCheck, Lock, Code, Database, Globe, Zap } from "lucide-react";
 import Link from "next/link";
 
 export default function DocsPage() {
@@ -50,7 +50,7 @@ export default function DocsPage() {
       </Card>
 
       {/* Role Details */}
-      <div className="grid lg:grid-cols-2 gap-8">
+      <div className="grid lg:grid-cols-2 gap-8 mb-8">
         {/* ADMIN Role */}
         <Card className="border-blue-200">
           <CardHeader className="bg-blue-50">
@@ -172,8 +172,112 @@ export default function DocsPage() {
         </Card>
       </div>
 
-      {/* Security Section */}
-      <Card className="mt-8 border-purple-200">
+            {/* Technology Stack Section */}
+      <Card className="mb-8 border-indigo-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Code className="h-6 w-6 text-indigo-600" />
+            Teknologi yang Digunakan
+          </CardTitle>
+          <CardDescription>
+            Stack teknologi modern yang digunakan dalam pengembangan sistem LPPM
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Frontend */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 mb-3">
+                <Globe className="h-5 w-5 text-blue-600" />
+                <h4 className="font-semibold text-blue-800">Frontend</h4>
+              </div>
+              <div className="space-y-2">
+                <Badge variant="outline" className="w-full justify-start">
+                  <span className="font-mono text-xs">Next.js 15.2.4</span>
+                </Badge>
+                <Badge variant="outline" className="w-full justify-start">
+                  <span className="font-mono text-xs">React 19</span>
+                </Badge>
+                <Badge variant="outline" className="w-full justify-start">
+                  <span className="font-mono text-xs">TypeScript 5</span>
+                </Badge>
+                <Badge variant="outline" className="w-full justify-start">
+                  <span className="font-mono text-xs">Tailwind CSS 4</span>
+                </Badge>
+                <Badge variant="outline" className="w-full justify-start">
+                  <span className="font-mono text-xs">Shadcn/ui</span>
+                </Badge>
+              </div>
+            </div>
+
+            {/* Backend */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 mb-3">
+                <Zap className="h-5 w-5 text-green-600" />
+                <h4 className="font-semibold text-green-800">Backend</h4>
+              </div>
+              <div className="space-y-2">
+                <Badge variant="outline" className="w-full justify-start">
+                  <span className="font-mono text-xs">Next.js API Routes</span>
+                </Badge>
+                <Badge variant="outline" className="w-full justify-start">
+                  <span className="font-mono text-xs">Prisma ORM 6.13</span>
+                </Badge>
+                <Badge variant="outline" className="w-full justify-start">
+                  <span className="font-mono text-xs">NextAuth.js 4.24</span>
+                </Badge>
+                <Badge variant="outline" className="w-full justify-start">
+                  <span className="font-mono text-xs">Zod Validation</span>
+                </Badge>
+              </div>
+            </div>
+
+            {/* Database */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 mb-3">
+                <Database className="h-5 w-5 text-purple-600" />
+                <h4 className="font-semibold text-purple-800">Database</h4>
+              </div>
+              <div className="space-y-2">
+                <Badge variant="outline" className="w-full justify-start">
+                  <span className="font-mono text-xs">PostgreSQL</span>
+                </Badge>
+                <Badge variant="outline" className="w-full justify-start">
+                  <span className="font-mono text-xs">Prisma Migrations</span>
+                </Badge>
+              </div>
+            </div>
+
+            {/* Core Libraries */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 mb-3">
+                <Code className="h-5 w-5 text-orange-600" />
+                <h4 className="font-semibold text-orange-800">Core Libraries</h4>
+              </div>
+              <div className="space-y-2">
+                <Badge variant="outline" className="w-full justify-start">
+                  <span className="font-mono text-xs">bcryptjs</span>
+                </Badge>
+                <Badge variant="outline" className="w-full justify-start">
+                  <span className="font-mono text-xs">Cloudinary</span>
+                </Badge>
+                <Badge variant="outline" className="w-full justify-start">
+                  <span className="font-mono text-xs">XLSX (Excel)</span>
+                </Badge>
+                <Badge variant="outline" className="w-full justify-start">
+                  <span className="font-mono text-xs">SWR</span>
+                </Badge>
+                <Badge variant="outline" className="w-full justify-start">
+                  <span className="font-mono text-xs">React Hook Form</span>
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+            {/* Security Section */}
+            <Card className="mb-8 border-purple-200">
         <CardHeader className="bg-purple-50">
           <CardTitle className="flex items-center gap-2 text-purple-800">
             <Lock className="h-6 w-6" />
@@ -200,6 +304,20 @@ export default function DocsPage() {
                   <p className="text-sm text-gray-600">DOSEN hanya bisa akses data yang dibuat sendiri</p>
                 </div>
               </div>
+              <div className="flex items-start gap-3">
+                <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+                <div>
+                  <h4 className="font-semibold">JWT Authentication</h4>
+                  <p className="text-sm text-gray-600">Autentikasi berbasis JWT dengan NextAuth.js</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+                <div>
+                  <h4 className="font-semibold">Password Hashing</h4>
+                  <p className="text-sm text-gray-600">Password di-hash menggunakan bcryptjs</p>
+                </div>
+              </div>
             </div>
             <div className="space-y-3">
               <div className="flex items-start gap-3">
@@ -216,6 +334,27 @@ export default function DocsPage() {
                   <p className="text-sm text-gray-600">Setiap API endpoint memvalidasi role sebelum memberikan akses</p>
                 </div>
               </div>
+              <div className="flex items-start gap-3">
+                <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+                <div>
+                  <h4 className="font-semibold">Input Validation</h4>
+                  <p className="text-sm text-gray-600">Validasi input menggunakan Zod schema</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+                <div>
+                  <h4 className="font-semibold">SQL Injection Protection</h4>
+                  <p className="text-sm text-gray-600">Proteksi SQL injection melalui Prisma ORM</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+                <div>
+                  <h4 className="font-semibold">Secure File Upload</h4>
+                  <p className="text-sm text-gray-600">Upload file aman dengan Cloudinary</p>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -224,14 +363,7 @@ export default function DocsPage() {
       {/* Footer */}
       <div className="text-center mt-12 pt-8 border-t">
         <p className="text-gray-600">
-          Dokumentasi ini diperbarui terakhir pada {new Date().toLocaleDateString('id-ID', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          })}
-        </p>
-        <p className="text-sm text-gray-500 mt-2">
-          Untuk pertanyaan lebih lanjut, silakan hubungi tim pengembang sistem LPPM
+          Dokumentasi ini diperbarui terakhir pada 31 Agustus 2025 19.00 WIB 
         </p>
       </div>
     </div>
