@@ -1,8 +1,9 @@
 "use client";
 import type React from "react";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { useSidebar } from "@/context/SidebarContext";
+import { signOut, useSession } from "next-auth/react";
 import {
   UserIcon,
   ArticleIcon,
@@ -11,6 +12,8 @@ import {
   CalendarIcon,
   CameraIcon,
   MonitorIcon,
+  PKMIcon,
+  UsersIcon,
 } from "@/components/dashboard/admin/icons/icon";
 
 type NavItem = {
@@ -20,45 +23,81 @@ type NavItem = {
   subItems?: { name: string; tabKey: string; pro?: boolean; new?: boolean }[];
 };
 
-const navItems: NavItem[] = [
+type NavGroup = {
+  title: string;
+  items: NavItem[];
+};
+
+const navGroups: NavGroup[] = [
   {
-    icon: <HomeIcon />,
-    name: "Home",
-    tabKey: "home",
+    title: "Dashboard",
+    items: [
+      {
+        icon: <HomeIcon />,
+        name: "Home",
+        tabKey: "home",
+      },
+    ],
   },
   {
-    icon: <ArticleIcon />,
-    name: "Artikel",
-    tabKey: "artikel",
+    title: "Konten Manajemen",
+    items: [
+      {
+        icon: <ArticleIcon />,
+        name: "Artikel",
+        tabKey: "artikel",
+      },
+      {
+        icon: <BellIcon />,
+        name: "Berita",
+        tabKey: "berita",
+      },
+      {
+        icon: <CameraIcon />,
+        name: "Pengumuman",
+        tabKey: "pengumuman",
+      },
+      {
+        icon: <CalendarIcon />,
+        name: "Agenda",
+        tabKey: "agenda",
+      },
+      {
+        icon: <MonitorIcon />,
+        name: "Webinar",
+        tabKey: "webinar",
+      },
+    ],
   },
   {
-    icon: <BellIcon />,
-    name: "Berita",
-    tabKey: "berita",
+    title: "Pengabdian",
+    items: [
+      {
+        icon: <PKMIcon />,
+        name: "PKM",
+        tabKey: "pkm",
+      },
+    ],
   },
   {
-    icon: <CameraIcon />,
-    name: "Pengumuman",
-    tabKey: "pengumuman",
-  },
-  {
-    icon: <CalendarIcon />,
-    name: "Agenda",
-    tabKey: "agenda",
-  },
-  {
-    icon: <MonitorIcon />,
-    name: "Webinar",
-    tabKey: "webinar",
-  },
-  {
-    icon: <UserIcon />,
-    name: "Profile",
-    tabKey: "profile",
+    title: "System",
+    items: [
+      {
+        icon: <UsersIcon />,
+        name: "Manajemen Pengguna",
+        tabKey: "users",
+      },
+      {
+        icon: <UserIcon />,
+        name: "Profile",
+        tabKey: "profile",
+      },
+    ],
   },
 ];
 
 const AppSidebar: React.FC = () => {
+  const { data: session } = useSession();
   const {
     isExpanded,
     isMobileOpen,
@@ -69,142 +108,101 @@ const AppSidebar: React.FC = () => {
     setIsMobileOpen,
   } = useSidebar();
 
-  const renderMenuItems = (
-    navItems: NavItem[],
-    menuType: "main" | "others"
-  ) => (
-    <ul className="flex flex-col gap-2">
-      {navItems.map((nav, index) => (
-        <li key={nav.name}>
-          {nav.subItems ? (
-            <button
-              onClick={() => handleSubmenuToggle(index, menuType)}
-              className={`group relative flex items-center w-full px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-in-out
-                ${
-                  openSubmenu?.type === menuType && openSubmenu?.index === index
-                    ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg shadow-red-500/25"
-                    : "text-gray-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 hover:text-red-600"
-                }
-                ${
-                  !isExpanded && !isHovered
-                    ? "lg:justify-center"
-                    : "lg:justify-start"
-                }`}>
-              <span
-                className={`flex items-center justify-center w-6 h-6 transition-all duration-200
-                  ${
-                    openSubmenu?.type === menuType &&
-                    openSubmenu?.index === index
-                      ? "text-white"
-                      : "text-gray-500 group-hover:text-red-600"
-                  }`}>
-                {nav.icon}
-              </span>
-              {(isExpanded || isHovered || isMobileOpen) && (
-                <span className="ml-3 font-medium transition-all duration-200">
-                  {nav.name}
-                </span>
-              )}
-              {openSubmenu?.type === menuType &&
-                openSubmenu?.index === index && (
-                  <div className="absolute right-2 w-2 h-2 bg-yellow-400 rounded-full"></div>
-                )}
-            </button>
-          ) : (
-            nav.tabKey && (
-              <button
-                onClick={() => {
-                  setActiveTab(nav.tabKey!);
-                  if (isMobileOpen) {
-                    setIsMobileOpen(false);
-                  }
-                }}
-                className={`group relative flex items-center w-full px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-in-out
-                  ${
-                    isActive(nav.tabKey)
-                      ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg shadow-red-500/25 transform scale-[1.02]"
-                      : "text-gray-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 hover:text-red-600 hover:transform hover:scale-[1.01]"
-                  }`}>
-                <span
-                  className={`flex items-center justify-center w-6 h-6 transition-all duration-200
-                    ${
-                      isActive(nav.tabKey)
-                        ? "text-white"
-                        : "text-gray-500 group-hover:text-red-600"
-                    }`}>
-                  {nav.icon}
-                </span>
-                {(isExpanded || isHovered || isMobileOpen) && (
-                  <span className="ml-3 font-medium transition-all duration-200">
-                    {nav.name}
-                  </span>
-                )}
-                {isActive(nav.tabKey) && (
-                  <div className="absolute right-2 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-                )}
-              </button>
-            )
-          )}
-          {nav.subItems && (isExpanded || isHovered || isMobileOpen) && (
-            <div
-              ref={(el) => {
-                subMenuRefs.current[`${menuType}-${index}`] = el;
-              }}
-              className="overflow-hidden transition-all duration-300"
-              style={{
-                height:
-                  openSubmenu?.type === menuType && openSubmenu?.index === index
-                    ? `${subMenuHeight[`${menuType}-${index}`]}px`
-                    : "0px",
-              }}>
-              <ul className="mt-2 space-y-1 ml-9">
-                {nav.subItems.map((subItem) => (
-                  <li key={subItem.name}>
-                    <button
-                      onClick={() => {
-                        setActiveTab(subItem.tabKey);
-                        if (isMobileOpen) {
-                          setIsMobileOpen(false);
-                        }
-                      }}
-                      className={`group flex items-center justify-between w-full px-3 py-2 text-sm rounded-lg transition-all duration-200
-                        ${
-                          isActive(subItem.tabKey)
-                            ? "bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-medium shadow-md"
-                            : "text-gray-600 hover:bg-yellow-50 hover:text-yellow-700"
-                        }`}>
-                      <span>{subItem.name}</span>
-                      <span className="flex items-center gap-1">
-                        {subItem.new && (
-                          <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                            new
-                          </span>
-                        )}
-                        {subItem.pro && (
-                          <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
-                            pro
-                          </span>
-                        )}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </li>
-      ))}
-    </ul>
-  );
+  const handleLogout = () => {
+    signOut({ callbackUrl: "/login" });
+  };
 
-  const [openSubmenu, setOpenSubmenu] = useState<{
-    type: "main" | "others";
-    index: number;
-  } | null>(null);
-  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
-    {}
-  );
-  const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const renderNavGroup = (group: NavGroup) => {
+    const isGroupOpen = openGroups.has(group.title);
+    
+    return (
+      <div key={group.title} className="space-y-2">
+        {(isExpanded || isHovered || isMobileOpen) ? (
+          <button
+            onClick={() => handleGroupToggle(group.title)}
+            className="flex items-center justify-between w-full px-3 py-2 text-xs font-semibold text-black uppercase tracking-wider hover:text-gray-700 transition-colors duration-200"
+          >
+            <span>{group.title}</span>
+            <svg
+              className={`w-3 h-3 transition-transform duration-200 ${
+                isGroupOpen ? "rotate-180" : ""
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+        ) : (
+          // Show group indicator when collapsed
+          <div className="flex justify-center py-2">
+            <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+          </div>
+        )}
+        
+        <div
+          className={`overflow-hidden transition-all duration-300 ${
+            isGroupOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+          } ${!isExpanded && !isHovered && !isMobileOpen ? "hidden" : ""}`}
+        >
+          <ul className="flex flex-col gap-2">
+            {group.items.map((nav) => (
+              <li key={nav.name}>
+                {nav.tabKey && (
+                  <button
+                    onClick={() => {
+                      setActiveTab(nav.tabKey!);
+                      if (isMobileOpen) {
+                        setIsMobileOpen(false);
+                      }
+                    }}
+                    className={`group relative flex items-center w-full px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-in-out
+                      ${
+                        isActive(nav.tabKey)
+                          ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg shadow-red-500/25 transform scale-[1.02]"
+                          : "text-black hover:bg-gradient-to-r hover:from-red-50 hover:to-yellow-50 hover:text-red-600 hover:transform hover:scale-[1.01]"
+                      }
+                      ${
+                        !isExpanded && !isHovered
+                          ? "lg:justify-center"
+                          : "lg:justify-start"
+                      }`}
+                  >
+                    <span
+                      className={`flex items-center justify-center w-6 h-6 transition-all duration-200
+                        ${
+                          isActive(nav.tabKey)
+                            ? "text-white"
+                            : "text-black group-hover:text-red-600"
+                        }`}
+                    >
+                      {nav.icon}
+                    </span>
+                    {(isExpanded || isHovered || isMobileOpen) && (
+                      <span className="ml-3 font-medium transition-all duration-200">
+                        {nav.name}
+                      </span>
+                    )}
+                    {isActive(nav.tabKey) && (
+                      <div className="absolute right-2 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                    )}
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set(["Dashboard"])); // Default open groups
 
   const isActive = useCallback(
     (tabKey: string) => tabKey === activeTab,
@@ -212,51 +210,26 @@ const AppSidebar: React.FC = () => {
   );
 
   useEffect(() => {
-    let submenuMatched = false;
-    ["main", "others"].forEach((menuType) => {
-      const items = menuType === "main" ? navItems : [];
-      items.forEach((nav, index) => {
-        if (nav.subItems) {
-          nav.subItems.forEach((subItem) => {
-            if (isActive(subItem.tabKey)) {
-              setOpenSubmenu({
-                type: menuType as "main" | "others",
-                index,
-              });
-              submenuMatched = true;
-            }
-          });
-        }
-      });
+    // Auto-open group that contains the active tab
+    navGroups.forEach((group) => {
+      const hasActiveTab = group.items.some((item) => 
+        item.tabKey && isActive(item.tabKey)
+      );
+      if (hasActiveTab) {
+        setOpenGroups((prev) => new Set([...prev, group.title]));
+      }
     });
-
-    if (!submenuMatched) {
-      setOpenSubmenu(null);
-    }
   }, [activeTab, isActive]);
 
-  useEffect(() => {
-    if (openSubmenu !== null) {
-      const key = `${openSubmenu.type}-${openSubmenu.index}`;
-      if (subMenuRefs.current[key]) {
-        setSubMenuHeight((prevHeights) => ({
-          ...prevHeights,
-          [key]: subMenuRefs.current[key]?.scrollHeight || 0,
-        }));
+  const handleGroupToggle = (groupTitle: string) => {
+    setOpenGroups((prevOpenGroups) => {
+      const newOpenGroups = new Set(prevOpenGroups);
+      if (newOpenGroups.has(groupTitle)) {
+        newOpenGroups.delete(groupTitle);
+      } else {
+        newOpenGroups.add(groupTitle);
       }
-    }
-  }, [openSubmenu]);
-
-  const handleSubmenuToggle = (index: number, menuType: "main" | "others") => {
-    setOpenSubmenu((prevOpenSubmenu) => {
-      if (
-        prevOpenSubmenu &&
-        prevOpenSubmenu.type === menuType &&
-        prevOpenSubmenu.index === index
-      ) {
-        return null;
-      }
-      return { type: menuType, index };
+      return newOpenGroups;
     });
   };
 
@@ -308,25 +281,82 @@ const AppSidebar: React.FC = () => {
 
       <div className="flex flex-col flex-1 overflow-y-auto px-4 py-6 space-y-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
         <nav>
-          <div className="space-y-2">
-            {(isExpanded || isHovered || isMobileOpen) && (
-              <h2 className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                Menu Utama
-              </h2>
-            )}
-            {renderMenuItems(navItems, "main")}
+          <div className="space-y-6">
+            {navGroups.map((group) => renderNavGroup(group))}
           </div>
         </nav>
       </div>
 
-      {(isExpanded || isHovered || isMobileOpen) && (
-        <div className="px-4 py-4 border-t border-gray-200/50">
-          <div className="text-center">
-            <p className="text-xs text-gray-400">LPPM Admin Dashboard</p>
-            <p className="text-xs text-gray-300 mt-1">v1.0.0</p>
+      <div className="px-4 py-4 border-t border-gray-200/50">
+        {(isExpanded || isHovered || isMobileOpen) ? (
+          <>
+            {/* User Info */}
+            <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
+              <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                <span className="text-sm font-medium text-red-600">
+                  {session?.user?.name?.charAt(0).toUpperCase() || "A"}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">{session?.user?.name}</p>
+                <p className="text-xs text-gray-500 capitalize">{session?.user?.role?.toLowerCase()}</p>
+              </div>
+            </div>
+            
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
+              </svg>
+              <span>Logout</span>
+            </button>
+            
+            {/* Version Info */}
+            <div className="text-center mt-4">
+              <p className="text-xs text-black">LPPM Admin Dashboard</p>
+              <p className="text-xs text-gray-600 mt-1">v1.0.0</p>
+            </div>
+          </>
+        ) : (
+          /* Collapsed view - just logout icon */
+          <div className="flex justify-center">
+            <button
+              onClick={handleLogout}
+              className="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              title="Logout"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
+              </svg>
+            </button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </aside>
   );
 };

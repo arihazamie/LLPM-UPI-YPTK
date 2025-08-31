@@ -5,9 +5,6 @@ import { PostType } from "@/types/post-type";
 
 const prisma = prismaEdge;
 
-/**
- * GET: Ambil semua postingan (opsional filter type)
- */
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);

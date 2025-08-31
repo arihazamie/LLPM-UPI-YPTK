@@ -23,16 +23,16 @@ import { Button } from "@/components/ui/button";
 interface Publikasi {
   id: string;
   judul: string;
-  author: string;
+  author: string[];
   namaJurnal: string;
   publisher: string;
   kategori: string;
-  level: string;
+  level?: string;
 }
 
 interface HKI {
   id: string;
-  author: string;
+  author: string[];
   nomorPenciptaan: string;
   tanggalPermohonan: string;
   jenisCiptaan: string;
@@ -42,11 +42,11 @@ interface HKI {
 
 interface Buku {
   id: string;
-  author: string;
+  author: string[];
   judulBuku: string;
   penerbit: string;
   isbn: string;
-  tahun: string;
+  tahun: number;
   jenisBuku: string;
   linkBuku: string;
 }
@@ -55,7 +55,7 @@ interface DetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   type: "publikasi" | "hki" | "buku";
-  data: unknown[];
+  data: unknown;
   title: string;
 }
 
@@ -114,11 +114,13 @@ export function DetailModal({
             className="bg-red-50 text-red-700 border-red-200">
             {publikasi.kategori}
           </Badge>
-          <Badge
-            variant="outline"
-            className="bg-blue-50 text-blue-700 border-blue-200">
-            Level: {publikasi.level}
-          </Badge>
+          {publikasi.level && (
+            <Badge
+              variant="outline"
+              className="bg-blue-50 text-blue-700 border-blue-200">
+              Level: {publikasi.level}
+            </Badge>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -130,7 +132,7 @@ export function DetailModal({
                 Penulis:
               </span>
             </div>
-            <p className="text-sm text-gray-600 ml-6">{publikasi.author}</p>
+            <p className="text-sm text-gray-600 ml-6">{publikasi.author.join(", ")}</p>
           </div>
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
@@ -178,7 +180,7 @@ export function DetailModal({
                 Pencipta:
               </span>
             </div>
-            <p className="text-sm text-gray-600 ml-6">{hki.author}</p>
+            <p className="text-sm text-gray-600 ml-6">{hki.author.join(", ")}</p>
           </div>
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
@@ -247,7 +249,7 @@ export function DetailModal({
                 Penulis:
               </span>
             </div>
-            <p className="text-sm text-gray-600 ml-6">{buku.author}</p>
+            <p className="text-sm text-gray-600 ml-6">{buku.author.join(", ")}</p>
           </div>
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
@@ -283,7 +285,7 @@ export function DetailModal({
   );
 
   const renderContent = () => {
-    if (data.length === 0) {
+    if (!data) {
       return (
         <div className="flex flex-col items-center justify-center py-12">
           <div
@@ -304,9 +306,9 @@ export function DetailModal({
 
     return (
       <div className="space-y-4">
-        {type === "publikasi" && (data as Publikasi[]).map(renderPublikasi)}
-        {type === "hki" && (data as HKI[]).map(renderHKI)}
-        {type === "buku" && (data as Buku[]).map(renderBuku)}
+        {type === "publikasi" && renderPublikasi(data as Publikasi)}
+        {type === "hki" && renderHKI(data as HKI)}
+        {type === "buku" && renderBuku(data as Buku)}
       </div>
     );
   };
@@ -323,7 +325,7 @@ export function DetailModal({
             <Badge
               variant="secondary"
               className="ml-2">
-              {data.length} item
+              {data ? "1" : "0"} item
             </Badge>
           </DialogTitle>
         </DialogHeader>

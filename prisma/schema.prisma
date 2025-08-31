@@ -18,6 +18,7 @@ model User {
   id        String   @id
   name      String   @unique
   email     String?  @unique
+  nohp      String?  @unique
   password  String
   role      Role
   createdAt DateTime @default(now())
@@ -73,7 +74,7 @@ enum KategoriJurnal {
 
 
 model Publikasi {
-  id              String          @id @default(cuid())
+  id              String          @id
   author          String[]
   judul           String
   namaJurnal      String
@@ -90,6 +91,8 @@ model Publikasi {
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@unique([pkmId])
 }
 
 enum JenisPrototype {
@@ -126,7 +129,7 @@ enum JenisBuku {
 
 // Model Buku
 model Buku {
-    id                String   @id @default(cuid())
+    id                String   @id
 
     author            String[]
     judulBuku         String
@@ -145,11 +148,13 @@ model Buku {
 
     createdAt         DateTime @default(now())
     updatedAt         DateTime @updatedAt
+
+    @@unique([pkmId])
 }
 
 // Model HKI
 model HKI {
-  id                String   @id @default(cuid())
+  id                String   @id
 
   author            String[]
   nomorPenciptaan   String
@@ -158,7 +163,7 @@ model HKI {
   judulCiptaan      String
   linkSertifikat    String
 
-    pkmId     String?
+  pkmId     String?
   pkm       PKM?     @relation(fields: [pkmId], references: [id])
 
 
@@ -167,18 +172,20 @@ model HKI {
 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+
+  @@unique([pkmId])
 }
 
 // Model PKM
 model PKM {
-  id          String   @id @default(cuid())
+  id          String   @id
   proposal    String   // wajib
   laporan     String   // wajib
 
   // Relasi luaran (opsional)
-  publikasi Publikasi[]
-  hki       HKI[]
-  buku      Buku[]
+  publikasi Publikasi?
+  hki       HKI?
+  buku      Buku?
 
   createdById String
   createdBy   User     @relation(fields: [createdById], references: [id])

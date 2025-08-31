@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prismaEdge } from "@/lib/prisma-edge";
 import * as bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
+import { withRoleAuth } from "@/lib/auth-helpers";
 
 function generateCustomId() {
   return "LPPM-" + randomUUID();
@@ -13,7 +14,7 @@ function validatePassword(password: unknown): string | null {
   return null;
 }
 
-export async function POST(request: NextRequest) {
+async function registerHandler(request: NextRequest) {
   try {
     const body = await request.json();
     const { name, password } = body;
@@ -76,3 +77,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Export the handler wrapped with ADMIN-only authorization
+export const POST = withRoleAuth(["ADMIN"], registerHandler);

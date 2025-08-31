@@ -1,6 +1,6 @@
 import type { PostType, ApiResponse, Post } from "@/types/post-type";
 
-const API_BASE_URL = "/api/postingan";
+const API_BASE_URL = "/api/public/postingan";
 
 export async function fetchPosts(
   type?: PostType,

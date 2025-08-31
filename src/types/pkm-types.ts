@@ -113,9 +113,9 @@ export interface PKM {
   id: string;
   proposal: string;
   laporan: string;
-  publikasi?: Publikasi[]; // Array of publikasi instead of single
-  hki?: HKI[]; // Array of HKI instead of single
-  buku?: Buku[]; // Array of buku instead of single
+  publikasi?: Publikasi; // Single publikasi instead of array
+  hki?: HKI; // Single HKI instead of array
+  buku?: Buku; // Single buku instead of array
   createdById: string;
   createdBy: User;
   createdAt: Date;

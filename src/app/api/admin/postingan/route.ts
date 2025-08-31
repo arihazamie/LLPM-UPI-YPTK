@@ -1,38 +1,16 @@
 // src/app/api/admin/postingan/route.ts
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
 import { v2 as cloudinary } from "cloudinary";
 import { prismaEdge as prisma } from "@/lib/prisma-edge";
 import { PostType } from "@prisma/client";
+import { withRoleAuth } from "@/lib/auth-helpers";
 
 cloudinary.config();
-
-async function verifyAdminSession() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return {
-      error: NextResponse.json(
-        { message: "Silakan login terlebih dahulu." },
-        { status: 401 }
-      ),
-    };
-  }
-  if (session.user.role !== "ADMIN") {
-    return {
-      error: NextResponse.json(
-        { message: "Akses ditolak: Hanya admin." },
-        { status: 403 }
-      ),
-    };
-  }
-  return { session };
-}
 
 /**
  * GET: Ambil semua postingan (opsional filter type)
  */
-export async function GET(req: Request) {
+export const GET = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
   try {
     const { searchParams } = new URL(req.url);
 
@@ -93,16 +71,13 @@ export async function GET(req: Request) {
       { status: 500 }
     );
   }
-}
+});
 
 /**
  * POST: Buat postingan baru
  */
-export async function POST(req: Request) {
+export const POST = withRoleAuth(["ADMIN", "PIMPINAN"], async (req, user) => {
   try {
-    const { error: sessionError, session } = await verifyAdminSession();
-    if (sessionError) return sessionError;
-
     const formData = await req.formData();
     const file = formData.get("thumbnail") as File | null;
     const type = formData.get("type") as string;
@@ -153,7 +128,7 @@ export async function POST(req: Request) {
           endDate && !isNaN(Date.parse(endDate))
             ? new Date(endDate)
             : undefined,
-        authorId: session!.user.id,
+        authorId: user.id,
       },
     });
 
@@ -168,20 +143,17 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-}
+});
 
 /**
  * PATCH: Update postingan
  */
-export async function PATCH(req: Request) {
+export const PATCH = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     if (!id)
       return NextResponse.json({ message: "ID tidak valid." }, { status: 400 });
-
-    const { error: sessionError } = await verifyAdminSession();
-    if (sessionError) return sessionError;
 
     const formData = await req.formData();
     const file = formData.get("thumbnail") as File | null;
@@ -251,20 +223,17 @@ export async function PATCH(req: Request) {
       { status: 500 }
     );
   }
-}
+});
 
 /**
  * DELETE: Hapus postingan
  */
-export async function DELETE(req: Request) {
+export const DELETE = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     if (!id)
       return NextResponse.json({ message: "ID tidak valid." }, { status: 400 });
-
-    const { error: sessionError } = await verifyAdminSession();
-    if (sessionError) return sessionError;
 
     const post = await prisma.post.findUnique({ where: { id } });
     if (!post)
@@ -287,4 +256,4 @@ export async function DELETE(req: Request) {
       { status: 500 }
     );
   }
-}
+});

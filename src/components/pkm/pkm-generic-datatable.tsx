@@ -12,7 +12,7 @@ interface PKMGenericDataTableProps {
   onDelete: (pkm: PKM) => void;
   onViewDetail: (
     type: "publikasi" | "hki" | "buku",
-    data: Publikasi[] | HKI[] | Buku[],
+    data: Publikasi | HKI | Buku,
     title: string
   ) => void;
   isLoading?: boolean;
@@ -44,11 +44,9 @@ export function PKMGenericDataTable({
   };
 
   // Cek apakah ada data publikasi, HKI, atau buku di seluruh dataset
-  const hasPublikasi = data.some(
-    (pkm) => pkm.publikasi && pkm.publikasi.length > 0
-  );
-  const hasHKI = data.some((pkm) => pkm.hki && pkm.hki.length > 0);
-  const hasBuku = data.some((pkm) => pkm.buku && pkm.buku.length > 0);
+  const hasPublikasi = data.some((pkm) => pkm.publikasi);
+  const hasHKI = data.some((pkm) => pkm.hki);
+  const hasBuku = data.some((pkm) => pkm.buku);
 
   const columns: Column<PKM>[] = [
     {
@@ -93,16 +91,14 @@ export function PKMGenericDataTable({
                 <div className="flex items-center space-x-1">
                   <Award className="w-4 h-4 text-red-500" />
                   <span className="text-sm">
-                    {pkm.publikasi && pkm.publikasi.length > 0 ? (
-                      <span className="text-red-600 font-medium">
-                        {pkm.publikasi.length}
-                      </span>
+                    {pkm.publikasi ? (
+                      <span className="text-red-600 font-medium">1</span>
                     ) : (
                       <span className="text-gray-500">0</span>
                     )}
                   </span>
                 </div>
-                {pkm.publikasi && pkm.publikasi.length > 0 && (
+                {pkm.publikasi && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -134,16 +130,14 @@ export function PKMGenericDataTable({
                 <div className="flex items-center space-x-1">
                   <FileText className="w-4 h-4 text-yellow-500" />
                   <span className="text-sm">
-                    {pkm.hki && pkm.hki.length > 0 ? (
-                      <span className="text-red-600 font-medium">
-                        {pkm.hki.length}
-                      </span>
+                    {pkm.hki ? (
+                      <span className="text-red-600 font-medium">1</span>
                     ) : (
                       <span className="text-gray-500">0</span>
                     )}
                   </span>
                 </div>
-                {pkm.hki && pkm.hki.length > 0 && (
+                {pkm.hki && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -171,16 +165,14 @@ export function PKMGenericDataTable({
                 <div className="flex items-center space-x-1">
                   <Book className="w-4 h-4 text-orange-500" />
                   <span className="text-sm">
-                    {pkm.buku && pkm.buku.length > 0 ? (
-                      <span className="text-red-600 font-medium">
-                        {pkm.buku.length}
-                      </span>
+                    {pkm.buku ? (
+                      <span className="text-red-600 font-medium">1</span>
                     ) : (
                       <span className="text-gray-500">0</span>
                     )}
                   </span>
                 </div>
-                {pkm.buku && pkm.buku.length > 0 && (
+                {pkm.buku && (
                   <Button
                     variant="ghost"
                     size="sm"

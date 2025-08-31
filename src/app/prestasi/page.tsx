@@ -9,7 +9,9 @@ import type { Prestasi } from "@/types/pkm-types";
 import { PrestasiAddEditModal } from "@/components/prestasi/prestasi-add-edit-modal";
 import { PrestasiDeleteModal } from "@/components/prestasi/prestasi-delete-modal";
 import { PrestasiGenericDataTable } from "@/components/prestasi/prestasi-generic-datatable";
+import { PrestasiExcelExportButton } from "@/components/prestasi/prestasi-excel-export-button";
 import { useSession } from "next-auth/react";
+import DosenOnly from "@/components/auth/DosenOnly";
 
 export default function PrestasiPage() {
   const [prestasis, setPrestasis] = useState<Prestasi[]>([]);
@@ -172,7 +174,8 @@ export default function PrestasiPage() {
   };
 
   return (
-    <div className="min-h-screen relative py-32 overflow-hidden">
+    <DosenOnly>
+      <div className="min-h-screen relative py-32 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-red-600/50 via-red-500 to-yellow-500">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]"></div>
         <div className="absolute top-0 left-0 w-full h-full">
@@ -187,19 +190,24 @@ export default function PrestasiPage() {
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <h1 className="text-4xl font-bold tracking-tight bg-white bg-clip-text text-transparent drop-shadow-2xl">
-              Manajemen Prestasi
+              Manajemen Prestasi - {session?.user?.name}
             </h1>
             <p className="text-lg text-white font-medium drop-shadow-sm">
               Kelola data prestasi dan pencapaian akademik UPI YPTK Padang
             </p>
           </div>
-          <Button
-            onClick={() => setShowAddModal(true)}
-            disabled={isLoading}
-            className="bg-white text-black px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 border-0">
-            <Plus className="w-4 h-4 mr-2" />
-            Tambah Prestasi
-          </Button>
+          <div className="flex items-center space-x-3">
+            <PrestasiExcelExportButton 
+              disabled={prestasis.length === 0 || isLoading}
+            />
+            <Button
+              onClick={() => setShowAddModal(true)}
+              disabled={isLoading}
+              className="bg-white text-black px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 border-0">
+              <Plus className="w-4 h-4 mr-2" />
+              Tambah Prestasi
+            </Button>
+          </div>
         </div>
 
         <Card className="border-0 shadow-lg bg-white/95 backdrop-blur-sm">
@@ -252,5 +260,6 @@ export default function PrestasiPage() {
         />
       </div>
     </div>
+    </DosenOnly>
   );
 }

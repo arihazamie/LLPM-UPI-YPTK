@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { withRoleAuth } from "@/lib/auth-helpers";
 
 const PrestasiSchema = z
   .object({
@@ -18,65 +19,68 @@ const PrestasiSchema = z
   })
   .strict();
 
-export async function POST(req: Request) {
-  try {
-    const body = await req.json();
+export const POST = withRoleAuth(
+  ["DOSEN", "ADMIN", "PIMPINAN"],
+  async (req, user) => {
+    try {
+      const body = await req.json();
 
-    const validatedData = PrestasiSchema.parse(body);
+      const validatedData = PrestasiSchema.parse(body);
 
-    const prestasi = await prisma.prestasi.create({
-      data: {
-        namaPrestasi: validatedData.namaPrestasi,
-        jenisPretasi: validatedData.jenisPretasi,
-        peringkatJuara: validatedData.peringkatJuara,
-        tingkat: validatedData.tingkat,
-        tanggal: new Date(validatedData.tanggal),
-        penyelenggara: validatedData.penyelenggara,
-        linkSertifikat: validatedData.linkSertifikat,
-        createdById: validatedData.createdById,
-      },
-      include: {
-        createdBy: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
+      const prestasi = await prisma.prestasi.create({
+        data: {
+          namaPrestasi: validatedData.namaPrestasi,
+          jenisPretasi: validatedData.jenisPretasi,
+          peringkatJuara: validatedData.peringkatJuara,
+          tingkat: validatedData.tingkat,
+          tanggal: new Date(validatedData.tanggal),
+          penyelenggara: validatedData.penyelenggara,
+          linkSertifikat: validatedData.linkSertifikat,
+          createdById: user.id,
+        },
+        include: {
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Prestasi berhasil ditambahkan",
-        data: prestasi,
-      },
-      { status: 201 }
-    );
-  } catch (error) {
-    if (error instanceof z.ZodError) {
       return NextResponse.json(
         {
-          success: false,
-          message: "Validasi gagal",
-          errors: error.issues.map((e) => ({
-            field: e.path.join("."),
-            message: e.message,
-          })),
+          success: true,
+          message: "Prestasi berhasil ditambahkan",
+          data: prestasi,
         },
-        { status: 400 }
+        { status: 201 }
+      );
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Validasi gagal",
+            errors: error.issues.map((e) => ({
+              field: e.path.join("."),
+              message: e.message,
+            })),
+          },
+          { status: 400 }
+        );
+      }
+      console.error(error);
+      return NextResponse.json(
+        { success: false, message: "Terjadi kesalahan pada server" },
+        { status: 500 }
       );
     }
-    console.error(error);
-    return NextResponse.json(
-      { success: false, message: "Terjadi kesalahan pada server" },
-      { status: 500 }
-    );
   }
-}
+);
 
-export async function GET() {
+export const GET = withRoleAuth(["DOSEN", "ADMIN", "PIMPINAN"], async () => {
   try {
     const prestasis = await prisma.prestasi.findMany({
       include: {
@@ -106,4 +110,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

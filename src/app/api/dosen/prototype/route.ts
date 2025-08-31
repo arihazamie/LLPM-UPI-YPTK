@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { withRoleAuth } from "@/lib/auth-helpers";
 
 // Skema validasi Zod
 const PrototypeSchema = z
@@ -27,7 +28,7 @@ const PrototypeSchema = z
   })
   .strict();
 
-export async function POST(req: Request) {
+export const POST = withRoleAuth(["DOSEN", "ADMIN", "PIMPINAN"], async (req, user) => {
   try {
     const body = await req.json();
     const validatedData = PrototypeSchema.parse(body);
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
         penggunaUtama: validatedData.penggunaUtama,
         jenisPrototype: validatedData.jenisPrototype,
         link: validatedData.link,
-        createdById: validatedData.createdById,
+        createdById: user.id,
       },
       include: {
         createdBy: {
@@ -78,11 +79,14 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function GET() {
+export const GET = withRoleAuth(["DOSEN", "ADMIN", "PIMPINAN"], async (req, user) => {
   try {
     const prototypes = await prisma.prototype.findMany({
+      where: {
+        createdById: user.id, // Hanya ambil prototype yang dibuat oleh user yang login
+      },
       include: {
         createdBy: {
           select: { id: true, name: true, email: true },
@@ -106,4 +110,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

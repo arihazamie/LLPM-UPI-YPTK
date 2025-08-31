@@ -61,32 +61,23 @@ export function PrestasiGenericDataTable({
 
   const columns: Column<Prestasi>[] = [
     {
-      key: "id",
-      header: "ID",
-      sortable: true,
-      render: (prestasi: Prestasi) => (
-        <span className="font-mono text-sm text-red-600">#{prestasi.id}</span>
-      ),
-      width: "80px",
-    },
-    {
       key: "namaPrestasi",
-      header: "Nama Prestasi",
+      header: "Nama",
       sortable: true,
       render: (prestasi: Prestasi) => (
-        <div className="space-y-1">
           <div className="font-medium text-slate-800">
             {prestasi.namaPrestasi}
           </div>
-          <div className="flex items-center space-x-2">
-            <Trophy className="w-3 h-3 text-yellow-500" />
-            <Badge
-              variant="secondary"
-              className="text-xs">
-              {prestasi.jenisPretasi}
-            </Badge>
+      ),
+    },
+    {
+      key: "jenisPrestasi",
+      header: "Jenis",
+      sortable: true,
+      render: (prestasi: Prestasi) => (
+          <div className="font-medium text-slate-800">
+            {prestasi.jenisPretasi}
           </div>
-        </div>
       ),
     },
     {

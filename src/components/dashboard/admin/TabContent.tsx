@@ -1,3 +1,5 @@
+"use client";
+
 import { useSidebar } from "@/context/SidebarContext"
 import HomeTab from "./tabs/HomeTab"
 import ArtikelTab from "./tabs/ArtikelTab"
@@ -5,7 +7,9 @@ import BeritaTab from "./tabs/BeritaTab"
 import PengumumanTab from "./tabs/PengumumanTab"
 import AgendaTab from "./tabs/AgendaTab"
 import WebinarTab from "./tabs/WebinarTab"
+import PKMTab from "./tabs/PKMTab"
 import ProfileTab from "./tabs/ProfileTab"
+import UsersTab from "./tabs/UsersTab"
 
 export default function TabContent() {
   const { activeTab } = useSidebar()
@@ -24,6 +28,10 @@ export default function TabContent() {
         return <AgendaTab />
       case "webinar":
         return <WebinarTab />
+      case "pkm":
+        return <PKMTab />
+      case "users":
+        return <UsersTab />
       case "profile":
         return <ProfileTab />
       default:

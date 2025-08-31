@@ -32,7 +32,6 @@ import {
   GraduationCap,
   Microscope,
   Settings,
-  List,
   Home,
 } from "lucide-react";
 import Link from "next/link";
@@ -106,11 +105,6 @@ const penelitianLinks = [
 const layananLinks = [
   { title: "PLP", href: "/layanan/plp", icon: Microscope },
   { title: "PPJS", href: "/layanan/ppjs", icon: Settings },
-  {
-    title: "Daftar Layanan",
-    href: "/layanan/daftar-layanan",
-    icon: List,
-  },
   { title: "PKM", href: "/pkm", icon: BookOpen, dosenOnly: true },
   { title: "Prototype", href: "/prototype", icon: Lightbulb, dosenOnly: true },
   { title: "Prestasi", href: "/prestasi", icon: Trophy, dosenOnly: true },
@@ -399,7 +393,7 @@ export function Navbar() {
             {role === "ADMIN" && (
               <Link
                 href={`/dashboard/${role.toLowerCase()}`}
-                className="flex items-center xl:px-4 xl:py-2.5 2xl:px-5 2xl:py-3 gap-2 xl:text-[12px] 2xl:text-lg rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:from-yellow-600 hover:to-orange-600 font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                className="flex items-center xl:px-4 xl:py-2.5 2xl:px-5 2xl:py-2 gap-2 xl:text-[12px] 2xl:text-lg bg-white rounded-2xl drop-shadow-lg hover:drop-shadow-2xl">
                 Dashboard
               </Link>
             )}

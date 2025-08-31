@@ -1,10 +1,7 @@
 import type React from "react";
-import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
-import "./globals.css";
 import { SidebarProvider } from "@/context/SidebarContext";
 import AdminLayout from "@/components/dashboard/admin/AdminLayout";
-import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -19,27 +16,18 @@ const poppins = Poppins({
   variable: "--font-poppins",
 });
 
-export const metadata: Metadata = {
-  title: "Dashboard App",
-  description: "Dashboard with sidebar navigation",
-  generator: "v0.app",
-};
 
-export default function RootLayout({
+
+export default function AdminDashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${inter.variable} ${poppins.variable}`}>
-      <body className="font-sans antialiased">
-        <SidebarProvider>
-          <AdminLayout>{children}</AdminLayout>
-        </SidebarProvider>
-        <Toaster />
-      </body>
-    </html>
+    <div className={`${inter.variable} ${poppins.variable}`}>
+      <SidebarProvider>
+        <AdminLayout>{children}</AdminLayout>
+      </SidebarProvider>
+    </div>
   );
 }

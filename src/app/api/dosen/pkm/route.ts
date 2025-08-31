@@ -2,37 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { KategoriJurnal, JenisBuku } from "@prisma/client";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
-
-// --- Session Verification ---
-async function verifyDosenSession() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return {
-      error: NextResponse.json(
-        {
-          success: false,
-          message: "Silakan login terlebih dahulu",
-        },
-        { status: 401 }
-      ),
-    };
-  }
-  if (session.user.role !== "DOSEN") {
-    return {
-      error: NextResponse.json(
-        {
-          success: false,
-          message:
-            "Akses ditolak: Hanya dosen yang dapat mengakses endpoint ini",
-        },
-        { status: 403 }
-      ),
-    };
-  }
-  return { session };
-}
+import { generatePkmId, generateHkiId, generateBukuId, generatePublikasiId } from "@/lib/utils";
+import { withRoleAuth } from "@/lib/auth-helpers";
 
 // --- Schemas ---
 const PublikasiInputSchema = z
@@ -73,54 +44,70 @@ const PkmCreateSchema = z
   .object({
     proposal: z.string().min(1),
     laporan: z.string().min(1),
-    publikasi: z.array(PublikasiInputSchema).optional(),
-    hki: z.array(HkiInputSchema).optional(),
-    buku: z.array(BukuInputSchema).optional(),
+    publikasi: PublikasiInputSchema.optional(),
+    hki: HkiInputSchema.optional(),
+    buku: BukuInputSchema.optional(),
   })
   .strict();
 
 type PkmCreateBody = z.infer<typeof PkmCreateSchema>;
 
 // --- Handler ---
-export async function POST(req: Request) {
+export const POST = withRoleAuth(["DOSEN", "ADMIN", "PIMPINAN"], async (req, user) => {
   try {
-    const { error: sessionError, session } = await verifyDosenSession();
-    if (sessionError) return sessionError;
-
     const json = await req.json();
     const body: PkmCreateBody = PkmCreateSchema.parse(json);
 
+    // Generate custom IDs
+    const pkmId = await generatePkmId(prisma);
+    
+    // Generate IDs for related records if they exist
+    const publikasiId = body.publikasi ? await generatePublikasiId(prisma) : undefined;
+    const hkiId = body.hki ? await generateHkiId(prisma) : undefined;
+    const bukuId = body.buku ? await generateBukuId(prisma) : undefined;
+
     const created = await prisma.pKM.create({
       data: {
+        id: pkmId,
         proposal: body.proposal,
         laporan: body.laporan,
-        createdById: session!.user.id,
+        createdById: user.id,
         ...(body.publikasi && {
           publikasi: {
-            create: body.publikasi.map((pub) => ({
-              ...pub,
-              createdById: session!.user.id,
-            })),
+            create: {
+              id: publikasiId!,
+              ...body.publikasi,
+              createdById: user.id,
+            },
           },
         }),
         ...(body.hki && {
           hki: {
-            create: body.hki.map((h) => ({
-              ...h,
-              createdById: session!.user.id,
-            })),
+            create: {
+              id: hkiId!,
+              ...body.hki,
+              createdById: user.id,
+            },
           },
         }),
         ...(body.buku && {
           buku: {
-            create: body.buku.map((b) => ({
-              ...b,
-              createdById: session!.user.id,
-            })),
+            create: {
+              id: bukuId!,
+              ...body.buku,
+              createdById: user.id,
+            },
           },
         }),
       },
-      include: { publikasi: true, hki: true, buku: true },
+      include: { 
+        publikasi: true, 
+        hki: true, 
+        buku: true,
+        createdBy: {
+          select: { id: true, name: true, email: true },
+        },
+      },
     });
 
     return NextResponse.json({
@@ -151,16 +138,13 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function GET() {
+export const GET = withRoleAuth(["DOSEN", "ADMIN", "PIMPINAN"], async (req, user) => {
   try {
-    const { error: sessionError, session } = await verifyDosenSession();
-    if (sessionError) return sessionError;
-
     const pkms = await prisma.pKM.findMany({
       where: {
-        createdById: session!.user.id, // Hanya ambil PKM yang dibuat oleh user yang login
+        createdById: user.id, // Hanya ambil PKM yang dibuat oleh user yang login
       },
       include: {
         publikasi: true,
@@ -188,4 +172,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

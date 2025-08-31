@@ -45,7 +45,7 @@ const Home = () => {
     const fetchStats = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/stats");
+        const response = await fetch("/api/public/stats");
         if (!response.ok) throw new Error("Failed to fetch stats");
         const data: StatsResponse = await response.json();
         setStatsData(data);

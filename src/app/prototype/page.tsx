@@ -22,6 +22,8 @@ import { PrototypeAddEditModal } from "@/components/prototype/prototype-add-edit
 import { PrototypeDeleteModal } from "@/components/prototype/prototype-delete-modal";
 import { AuthorsModal } from "@/components/modalUsers";
 import { useSession } from "next-auth/react";
+import DosenOnly from "@/components/auth/DosenOnly";
+import { PrototypeExcelExportButton } from "@/components/prototype/prototype-excel-export-button";
 
 export default function PrototypePage() {
   const [prototypes, setPrototypes] = useState<Prototype[]>([]);
@@ -220,7 +222,8 @@ export default function PrototypePage() {
   );
 
   return (
-    <div className="min-h-screen relative py-32 overflow-hidden">
+    <DosenOnly>
+      <div className="min-h-screen relative py-32 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-red-600/50 via-red-500 to-yellow-500">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]"></div>
         <div className="absolute top-0 left-0 w-full h-full">
@@ -235,12 +238,16 @@ export default function PrototypePage() {
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <h1 className="text-4xl font-bold tracking-tight bg-white bg-clip-text text-transparent drop-shadow-2xl">
-              Manajemen Prototype
+              Manajemen Prototype - {session?.user?.name}
             </h1>
             <p className="text-lg text-white font-medium drop-shadow-sm">
               Kelola prototype teknologi dan inovasi UPI YPTK Padang
             </p>
           </div>
+          <div className="flex items-center space-x-3">
+            <PrototypeExcelExportButton 
+              disabled={prototypes.length === 0 || isLoading}
+            />
           <Button
             onClick={() => setShowAddModal(true)}
             disabled={isLoading}
@@ -248,6 +255,7 @@ export default function PrototypePage() {
             <Plus className="w-4 h-4 mr-2" />
             Tambah Prototype
           </Button>
+          </div>
         </div>
 
         <Card className="border-0 shadow-lg bg-white/95 backdrop-blur-sm">
@@ -444,5 +452,6 @@ export default function PrototypePage() {
         />
       </div>
     </div>
+    </DosenOnly>
   );
 }
