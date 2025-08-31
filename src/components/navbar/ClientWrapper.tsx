@@ -27,7 +27,7 @@ export default function ClientWrapper({
     <SessionWrapper>
       <ScrollToTop />
       <Navbar />
-      <main className="flex-1 -mt-28 xl:-mt-[138px] 2xl:-mt-32">
+      <main className="flex-1 -mt-32 xl:-mt-[138px] 2xl:-mt-32">
         {children}
       </main>
       <Footer />
