@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface Publikasi {
+interface Jurnal {
   id: string;
   judul: string;
   author: string[];
@@ -28,6 +28,7 @@ interface Publikasi {
   publisher: string;
   kategori: string;
   level?: string;
+  linkJurnal: string;
 }
 
 interface HKI {
@@ -54,14 +55,14 @@ interface Buku {
 interface DetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  type: "publikasi" | "hki" | "buku";
+  type: "jurnal" | "hki" | "buku";
   data: unknown;
   title: string;
 }
 
 const getTypeIcon = (type: string) => {
   switch (type) {
-    case "publikasi":
+    case "jurnal":
       return <Award className="w-5 h-5 text-red-500" />;
     case "hki":
       return <FileText className="w-5 h-5 text-yellow-500" />;
@@ -74,7 +75,7 @@ const getTypeIcon = (type: string) => {
 
 const getTypeColor = (type: string) => {
   switch (type) {
-    case "publikasi":
+    case "jurnal":
       return "bg-red-50 border-red-200 text-red-700";
     case "hki":
       return "bg-yellow-50 border-yellow-200 text-yellow-700";
@@ -100,25 +101,25 @@ export function DetailModal({
     });
   };
 
-  const renderPublikasi = (publikasi: Publikasi) => (
+  const renderJurnal = (jurnal: Jurnal) => (
     <Card
-      key={publikasi.id}
+      key={jurnal.id}
       className="mb-4 border-l-4 border-l-red-500">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-semibold text-gray-900">
-          {publikasi.judul}
+          {jurnal.judul}
         </CardTitle>
         <div className="flex flex-wrap gap-2 mt-2">
           <Badge
             variant="outline"
             className="bg-red-50 text-red-700 border-red-200">
-            {publikasi.kategori}
+            {jurnal.kategori}
           </Badge>
-          {publikasi.level && (
+          {jurnal.level && (
             <Badge
               variant="outline"
               className="bg-blue-50 text-blue-700 border-blue-200">
-              Level: {publikasi.level}
+              Level: {jurnal.level}
             </Badge>
           )}
         </div>
@@ -132,14 +133,16 @@ export function DetailModal({
                 Penulis:
               </span>
             </div>
-            <p className="text-sm text-gray-600 ml-6">{publikasi.author.join(", ")}</p>
+            <p className="text-sm text-gray-600 ml-6">
+              {jurnal.author.join(", ")}
+            </p>
           </div>
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
               <Book className="w-4 h-4 text-gray-500" />
               <span className="text-sm font-medium text-gray-700">Jurnal:</span>
             </div>
-            <p className="text-sm text-gray-600 ml-6">{publikasi.namaJurnal}</p>
+            <p className="text-sm text-gray-600 ml-6">{jurnal.namaJurnal}</p>
           </div>
         </div>
         <div className="space-y-2">
@@ -149,8 +152,20 @@ export function DetailModal({
               Publisher:
             </span>
           </div>
-          <p className="text-sm text-gray-600 ml-6">{publikasi.publisher}</p>
+          <p className="text-sm text-gray-600 ml-6">{jurnal.publisher}</p>
         </div>
+        {jurnal.linkJurnal && (
+          <div className="pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.open(jurnal.linkJurnal, "_blank")}
+              className="w-full">
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Lihat Jurnal
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -180,7 +195,9 @@ export function DetailModal({
                 Pencipta:
               </span>
             </div>
-            <p className="text-sm text-gray-600 ml-6">{hki.author.join(", ")}</p>
+            <p className="text-sm text-gray-600 ml-6">
+              {hki.author.join(", ")}
+            </p>
           </div>
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
@@ -249,7 +266,9 @@ export function DetailModal({
                 Penulis:
               </span>
             </div>
-            <p className="text-sm text-gray-600 ml-6">{buku.author.join(", ")}</p>
+            <p className="text-sm text-gray-600 ml-6">
+              {buku.author.join(", ")}
+            </p>
           </div>
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
@@ -306,7 +325,7 @@ export function DetailModal({
 
     return (
       <div className="space-y-4">
-        {type === "publikasi" && renderPublikasi(data as Publikasi)}
+        {type === "jurnal" && renderJurnal(data as Jurnal)}
         {type === "hki" && renderHKI(data as HKI)}
         {type === "buku" && renderBuku(data as Buku)}
       </div>

@@ -22,7 +22,7 @@ export async function GET() {
             nohp: true,
           },
         },
-        publikasi: true,
+        jurnal: true,
         hki: true,
         buku: true,
       },
@@ -36,9 +36,11 @@ export async function GET() {
       "Nama Dosen": pkm.createdBy.name,
       Email: pkm.createdBy.email,
       "No HP": pkm.createdBy.nohp,
+      Judul: pkm.judul,
       Proposal: pkm.proposal,
       Laporan: pkm.laporan,
-      Publikasi: pkm.publikasi ? "Ada" : "Tidak ada",
+      Jurnal: pkm.jurnal ? "Ada" : "Tidak ada",
+      "Link Jurnal": pkm.jurnal?.linkJurnal || "-",
       HKI: pkm.hki ? "Ada" : "Tidak ada",
       Buku: pkm.buku ? "Ada" : "Tidak ada",
       "Tanggal Dibuat": pkm.createdAt.toLocaleDateString("id-ID"),
@@ -54,9 +56,11 @@ export async function GET() {
       { wch: 25 }, // Nama Dosen
       { wch: 30 }, // Email
       { wch: 15 }, // No HP
+      { wch: 40 }, // Judul
       { wch: 40 }, // Proposal
       { wch: 40 }, // Laporan
-      { wch: 15 }, // Publikasi
+      { wch: 15 }, // Jurnal
+      { wch: 40 }, // Link Jurnal
       { wch: 15 }, // HKI
       { wch: 15 }, // Buku
       { wch: 15 }, // Tanggal Dibuat

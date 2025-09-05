@@ -96,3 +96,14 @@ export const UsersIcon = () => (
     />
   </svg>
 )
+
+export const PenelitianIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4zm2 3h8a1 1 0 110 2H6a1 1 0 010-2zm0 4h8a1 1 0 110 2H6a1 1 0 110-2zm0 4h5a1 1 0 110 2H6a1 1 0 110-2zm8-1a1 1 0 100-2 1 1 0 000 2zm0 3a1 1 0 100-2 1 1 0 000 2z"
+      fill="currentColor"
+    />
+  </svg>
+)

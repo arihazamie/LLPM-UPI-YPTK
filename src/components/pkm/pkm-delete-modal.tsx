@@ -36,7 +36,7 @@ export function PKMDeleteModal({ isOpen, onClose, onConfirm, title, loading = fa
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Hapus PKM?</h3>
               <p className="text-gray-600 text-sm">
-                Apakah Anda yakin ingin menghapus PKM {`"${title}"`}? Semua data terkait termasuk publikasi, HKI, dan
+                Apakah Anda yakin ingin menghapus PKM {`"${title}"`}? Semua data terkait termasuk jurnal, HKI, dan
                 buku akan ikut terhapus. Tindakan ini tidak dapat dibatalkan.
               </p>
             </div>

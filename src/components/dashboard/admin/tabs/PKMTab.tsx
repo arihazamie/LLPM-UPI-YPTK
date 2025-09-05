@@ -8,10 +8,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, X, ExternalLink, FileTextIcon, BookOpenIcon, AwardIcon } from "lucide-react";
+import {
+  PlusIcon,
+  X,
+  ExternalLink,
+  FileTextIcon,
+  BookOpenIcon,
+  AwardIcon,
+} from "lucide-react";
 import { useModal } from "@/hooks/useModal";
 import { useState, useEffect } from "react";
-import type { PKM, Publikasi, HKI, Buku } from "@/types/pkm-types";
+import type { PKM, Jurnal, HKI, Buku } from "@/types/pkm-types";
 import { KategoriJurnal, JenisBuku } from "@/types/pkm-types";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
@@ -35,15 +42,16 @@ export default function PKMTab() {
   const [totalItems, setTotalItems] = useState(0);
 
   // Form states
+  const [judul, setJudul] = useState("");
   const [proposal, setProposal] = useState("");
   const [laporan, setLaporan] = useState("");
-  const [publikasi, setPublikasi] = useState<Publikasi | undefined>(undefined);
+  const [jurnal, setJurnal] = useState<Jurnal | undefined>(undefined);
   const [hki, setHki] = useState<HKI | undefined>(undefined);
   const [buku, setBuku] = useState<Buku | undefined>(undefined);
   const [isSaving, setIsSaving] = useState(false);
 
   // Sub-modals
-  const [showPublikasiModal, setShowPublikasiModal] = useState(false);
+  const [showJurnalModal, setShowJurnalModal] = useState(false);
   const [showHkiModal, setShowHkiModal] = useState(false);
   const [showBukuModal, setShowBukuModal] = useState(false);
 
@@ -79,9 +87,10 @@ export default function PKMTab() {
     setModalMode("add");
     setSelectedPkm(null);
     // Reset form
+    setJudul("");
     setProposal("");
     setLaporan("");
-    setPublikasi(undefined);
+    setJurnal(undefined);
     setHki(undefined);
     setBuku(undefined);
     addEditModal.openModal();
@@ -91,9 +100,10 @@ export default function PKMTab() {
     setModalMode("edit");
     setSelectedPkm(pkm);
     // Populate form with existing data
+    setJudul(pkm.judul || "");
     setProposal(pkm.proposal || "");
     setLaporan(pkm.laporan || "");
-    setPublikasi(pkm.publikasi || undefined);
+    setJurnal(pkm.jurnal || undefined);
     setHki(pkm.hki || undefined);
     setBuku(pkm.buku || undefined);
     addEditModal.openModal();
@@ -115,30 +125,35 @@ export default function PKMTab() {
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      
-      if (!proposal.trim() || !laporan.trim()) {
-        toast.error("Proposal dan laporan harus diisi");
+
+      if (!judul.trim() || !proposal.trim() || !laporan.trim()) {
+        toast.error("Judul, proposal dan laporan harus diisi");
         return;
       }
 
       const pkmData = {
+        judul: judul.trim(),
         proposal: proposal.trim(),
         laporan: laporan.trim(),
-        ...(publikasi && {
-          publikasi: {
-            judul: publikasi.judul,
-            author: publikasi.author,
-            namaJurnal: publikasi.namaJurnal,
-            publisher: publikasi.publisher,
-            kategori: publikasi.kategori,
-            level: publikasi.level,
+        ...(jurnal && {
+          jurnal: {
+            judul: jurnal.judul,
+            author: jurnal.author,
+            namaJurnal: jurnal.namaJurnal,
+            publisher: jurnal.publisher,
+            kategori: jurnal.kategori,
+            level: jurnal.level,
+            linkJurnal: jurnal.linkJurnal,
           },
         }),
         ...(hki && {
           hki: {
             author: hki.author,
             nomorPenciptaan: hki.nomorPenciptaan,
-            tanggalPermohonan: hki.tanggalPermohonan instanceof Date ? hki.tanggalPermohonan.toISOString() : hki.tanggalPermohonan,
+            tanggalPermohonan:
+              hki.tanggalPermohonan instanceof Date
+                ? hki.tanggalPermohonan.toISOString()
+                : hki.tanggalPermohonan,
             jenisCiptaan: hki.jenisCiptaan,
             judulCiptaan: hki.judulCiptaan,
             linkSertifikat: hki.linkSertifikat,
@@ -157,7 +172,15 @@ export default function PKMTab() {
         }),
       };
 
-      const url = modalMode === "add" ? "/api/admin/pkm" : `/api/admin/pkm?id=${selectedPkm?.id}`;
+      // Debug logging
+      console.log("PKM Data being sent:", pkmData);
+      console.log("Jurnal state:", jurnal);
+      console.log("Modal mode:", modalMode);
+
+      const url =
+        modalMode === "add"
+          ? "/api/admin/pkm"
+          : `/api/admin/pkm?id=${selectedPkm?.id}`;
       const method = modalMode === "add" ? "POST" : "PUT";
 
       const response = await fetch(url, {
@@ -170,24 +193,39 @@ export default function PKMTab() {
 
       const result = await response.json();
 
+      console.log("API Response:", result); // Debug log
+
       if (response.ok) {
         toast.success(
-          modalMode === "add" ? "PKM berhasil dibuat" : "PKM berhasil diperbarui"
+          modalMode === "add"
+            ? "PKM berhasil dibuat"
+            : "PKM berhasil diperbarui"
         );
         addEditModal.closeModal();
-        fetchPKMs();
+
+        // Add small delay before refreshing to ensure database is updated
+        setTimeout(() => {
+          fetchPKMs();
+        }, 500);
       } else {
         // Log the detailed error for debugging
         console.error("API Error:", result);
         if (result.errors && Array.isArray(result.errors)) {
-          const errorMessages = result.errors.map((err: { field: string; message: string }) => `${err.field}: ${err.message}`).join(', ');
+          const errorMessages = result.errors
+            .map(
+              (err: { field: string; message: string }) =>
+                `${err.field}: ${err.message}`
+            )
+            .join(", ");
           throw new Error(`Validasi gagal: ${errorMessages}`);
         }
         throw new Error(result.message || "Gagal menyimpan PKM");
       }
     } catch (error) {
       console.error("Error saving PKM:", error);
-      toast.error(error instanceof Error ? error.message : "Gagal menyimpan PKM");
+      toast.error(
+        error instanceof Error ? error.message : "Gagal menyimpan PKM"
+      );
     } finally {
       setIsSaving(false);
     }
@@ -220,14 +258,14 @@ export default function PKMTab() {
   };
 
   // Helper functions for managing related data
-  const handleAddPublikasi = (newPublikasi: Partial<Publikasi>) => {
-    const publikasiWithId = {
-      ...newPublikasi,
+  const handleAddJurnal = (newJurnal: Partial<Jurnal>) => {
+    const jurnalWithId = {
+      ...newJurnal,
       id: Date.now().toString(),
       createdAt: new Date(),
       updatedAt: new Date(),
-    } as Publikasi;
-    setPublikasi(publikasiWithId);
+    } as Jurnal;
+    setJurnal(jurnalWithId);
   };
 
   const handleAddHki = (newHki: Partial<HKI>) => {
@@ -248,10 +286,6 @@ export default function PKMTab() {
       updatedAt: new Date(),
     } as Buku;
     setBuku(bukuWithId);
-  };
-
-  const removePublikasi = () => {
-    setPublikasi(undefined);
   };
 
   const removeHki = () => {
@@ -275,8 +309,7 @@ export default function PKMTab() {
           <AdminExcelExportButton disabled={pkms.length === 0} />
           <Button
             onClick={handleAdd}
-            className="bg-red-500 hover:bg-red-600 text-white"
-          >
+            className="bg-red-500 hover:bg-red-600 text-white">
             <PlusIcon className="w-4 h-4 mr-2" />
             Tambah PKM
           </Button>
@@ -305,11 +338,9 @@ export default function PKMTab() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {pkms.reduce((acc, pkm) => acc + (pkm.publikasi ? 1 : 0), 0)}
+              {pkms.reduce((acc, pkm) => acc + (pkm.jurnal ? 1 : 0), 0)}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Total publikasi
-            </p>
+            <p className="text-xs text-muted-foreground">Total publikasi</p>
           </CardContent>
         </Card>
 
@@ -322,9 +353,7 @@ export default function PKMTab() {
             <div className="text-2xl font-bold">
               {pkms.reduce((acc, pkm) => acc + (pkm.hki ? 1 : 0), 0)}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Total HKI
-            </p>
+            <p className="text-xs text-muted-foreground">Total HKI</p>
           </CardContent>
         </Card>
 
@@ -337,9 +366,7 @@ export default function PKMTab() {
             <div className="text-2xl font-bold">
               {pkms.reduce((acc, pkm) => acc + (pkm.buku ? 1 : 0), 0)}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Total buku
-            </p>
+            <p className="text-xs text-muted-foreground">Total buku</p>
           </CardContent>
         </Card>
       </div>
@@ -375,13 +402,24 @@ export default function PKMTab() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={addEditModal.closeModal}
-              >
+                onClick={addEditModal.closeModal}>
                 ✕
               </Button>
             </div>
 
             <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
+              <div className="space-y-2">
+                <Label htmlFor="judul">Judul PKM *</Label>
+                <Input
+                  id="judul"
+                  value={judul}
+                  onChange={(e) => setJudul(e.target.value)}
+                  placeholder="Masukkan judul PKM"
+                  required
+                  disabled={isSaving}
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="proposal">Link Proposal *</Label>
                 <div className="space-y-2">
@@ -466,29 +504,29 @@ export default function PKMTab() {
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label>Publikasi {publikasi ? "(1)" : "(0)"}</Label>
+                  <Label>Jurnal {jurnal ? "(1)" : "(0)"}</Label>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowPublikasiModal(true)}
-                    disabled={!!publikasi}>
+                    onClick={() => setShowJurnalModal(true)}
+                    disabled={!!jurnal}>
                     <PlusIcon className="w-4 h-4 mr-2" />
-                    Tambah Publikasi
+                    Tambah Jurnal
                   </Button>
                 </div>
-                {publikasi && (
+                {jurnal && (
                   <div className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
-                      <p className="font-medium">{publikasi.judul}</p>
+                      <p className="font-medium">{jurnal.judul}</p>
                       <p className="text-sm text-muted-foreground">
-                        {publikasi.namaJurnal} - {publikasi.kategori}
+                        {jurnal.namaJurnal} - {jurnal.kategori}
                       </p>
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={removePublikasi}>
+                      onClick={() => setJurnal(undefined)}>
                       <X className="w-4 h-4" />
                     </Button>
                   </div>
@@ -569,7 +607,11 @@ export default function PKMTab() {
                 onClick={handleSave}
                 disabled={isSaving}
                 className="bg-red-500 hover:bg-red-600">
-                {isSaving ? "Menyimpan..." : modalMode === "add" ? "Simpan" : "Update"}
+                {isSaving
+                  ? "Menyimpan..."
+                  : modalMode === "add"
+                  ? "Simpan"
+                  : "Update"}
               </Button>
             </div>
           </div>
@@ -577,7 +619,7 @@ export default function PKMTab() {
       )}
 
       {/* Publikasi Modal */}
-      {showPublikasiModal && (
+      {showJurnalModal && (
         <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl shadow-xl">
             <div className="flex justify-between items-center mb-4">
@@ -585,17 +627,16 @@ export default function PKMTab() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowPublikasiModal(false)}
-              >
+                onClick={() => setShowJurnalModal(false)}>
                 ✕
               </Button>
             </div>
-            <PublikasiForm
+            <JurnalForm
               onSave={(data) => {
-                handleAddPublikasi(data);
-                setShowPublikasiModal(false);
+                handleAddJurnal(data);
+                setShowJurnalModal(false);
               }}
-              onCancel={() => setShowPublikasiModal(false)}
+              onCancel={() => setShowJurnalModal(false)}
             />
           </div>
         </div>
@@ -610,8 +651,7 @@ export default function PKMTab() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowHkiModal(false)}
-              >
+                onClick={() => setShowHkiModal(false)}>
                 ✕
               </Button>
             </div>
@@ -635,8 +675,7 @@ export default function PKMTab() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowBukuModal(false)}
-              >
+                onClick={() => setShowBukuModal(false)}>
                 ✕
               </Button>
             </div>
@@ -657,21 +696,19 @@ export default function PKMTab() {
           <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
             <h2 className="text-xl font-semibold mb-4">Hapus PKM</h2>
             <p className="text-gray-600 mb-4">
-              Apakah Anda yakin ingin menghapus PKM &quot;{selectedPkm.id}&quot;? 
-              Tindakan ini tidak dapat dibatalkan.
+              Apakah Anda yakin ingin menghapus PKM &quot;{selectedPkm.id}
+              &quot;? Tindakan ini tidak dapat dibatalkan.
             </p>
             <div className="flex justify-end space-x-2">
               <Button
                 variant="outline"
-                onClick={deleteModal.closeModal}
-              >
+                onClick={deleteModal.closeModal}>
                 Batal
               </Button>
               <Button
                 onClick={handleDeleteConfirm}
                 disabled={loading}
-                className="bg-red-500 hover:bg-red-600"
-              >
+                className="bg-red-500 hover:bg-red-600">
                 {loading ? "Menghapus..." : "Hapus"}
               </Button>
             </div>
@@ -684,12 +721,13 @@ export default function PKMTab() {
         <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-xl">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Detail PKM: {selectedPkm.id}</h2>
+              <h2 className="text-xl font-semibold">
+                Detail PKM: {selectedPkm.id}
+              </h2>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={detailModal.closeModal}
-              >
+                onClick={detailModal.closeModal}>
                 ✕
               </Button>
             </div>
@@ -698,26 +736,66 @@ export default function PKMTab() {
                 <h3 className="font-semibold mb-2">Informasi Dasar</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <p><strong>Proposal:</strong> {selectedPkm.proposal}</p>
-                    <p><strong>Laporan:</strong> {selectedPkm.laporan}</p>
+                    <p>
+                      <strong>Judul:</strong> {selectedPkm.judul}
+                    </p>
+                    <p>
+                      <strong>Proposal:</strong> {selectedPkm.proposal}
+                    </p>
+                    <p>
+                      <strong>Laporan:</strong> {selectedPkm.laporan}
+                    </p>
                   </div>
                   <div>
-                    <p><strong>Dibuat oleh:</strong> {selectedPkm.createdBy.name}</p>
-                    <p><strong>Email:</strong> {selectedPkm.createdBy.email}</p>
-                    <p><strong>Tanggal dibuat:</strong> {new Date(selectedPkm.createdAt).toLocaleDateString("id-ID")}</p>
+                    <p>
+                      <strong>Dibuat oleh:</strong> {selectedPkm.createdBy.name}
+                    </p>
+                    <p>
+                      <strong>Email:</strong> {selectedPkm.createdBy.email}
+                    </p>
+                    <p>
+                      <strong>Tanggal dibuat:</strong>{" "}
+                      {new Date(selectedPkm.createdAt).toLocaleDateString(
+                        "id-ID"
+                      )}
+                    </p>
                   </div>
                 </div>
               </div>
 
-              {selectedPkm.publikasi && (
+              {selectedPkm.jurnal && (
                 <div>
                   <h3 className="font-semibold mb-2">Publikasi</h3>
                   <div className="border rounded p-3 mb-2">
-                    <p><strong>Judul:</strong> {selectedPkm.publikasi.judul}</p>
-                    <p><strong>Jurnal:</strong> {selectedPkm.publikasi.namaJurnal}</p>
-                    <p><strong>Publisher:</strong> {selectedPkm.publikasi.publisher}</p>
-                    <p><strong>Kategori:</strong> {selectedPkm.publikasi.kategori}</p>
-                    {selectedPkm.publikasi.level && <p><strong>Level:</strong> {selectedPkm.publikasi.level}</p>}
+                    <p>
+                      <strong>Judul:</strong> {selectedPkm.jurnal.judul}
+                    </p>
+                    <p>
+                      <strong>Jurnal:</strong> {selectedPkm.jurnal.namaJurnal}
+                    </p>
+                    <p>
+                      <strong>Publisher:</strong> {selectedPkm.jurnal.publisher}
+                    </p>
+                    <p>
+                      <strong>Kategori:</strong> {selectedPkm.jurnal.kategori}
+                    </p>
+                    {selectedPkm.jurnal.level && (
+                      <p>
+                        <strong>Level:</strong> {selectedPkm.jurnal.level}
+                      </p>
+                    )}
+                    {selectedPkm.jurnal.linkJurnal && (
+                      <p>
+                        <strong>Link Jurnal:</strong>{" "}
+                        <a
+                          href={selectedPkm.jurnal.linkJurnal}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 underline">
+                          Lihat Jurnal
+                        </a>
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
@@ -726,10 +804,21 @@ export default function PKMTab() {
                 <div>
                   <h3 className="font-semibold mb-2">HKI</h3>
                   <div className="border rounded p-3 mb-2">
-                    <p><strong>Judul:</strong> {selectedPkm.hki.judulCiptaan}</p>
-                    <p><strong>Nomor:</strong> {selectedPkm.hki.nomorPenciptaan}</p>
-                    <p><strong>Jenis:</strong> {selectedPkm.hki.jenisCiptaan}</p>
-                    <p><strong>Tanggal:</strong> {new Date(selectedPkm.hki.tanggalPermohonan).toLocaleDateString("id-ID")}</p>
+                    <p>
+                      <strong>Judul:</strong> {selectedPkm.hki.judulCiptaan}
+                    </p>
+                    <p>
+                      <strong>Nomor:</strong> {selectedPkm.hki.nomorPenciptaan}
+                    </p>
+                    <p>
+                      <strong>Jenis:</strong> {selectedPkm.hki.jenisCiptaan}
+                    </p>
+                    <p>
+                      <strong>Tanggal:</strong>{" "}
+                      {new Date(
+                        selectedPkm.hki.tanggalPermohonan
+                      ).toLocaleDateString("id-ID")}
+                    </p>
                   </div>
                 </div>
               )}
@@ -738,11 +827,21 @@ export default function PKMTab() {
                 <div>
                   <h3 className="font-semibold mb-2">Buku</h3>
                   <div className="border rounded p-3 mb-2">
-                    <p><strong>Judul:</strong> {selectedPkm.buku.judulBuku}</p>
-                    <p><strong>Penerbit:</strong> {selectedPkm.buku.penerbit}</p>
-                    <p><strong>ISBN:</strong> {selectedPkm.buku.isbn}</p>
-                    <p><strong>Tahun:</strong> {selectedPkm.buku.tahun}</p>
-                    <p><strong>Jenis:</strong> {selectedPkm.buku.jenisBuku}</p>
+                    <p>
+                      <strong>Judul:</strong> {selectedPkm.buku.judulBuku}
+                    </p>
+                    <p>
+                      <strong>Penerbit:</strong> {selectedPkm.buku.penerbit}
+                    </p>
+                    <p>
+                      <strong>ISBN:</strong> {selectedPkm.buku.isbn}
+                    </p>
+                    <p>
+                      <strong>Tahun:</strong> {selectedPkm.buku.tahun}
+                    </p>
+                    <p>
+                      <strong>Jenis:</strong> {selectedPkm.buku.jenisBuku}
+                    </p>
                   </div>
                 </div>
               )}
@@ -750,8 +849,7 @@ export default function PKMTab() {
               <div className="flex justify-end">
                 <Button
                   variant="outline"
-                  onClick={detailModal.closeModal}
-                >
+                  onClick={detailModal.closeModal}>
                   Tutup
                 </Button>
               </div>
@@ -764,20 +862,32 @@ export default function PKMTab() {
 }
 
 // Publikasi Form Component
-function PublikasiForm({ onSave, onCancel }: { onSave: (data: Partial<Publikasi>) => void; onCancel: () => void }) {
+function JurnalForm({
+  onSave,
+  onCancel,
+}: {
+  onSave: (data: Partial<Jurnal>) => void;
+  onCancel: () => void;
+}) {
   const [judul, setJudul] = useState("");
   const [authors, setAuthors] = useState<string[]>([""]);
   const [namaJurnal, setNamaJurnal] = useState("");
   const [publisher, setPublisher] = useState("");
   const [kategori, setKategori] = useState<KategoriJurnal>(KategoriJurnal.OJS);
   const [level, setLevel] = useState("");
+  const [linkJurnal, setLinkJurnal] = useState("");
 
   const handleSave = () => {
-    if (!judul.trim() || !namaJurnal.trim() || !publisher.trim()) {
+    if (
+      !judul.trim() ||
+      !namaJurnal.trim() ||
+      !publisher.trim() ||
+      !linkJurnal.trim()
+    ) {
       toast.error("Semua field wajib diisi");
       return;
     }
-    
+
     onSave({
       judul: judul.trim(),
       author: authors.filter((author) => author.trim() !== ""),
@@ -785,6 +895,7 @@ function PublikasiForm({ onSave, onCancel }: { onSave: (data: Partial<Publikasi>
       publisher: publisher.trim(),
       kategori,
       level: level || undefined,
+      linkJurnal: linkJurnal.trim(),
     });
   };
 
@@ -841,7 +952,9 @@ function PublikasiForm({ onSave, onCancel }: { onSave: (data: Partial<Publikasi>
         <Label>Penulis *</Label>
         <div className="space-y-2">
           {authors.map((author, index) => (
-            <div key={index} className="flex space-x-2">
+            <div
+              key={index}
+              className="flex space-x-2">
               <Input
                 value={author}
                 onChange={(e) => updateAuthor(index, e.target.value)}
@@ -852,8 +965,7 @@ function PublikasiForm({ onSave, onCancel }: { onSave: (data: Partial<Publikasi>
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => removeAuthor(index)}
-                >
+                  onClick={() => removeAuthor(index)}>
                   <X className="w-4 h-4" />
                 </Button>
               )}
@@ -863,8 +975,7 @@ function PublikasiForm({ onSave, onCancel }: { onSave: (data: Partial<Publikasi>
             type="button"
             variant="outline"
             size="sm"
-            onClick={addAuthor}
-          >
+            onClick={addAuthor}>
             <PlusIcon className="w-4 h-4 mr-2" />
             Tambah Penulis
           </Button>
@@ -893,13 +1004,17 @@ function PublikasiForm({ onSave, onCancel }: { onSave: (data: Partial<Publikasi>
 
       <div>
         <Label htmlFor="kategori">Kategori Jurnal *</Label>
-        <Select value={kategori} onValueChange={(value) => setKategori(value as KategoriJurnal)}>
+        <Select
+          value={kategori}
+          onValueChange={(value) => setKategori(value as KategoriJurnal)}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {Object.values(KategoriJurnal).map((kat) => (
-              <SelectItem key={kat} value={kat}>
+              <SelectItem
+                key={kat}
+                value={kat}>
                 {kat}
               </SelectItem>
             ))}
@@ -910,13 +1025,17 @@ function PublikasiForm({ onSave, onCancel }: { onSave: (data: Partial<Publikasi>
       {getLevelOptions().length > 0 && (
         <div>
           <Label htmlFor="level">Level</Label>
-          <Select value={level} onValueChange={setLevel}>
+          <Select
+            value={level}
+            onValueChange={setLevel}>
             <SelectTrigger>
               <SelectValue placeholder="Pilih level" />
             </SelectTrigger>
             <SelectContent>
               {getLevelOptions().map((option) => (
-                <SelectItem key={option.value} value={option.value}>
+                <SelectItem
+                  key={option.value}
+                  value={option.value}>
                   {option.label}
                 </SelectItem>
               ))}
@@ -925,11 +1044,49 @@ function PublikasiForm({ onSave, onCancel }: { onSave: (data: Partial<Publikasi>
         </div>
       )}
 
+      <div>
+        <Label htmlFor="linkJurnal">Link Jurnal *</Label>
+        <Input
+          id="linkJurnal"
+          value={linkJurnal}
+          onChange={(e) => setLinkJurnal(e.target.value)}
+          placeholder="Masukkan link jurnal (https://...)"
+        />
+        {linkJurnal && (
+          <div className="flex items-center space-x-2 mt-1">
+            <div
+              className={`w-2 h-2 rounded-full ${
+                linkJurnal.startsWith("http") ? "bg-green-500" : "bg-red-500"
+              }`}
+            />
+            <span className="text-xs text-slate-600">
+              {linkJurnal.startsWith("http")
+                ? "Link valid"
+                : "Link tidak valid - harus dimulai dengan http:// atau https://"}
+            </span>
+            {linkJurnal.startsWith("http") && (
+              <a
+                href={linkJurnal}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-blue-600 hover:text-blue-800 underline flex items-center space-x-1">
+                <span>Test Link</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+
       <div className="flex justify-end space-x-2 pt-4">
-        <Button variant="outline" onClick={onCancel}>
+        <Button
+          variant="outline"
+          onClick={onCancel}>
           Batal
         </Button>
-        <Button onClick={handleSave} className="bg-red-500 hover:bg-red-600">
+        <Button
+          onClick={handleSave}
+          className="bg-red-500 hover:bg-red-600">
           Simpan
         </Button>
       </div>
@@ -938,7 +1095,13 @@ function PublikasiForm({ onSave, onCancel }: { onSave: (data: Partial<Publikasi>
 }
 
 // HKI Form Component
-function HkiForm({ onSave, onCancel }: { onSave: (data: Partial<HKI>) => void; onCancel: () => void }) {
+function HkiForm({
+  onSave,
+  onCancel,
+}: {
+  onSave: (data: Partial<HKI>) => void;
+  onCancel: () => void;
+}) {
   const [authors, setAuthors] = useState<string[]>([""]);
   const [nomorPenciptaan, setNomorPenciptaan] = useState("");
   const [tanggalPermohonan, setTanggalPermohonan] = useState("");
@@ -947,11 +1110,17 @@ function HkiForm({ onSave, onCancel }: { onSave: (data: Partial<HKI>) => void; o
   const [linkSertifikat, setLinkSertifikat] = useState("");
 
   const handleSave = () => {
-    if (!nomorPenciptaan.trim() || !jenisCiptaan.trim() || !judulCiptaan.trim() || !linkSertifikat.trim() || !tanggalPermohonan) {
+    if (
+      !nomorPenciptaan.trim() ||
+      !jenisCiptaan.trim() ||
+      !judulCiptaan.trim() ||
+      !linkSertifikat.trim() ||
+      !tanggalPermohonan
+    ) {
       toast.error("Semua field wajib diisi");
       return;
     }
-    
+
     onSave({
       author: authors.filter((author) => author.trim() !== ""),
       nomorPenciptaan: nomorPenciptaan.trim(),
@@ -984,7 +1153,9 @@ function HkiForm({ onSave, onCancel }: { onSave: (data: Partial<HKI>) => void; o
         <Label>Penulis *</Label>
         <div className="space-y-2">
           {authors.map((author, index) => (
-            <div key={index} className="flex space-x-2">
+            <div
+              key={index}
+              className="flex space-x-2">
               <Input
                 value={author}
                 onChange={(e) => updateAuthor(index, e.target.value)}
@@ -995,8 +1166,7 @@ function HkiForm({ onSave, onCancel }: { onSave: (data: Partial<HKI>) => void; o
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => removeAuthor(index)}
-                >
+                  onClick={() => removeAuthor(index)}>
                   <X className="w-4 h-4" />
                 </Button>
               )}
@@ -1006,8 +1176,7 @@ function HkiForm({ onSave, onCancel }: { onSave: (data: Partial<HKI>) => void; o
             type="button"
             variant="outline"
             size="sm"
-            onClick={addAuthor}
-          >
+            onClick={addAuthor}>
             <PlusIcon className="w-4 h-4 mr-2" />
             Tambah Penulis
           </Button>
@@ -1065,10 +1234,14 @@ function HkiForm({ onSave, onCancel }: { onSave: (data: Partial<HKI>) => void; o
       </div>
 
       <div className="flex justify-end space-x-2 pt-4">
-        <Button variant="outline" onClick={onCancel}>
+        <Button
+          variant="outline"
+          onClick={onCancel}>
           Batal
         </Button>
-        <Button onClick={handleSave} className="bg-red-500 hover:bg-red-600">
+        <Button
+          onClick={handleSave}
+          className="bg-red-500 hover:bg-red-600">
           Simpan
         </Button>
       </div>
@@ -1077,7 +1250,13 @@ function HkiForm({ onSave, onCancel }: { onSave: (data: Partial<HKI>) => void; o
 }
 
 // Buku Form Component
-function BukuForm({ onSave, onCancel }: { onSave: (data: Partial<Buku>) => void; onCancel: () => void }) {
+function BukuForm({
+  onSave,
+  onCancel,
+}: {
+  onSave: (data: Partial<Buku>) => void;
+  onCancel: () => void;
+}) {
   const [authors, setAuthors] = useState<string[]>([""]);
   const [judulBuku, setJudulBuku] = useState("");
   const [penerbit, setPenerbit] = useState("");
@@ -1087,17 +1266,27 @@ function BukuForm({ onSave, onCancel }: { onSave: (data: Partial<Buku>) => void;
   const [linkBuku, setLinkBuku] = useState("");
 
   const handleSave = () => {
-    if (!judulBuku.trim() || !penerbit.trim() || !isbn.trim() || !tahun.trim() || !linkBuku.trim()) {
+    if (
+      !judulBuku.trim() ||
+      !penerbit.trim() ||
+      !isbn.trim() ||
+      !tahun.trim() ||
+      !linkBuku.trim()
+    ) {
       toast.error("Semua field wajib diisi");
       return;
     }
-    
+
     const tahunNumber = parseInt(tahun);
-    if (isNaN(tahunNumber) || tahunNumber < 1900 || tahunNumber > new Date().getFullYear()) {
+    if (
+      isNaN(tahunNumber) ||
+      tahunNumber < 1900 ||
+      tahunNumber > new Date().getFullYear()
+    ) {
       toast.error("Tahun tidak valid");
       return;
     }
-    
+
     onSave({
       author: authors.filter((author) => author.trim() !== ""),
       judulBuku: judulBuku.trim(),
@@ -1131,7 +1320,9 @@ function BukuForm({ onSave, onCancel }: { onSave: (data: Partial<Buku>) => void;
         <Label>Penulis *</Label>
         <div className="space-y-2">
           {authors.map((author, index) => (
-            <div key={index} className="flex space-x-2">
+            <div
+              key={index}
+              className="flex space-x-2">
               <Input
                 value={author}
                 onChange={(e) => updateAuthor(index, e.target.value)}
@@ -1142,8 +1333,7 @@ function BukuForm({ onSave, onCancel }: { onSave: (data: Partial<Buku>) => void;
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => removeAuthor(index)}
-                >
+                  onClick={() => removeAuthor(index)}>
                   <X className="w-4 h-4" />
                 </Button>
               )}
@@ -1153,8 +1343,7 @@ function BukuForm({ onSave, onCancel }: { onSave: (data: Partial<Buku>) => void;
             type="button"
             variant="outline"
             size="sm"
-            onClick={addAuthor}
-          >
+            onClick={addAuthor}>
             <PlusIcon className="w-4 h-4 mr-2" />
             Tambah Penulis
           </Button>
@@ -1206,13 +1395,17 @@ function BukuForm({ onSave, onCancel }: { onSave: (data: Partial<Buku>) => void;
 
       <div>
         <Label htmlFor="jenisBuku">Jenis Buku *</Label>
-        <Select value={jenisBuku} onValueChange={(value) => setJenisBuku(value as JenisBuku)}>
+        <Select
+          value={jenisBuku}
+          onValueChange={(value) => setJenisBuku(value as JenisBuku)}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {Object.values(JenisBuku).map((jenis) => (
-              <SelectItem key={jenis} value={jenis}>
+              <SelectItem
+                key={jenis}
+                value={jenis}>
                 {jenis.replace("_", " ")}
               </SelectItem>
             ))}
@@ -1231,10 +1424,14 @@ function BukuForm({ onSave, onCancel }: { onSave: (data: Partial<Buku>) => void;
       </div>
 
       <div className="flex justify-end space-x-2 pt-4">
-        <Button variant="outline" onClick={onCancel}>
+        <Button
+          variant="outline"
+          onClick={onCancel}>
           Batal
         </Button>
-        <Button onClick={handleSave} className="bg-red-500 hover:bg-red-600">
+        <Button
+          onClick={handleSave}
+          className="bg-red-500 hover:bg-red-600">
           Simpan
         </Button>
       </div>

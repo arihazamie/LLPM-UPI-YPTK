@@ -2,18 +2,24 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { KategoriJurnal, JenisBuku } from "@prisma/client";
-import { generatePkmId, generateHkiId, generateBukuId, generatePublikasiId } from "@/lib/utils";
+import {
+  generatePkmId,
+  generateHkiId,
+  generateBukuId,
+  generateJurnalId,
+} from "@/lib/utils";
 import { withRoleAuth } from "@/lib/auth-helpers";
 
 // --- Schemas ---
-const PublikasiInputSchema = z
+const JurnalInputSchema = z
   .object({
-    judul: z.string().min(1),
     author: z.array(z.string()).min(1),
+    judul: z.string().min(1),
     namaJurnal: z.string().min(1),
     publisher: z.string().min(1),
     kategori: z.nativeEnum(KategoriJurnal),
     level: z.string().optional(),
+    linkJurnal: z.string().min(1),
   })
   .strict();
 
@@ -42,9 +48,10 @@ const BukuInputSchema = z
 
 const PkmCreateSchema = z
   .object({
+    judul: z.string().min(1),
     proposal: z.string().min(1),
     laporan: z.string().min(1),
-    publikasi: PublikasiInputSchema.optional(),
+    jurnal: JurnalInputSchema.optional(),
     hki: HkiInputSchema.optional(),
     buku: BukuInputSchema.optional(),
   })
@@ -53,123 +60,131 @@ const PkmCreateSchema = z
 type PkmCreateBody = z.infer<typeof PkmCreateSchema>;
 
 // --- Handler ---
-export const POST = withRoleAuth(["DOSEN", "ADMIN", "PIMPINAN"], async (req, user) => {
-  try {
-    const json = await req.json();
-    const body: PkmCreateBody = PkmCreateSchema.parse(json);
+export const POST = withRoleAuth(
+  ["DOSEN", "ADMIN", "PIMPINAN"],
+  async (req, user) => {
+    try {
+      const json = await req.json();
+      const body: PkmCreateBody = PkmCreateSchema.parse(json);
 
-    // Generate custom IDs
-    const pkmId = await generatePkmId(prisma);
-    
-    // Generate IDs for related records if they exist
-    const publikasiId = body.publikasi ? await generatePublikasiId(prisma) : undefined;
-    const hkiId = body.hki ? await generateHkiId(prisma) : undefined;
-    const bukuId = body.buku ? await generateBukuId(prisma) : undefined;
+      // Generate custom IDs
+      const pkmId = await generatePkmId(prisma);
 
-    const created = await prisma.pKM.create({
-      data: {
-        id: pkmId,
-        proposal: body.proposal,
-        laporan: body.laporan,
-        createdById: user.id,
-        ...(body.publikasi && {
-          publikasi: {
-            create: {
-              id: publikasiId!,
-              ...body.publikasi,
-              createdById: user.id,
+      // Generate IDs for related records if they exist
+      const jurnalId = body.jurnal ? await generateJurnalId(prisma) : undefined;
+      const hkiId = body.hki ? await generateHkiId(prisma) : undefined;
+      const bukuId = body.buku ? await generateBukuId(prisma) : undefined;
+
+      const created = await prisma.pKM.create({
+        data: {
+          id: pkmId,
+          judul: body.judul,
+          proposal: body.proposal,
+          laporan: body.laporan,
+          createdById: user.id,
+          ...(body.jurnal && {
+            jurnal: {
+              create: {
+                id: jurnalId!,
+                ...body.jurnal,
+                createdById: user.id,
+                linkJurnal: body.jurnal.linkJurnal,
+              },
             },
-          },
-        }),
-        ...(body.hki && {
-          hki: {
-            create: {
-              id: hkiId!,
-              ...body.hki,
-              createdById: user.id,
+          }),
+          ...(body.hki && {
+            hki: {
+              create: {
+                id: hkiId!,
+                ...body.hki,
+                createdById: user.id,
+              },
             },
-          },
-        }),
-        ...(body.buku && {
-          buku: {
-            create: {
-              id: bukuId!,
-              ...body.buku,
-              createdById: user.id,
+          }),
+          ...(body.buku && {
+            buku: {
+              create: {
+                id: bukuId!,
+                ...body.buku,
+                createdById: user.id,
+              },
             },
-          },
-        }),
-      },
-      include: { 
-        publikasi: true, 
-        hki: true, 
-        buku: true,
-        createdBy: {
-          select: { id: true, name: true, email: true },
+          }),
         },
-      },
-    });
+        include: {
+          jurnal: true,
+          hki: true,
+          buku: true,
+          createdBy: {
+            select: { id: true, name: true, email: true },
+          },
+        },
+      });
 
-    return NextResponse.json({
-      success: true,
-      message: "PKM berhasil dibuat",
-      data: created,
-    });
-  } catch (err) {
-    if (err instanceof z.ZodError) {
+      return NextResponse.json({
+        success: true,
+        message: "PKM berhasil dibuat",
+        data: created,
+      });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Validasi data gagal",
+            errors: err.issues.map((issue) => ({
+              field: issue.path.join("."),
+              message: issue.message,
+            })),
+          },
+          { status: 400 }
+        );
+      }
+      console.error("Error create PKM:", err);
       return NextResponse.json(
         {
           success: false,
-          message: "Validasi data gagal",
-          errors: err.issues.map((issue) => ({
-            field: issue.path.join("."),
-            message: issue.message,
-          })),
+          message: "Terjadi kesalahan pada server saat membuat PKM",
         },
-        { status: 400 }
+        { status: 500 }
       );
     }
-    console.error("Error create PKM:", err);
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Terjadi kesalahan pada server saat membuat PKM",
-      },
-      { status: 500 }
-    );
   }
-});
+);
 
-export const GET = withRoleAuth(["DOSEN", "ADMIN", "PIMPINAN"], async (req, user) => {
-  try {
-    const pkms = await prisma.pKM.findMany({
-      where: {
-        createdById: user.id, // Hanya ambil PKM yang dibuat oleh user yang login
-      },
-      include: {
-        publikasi: true,
-        hki: true,
-        buku: true,
-        createdBy: {
-          select: { id: true, name: true, email: true },
+export const GET = withRoleAuth(
+  ["DOSEN", "ADMIN", "PIMPINAN"],
+  async (req, user) => {
+    try {
+      const pkms = await prisma.pKM.findMany({
+        where: {
+          createdById: user.id, // Hanya ambil PKM yang dibuat oleh user yang login
         },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+        include: {
+          jurnal: true,
+          hki: true,
+          buku: true,
+          createdBy: {
+            select: { id: true, name: true, email: true },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      });
 
-    return NextResponse.json({
-      success: true,
-      message: "Data PKM berhasil diambil",
-      data: pkms,
-    });
-  } catch (error) {
-    console.error("Error fetching PKMs:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Gagal mengambil data PKM",
-      },
-      { status: 500 }
-    );
+      return NextResponse.json({
+        success: true,
+        message: "Data PKM berhasil diambil",
+        data: pkms,
+      });
+    } catch (error) {
+      console.error("Error fetching PKMs:", error);
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Gagal mengambil data PKM",
+        },
+        { status: 500 }
+      );
+    }
   }
-});
+);

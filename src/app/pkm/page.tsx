@@ -21,12 +21,12 @@ export default function PKMPage() {
   const [deletingPkm, setDeletingPkm] = useState<PKM | undefined>();
   const [detailModal, setDetailModal] = useState<{
     isOpen: boolean;
-    type: "publikasi" | "hki" | "buku";
+    type: "jurnal" | "hki" | "buku";
     data: unknown;
     title: string;
   }>({
     isOpen: false,
-    type: "publikasi",
+    type: "jurnal",
     data: null,
     title: "",
   });
@@ -42,12 +42,12 @@ export default function PKMPage() {
       setIsLoading(true);
       const response = await fetch("/api/dosen/pkm", {
         headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
       });
       const result = await response.json();
-      
+
       if (response.ok) {
         setPkms(result.data || []);
       } else {
@@ -67,16 +67,17 @@ export default function PKMPage() {
     try {
       setIsLoading(true);
       const payload = {
+        judul: pkmData.judul || "",
         proposal: pkmData.proposal || "",
         laporan: pkmData.laporan || "",
-        ...(pkmData.publikasi && {
-          publikasi: {
-            judul: pkmData.publikasi.judul,
-            author: pkmData.publikasi.author,
-            namaJurnal: pkmData.publikasi.namaJurnal,
-            publisher: pkmData.publikasi.publisher,
-            kategori: pkmData.publikasi.kategori,
-            level: pkmData.publikasi.level,
+        ...(pkmData.jurnal && {
+          jurnal: {
+            judul: pkmData.jurnal.judul,
+            author: pkmData.jurnal.author,
+            namaJurnal: pkmData.jurnal.namaJurnal,
+            publisher: pkmData.jurnal.publisher,
+            kategori: pkmData.jurnal.kategori,
+            level: pkmData.jurnal.level,
           },
         }),
         ...(pkmData.hki && {
@@ -114,7 +115,7 @@ export default function PKMPage() {
 
       if (response.ok) {
         // Tambahkan delay kecil untuk memastikan database sudah selesai
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
         // Refresh data dari server untuk memastikan konsistensi
         await fetchPkms();
         setShowAddModal(false);
@@ -140,16 +141,17 @@ export default function PKMPage() {
     try {
       setIsLoading(true);
       const payload = {
+        judul: pkmData.judul || "",
         proposal: pkmData.proposal || "",
         laporan: pkmData.laporan || "",
-        ...(pkmData.publikasi && {
-          publikasi: {
-            judul: pkmData.publikasi.judul,
-            author: pkmData.publikasi.author,
-            namaJurnal: pkmData.publikasi.namaJurnal,
-            publisher: pkmData.publikasi.publisher,
-            kategori: pkmData.publikasi.kategori,
-            level: pkmData.publikasi.level,
+        ...(pkmData.jurnal && {
+          jurnal: {
+            judul: pkmData.jurnal.judul,
+            author: pkmData.jurnal.author,
+            namaJurnal: pkmData.jurnal.namaJurnal,
+            publisher: pkmData.jurnal.publisher,
+            kategori: pkmData.jurnal.kategori,
+            level: pkmData.jurnal.level,
           },
         }),
         ...(pkmData.hki && {
@@ -187,7 +189,7 @@ export default function PKMPage() {
 
       if (response.ok) {
         // Tambahkan delay kecil untuk memastikan database sudah selesai
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
         // Refresh data dari server untuk memastikan konsistensi
         await fetchPkms();
         setEditingPkm(undefined);
@@ -217,7 +219,7 @@ export default function PKMPage() {
 
       if (response.ok) {
         // Tambahkan delay kecil untuk memastikan database sudah selesai
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
         // Refresh data dari server untuk memastikan konsistensi
         await fetchPkms();
         setDeletingPkm(undefined);
@@ -236,7 +238,7 @@ export default function PKMPage() {
   };
 
   const handleViewDetail = (
-    type: "publikasi" | "hki" | "buku",
+    type: "jurnal" | "hki" | "buku",
     data: unknown,
     title: string
   ) => {
@@ -251,172 +253,189 @@ export default function PKMPage() {
   return (
     <DosenOnly>
       <div className="min-h-screen relative py-32 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-red-600/50 via-red-500 to-yellow-500">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]"></div>
-        <div className="absolute top-0 left-0 w-full h-full">
-          <div className="absolute top-20 left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-yellow-300/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-red-400/10 to-yellow-400/10 rounded-full blur-3xl animate-spin"
-            style={{ animationDuration: "20s" }}></div>
-        </div>
-      </div>
-      <div className="relative z-10 container mx-auto p-8 space-y-8">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h1 className="text-4xl font-bold tracking-tight bg-white bg-clip-text text-transparent drop-shadow-2xl">
-              Manajemen PKM - {session?.user?.name}
-            </h1>
-            <p className="text-lg text-white font-medium drop-shadow-sm">
-              Kelola data Pengabdian Kepada Masyarakat UPI YPTK Padang
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <PKMExcelButton
-              disabled={isLoading || pkms.length === 0}
-            />
-            <Button
-              onClick={() => setShowAddModal(true)}
-              disabled={isLoading}
-              className="bg-white text-black px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 border-0">
-              <Plus className="w-4 h-4 mr-2" />
-              Tambah PKM
-            </Button>
+        <div className="absolute inset-0 bg-gradient-to-br from-red-600/50 via-red-500 to-yellow-500">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]"></div>
+          <div className="absolute top-0 left-0 w-full h-full">
+            <div className="absolute top-20 left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-20 right-20 w-96 h-96 bg-yellow-300/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+            <div
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-red-400/10 to-yellow-400/10 rounded-full blur-3xl animate-spin"
+              style={{ animationDuration: "20s" }}></div>
           </div>
         </div>
-
-        {/* Data Summary Cards */}
-        {pkms.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card className="border-0 shadow-lg bg-white/95 backdrop-blur-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Total PKM</p>
-                    <p className="text-2xl font-bold text-slate-900">{pkms.length}</p>
-                  </div>
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-blue-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="border-0 shadow-lg bg-white/95 backdrop-blur-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Total Publikasi</p>
-                    <p className="text-2xl font-bold text-slate-900">
-                      {pkms.reduce((total, pkm) => total + (pkm.publikasi ? 1 : 0), 0)}
-                    </p>
-                  </div>
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-green-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="border-0 shadow-lg bg-white/95 backdrop-blur-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Total HKI</p>
-                    <p className="text-2xl font-bold text-slate-900">
-                      {pkms.reduce((total, pkm) => total + (pkm.hki ? 1 : 0), 0)}
-                    </p>
-                  </div>
-                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-purple-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="border-0 shadow-lg bg-white/95 backdrop-blur-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Total Buku</p>
-                    <p className="text-2xl font-bold text-slate-900">
-                      {pkms.reduce((total, pkm) => total + (pkm.buku ? 1 : 0), 0)}
-                    </p>
-                  </div>
-                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-orange-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        <div className="relative z-10 container mx-auto p-8 space-y-8">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <h1 className="text-4xl font-bold tracking-tight bg-white bg-clip-text text-transparent drop-shadow-2xl">
+                Manajemen PKM - {session?.user?.name}
+              </h1>
+              <p className="text-lg text-white font-medium drop-shadow-sm">
+                Kelola data Pengabdian Kepada Masyarakat UPI YPTK Padang
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <PKMExcelButton disabled={isLoading || pkms.length === 0} />
+              <Button
+                onClick={() => setShowAddModal(true)}
+                disabled={isLoading}
+                className="bg-white text-black px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 border-0">
+                <Plus className="w-4 h-4 mr-2" />
+                Tambah PKM
+              </Button>
+            </div>
           </div>
-        )}
 
-        <Card className="border-0 shadow-lg bg-white/95 backdrop-blur-sm">
-          <CardContent className="p-6">
-            {pkms.length === 0 && !isLoading ? (
-              <div className="flex flex-col items-center justify-center py-16">
-                <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-yellow-100 rounded-full flex items-center justify-center mb-4">
-                  <FileText className="w-8 h-8 text-red-600" />
+          {/* Data Summary Cards */}
+          {pkms.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <Card className="border-0 shadow-lg bg-white/95 backdrop-blur-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-600">
+                        Total PKM
+                      </p>
+                      <p className="text-2xl font-bold text-slate-900">
+                        {pkms.length}
+                      </p>
+                    </div>
+                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <FileText className="w-5 h-5 text-blue-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-lg bg-white/95 backdrop-blur-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-600">
+                        Total Jurnal
+                      </p>
+                      <p className="text-2xl font-bold text-slate-900">
+                        {pkms.reduce(
+                          (total, pkm) => total + (pkm.jurnal ? 1 : 0),
+                          0
+                        )}
+                      </p>
+                    </div>
+                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                      <FileText className="w-5 h-5 text-green-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-lg bg-white/95 backdrop-blur-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-600">
+                        Total HKI
+                      </p>
+                      <p className="text-2xl font-bold text-slate-900">
+                        {pkms.reduce(
+                          (total, pkm) => total + (pkm.hki ? 1 : 0),
+                          0
+                        )}
+                      </p>
+                    </div>
+                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <FileText className="w-5 h-5 text-purple-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-lg bg-white/95 backdrop-blur-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-600">
+                        Total Buku
+                      </p>
+                      <p className="text-2xl font-bold text-slate-900">
+                        {pkms.reduce(
+                          (total, pkm) => total + (pkm.buku ? 1 : 0),
+                          0
+                        )}
+                      </p>
+                    </div>
+                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                      <FileText className="w-5 h-5 text-orange-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          <Card className="border-0 shadow-lg bg-white/95 backdrop-blur-sm">
+            <CardContent className="p-6">
+              {pkms.length === 0 && !isLoading ? (
+                <div className="flex flex-col items-center justify-center py-16">
+                  <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-yellow-100 rounded-full flex items-center justify-center mb-4">
+                    <FileText className="w-8 h-8 text-red-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                    Belum ada data PKM
+                  </h3>
+                  <p className="text-slate-500 text-center mb-6 max-w-sm">
+                    Mulai dengan menambahkan PKM pertama Anda untuk UPI YPTK
+                    Padang
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <PKMExcelButton disabled={isLoading || pkms.length === 0} />
+                    <Button
+                      onClick={() => setShowAddModal(true)}
+                      className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 shadow-lg">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Tambah PKM
+                    </Button>
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">
-                  Belum ada data PKM
-                </h3>
-                <p className="text-slate-500 text-center mb-6 max-w-sm">
-                  Mulai dengan menambahkan PKM pertama Anda untuk UPI YPTK
-                  Padang
-                </p>
-                <div className="flex items-center gap-3">
-                  <PKMExcelButton
-                    disabled={isLoading || pkms.length === 0}
-                  />
-                  <Button
-                    onClick={() => setShowAddModal(true)}
-                    className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 shadow-lg">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Tambah PKM
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <PKMGenericDataTable
-                data={pkms}
-                onEdit={setEditingPkm}
-                onDelete={setDeletingPkm}
-                onViewDetail={handleViewDetail}
-                isLoading={isLoading}
-              />
-            )}
-          </CardContent>
-        </Card>
+              ) : (
+                <PKMGenericDataTable
+                  data={pkms}
+                  onEdit={setEditingPkm}
+                  onDelete={setDeletingPkm}
+                  onViewDetail={handleViewDetail}
+                  isLoading={isLoading}
+                />
+              )}
+            </CardContent>
+          </Card>
 
-        <PKMAddEditModal
-          isOpen={showAddModal || !!editingPkm}
-          onClose={() => {
-            setShowAddModal(false);
-            setEditingPkm(undefined);
-          }}
-          onSave={editingPkm ? handleEditPkm : handleAddPkm}
-          pkm={editingPkm}
-        />
+          <PKMAddEditModal
+            isOpen={showAddModal || !!editingPkm}
+            onClose={() => {
+              setShowAddModal(false);
+              setEditingPkm(undefined);
+            }}
+            onSave={editingPkm ? handleEditPkm : handleAddPkm}
+            pkm={editingPkm}
+          />
 
-        <PKMDeleteModal
-          isOpen={!!deletingPkm}
-          onClose={() => setDeletingPkm(undefined)}
-          onConfirm={() => deletingPkm && handleDeletePkm(deletingPkm.id)}
-          title={`PKM #${deletingPkm?.id || ""}`}
-          loading={isLoading}
-        />
+          <PKMDeleteModal
+            isOpen={!!deletingPkm}
+            onClose={() => setDeletingPkm(undefined)}
+            onConfirm={() => deletingPkm && handleDeletePkm(deletingPkm.id)}
+            title={`PKM #${deletingPkm?.id || ""}`}
+            loading={isLoading}
+          />
 
-        <DetailModal
-          isOpen={detailModal.isOpen}
-          onClose={() => setDetailModal((prev) => ({ ...prev, isOpen: false }))}
-          type={detailModal.type}
-          data={detailModal.data}
-          title={detailModal.title}
-        />
+          <DetailModal
+            isOpen={detailModal.isOpen}
+            onClose={() =>
+              setDetailModal((prev) => ({ ...prev, isOpen: false }))
+            }
+            type={detailModal.type}
+            data={detailModal.data}
+            title={detailModal.title}
+          />
+        </div>
       </div>
-    </div>
     </DosenOnly>
   );
 }

@@ -33,7 +33,15 @@ type TimPerson = BasePerson | Coordinator;
 export default function TimLppmPage() {
   const coordinators = [
     {
-      name: "Dr. Randiant Bayu Putra, SE, MM",
+      name: "Febri Hadi, S.Kom, M.Kom",
+      position: "Koordinator Bidang Penelitian dan Pengelonan",
+      faculty: "Fakultas Ilmu Komputer",
+      image: "/economics-coordinator.png",
+      gradient: "from-orange-500 to-orange-600",
+      icon: BookOpen,
+    },
+    {
+      name: "Dr. Ramdani Bayu Putra, SE, MM",
       position: "Koordinator Bidang Ekonomi dan Bisnis",
       faculty: "Fakultas Ekonomi dan Bisnis",
       image: "/economics-coordinator.png",
@@ -41,7 +49,7 @@ export default function TimLppmPage() {
       icon: BookOpen,
     },
     {
-      name: "Dania Crefioza, S.E., M.M",
+      name: "Omia Crefioza, S.E., M.M",
       position: "Koordinator Bidang Proof Reading",
       faculty: "Fakultas Ekonomi dan Bisnis",
       image: "/proof-reading-coordinator.png",
@@ -49,7 +57,7 @@ export default function TimLppmPage() {
       icon: Globe,
     },
     {
-      name: "Chariya Ones Charli, SE, MM",
+      name: "Chintya Ones Charli, SE, MM",
       position: "Koordinator Bidang Pengabdian kepada Masyarakat",
       faculty: "Fakultas Ekonomi dan Bisnis",
       image: "/community-service-coordinator.png",
@@ -57,9 +65,9 @@ export default function TimLppmPage() {
       icon: Users,
     },
     {
-      name: "Delila Sari Br Putri, SE, MM",
+      name: "Della Asmaria Putri, SE, MM",
       position: "Koordinator Bidang Kesekretariatan dan Laboratorium Riset",
-      faculty: "Fakultas Ekonomi dan Bisnis",
+      faculty: "",
       image: "/secretariat-coordinator.png",
       gradient: "from-pink-500 to-pink-600",
       icon: Cog,

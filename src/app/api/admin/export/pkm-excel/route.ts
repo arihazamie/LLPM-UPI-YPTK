@@ -5,50 +5,53 @@ import { withRoleAuth } from "@/lib/auth-helpers";
 
 export const GET = withRoleAuth(["ADMIN", "PIMPINAN"], async () => {
   try {
-
     // Fetch ALL PKM data with all related data (admin can see all PKMs)
     const pkms = await prisma.pKM.findMany({
-      include: { 
-        publikasi: true, 
-        hki: true, 
+      include: {
+        jurnal: true,
+        hki: true,
         buku: true,
         createdBy: {
-          select: { id: true, name: true, email: true }
-        }
+          select: { id: true, name: true, email: true },
+        },
       },
-      orderBy: { createdAt: "desc" }
+      orderBy: { createdAt: "desc" },
     });
 
     // Prepare data for Excel sheets
     const pkmData = pkms.map((pkm, index) => ({
-      "No": index + 1,
+      No: index + 1,
       "ID PKM": pkm.id,
-      "Proposal": pkm.proposal,
-      "Laporan": pkm.laporan,
+      Judul: pkm.judul,
+      Proposal: pkm.proposal,
+      Laporan: pkm.laporan,
       "Dibuat Oleh": pkm.createdBy.name,
-      "Email": pkm.createdBy.email,
+      Email: pkm.createdBy.email,
       "Tanggal Dibuat": new Date(pkm.createdAt).toLocaleDateString("id-ID"),
       "Tanggal Diupdate": new Date(pkm.updatedAt).toLocaleDateString("id-ID"),
-      "Memiliki Publikasi": pkm.publikasi ? "Ya" : "Tidak",
+      "Memiliki Jurnal": pkm.jurnal ? "Ya" : "Tidak",
       "Memiliki HKI": pkm.hki ? "Ya" : "Tidak",
       "Memiliki Buku": pkm.buku ? "Ya" : "Tidak",
     }));
 
-    // Prepare publikasi data
-    const publikasiData = pkms
-      .filter(pkm => pkm.publikasi)
+    // Prepare jurnal data
+    const jurnalData = pkms
+      .filter((pkm) => pkm.jurnal)
       .map((pkm, pkmIndex) => {
-        const pub = pkm.publikasi!;
+        const pub = pkm.jurnal!;
         return {
-          "No": pkmIndex + 1,
+          No: pkmIndex + 1,
           "ID PKM": pkm.id,
-          "ID Publikasi": pub.id,
-          "Judul": pub.judul,
-          "Author": Array.isArray(pub.author) ? pub.author.join(", ") : pub.author,
+          "ID Jurnal": pub.id,
+          Judul: pub.judul,
+          Author: Array.isArray(pub.author)
+            ? pub.author.join(", ")
+            : pub.author,
           "Nama Jurnal": pub.namaJurnal,
-          "Publisher": pub.publisher,
-          "Kategori": pub.kategori,
-          "Level": pub.level || "-",
+          Publisher: pub.publisher,
+          Kategori: pub.kategori,
+          Level: pub.level || "-",
+          "Link Jurnal": pub.linkJurnal,
           "Dibuat Oleh": pkm.createdBy.name,
           "Tanggal Dibuat": new Date(pub.createdAt).toLocaleDateString("id-ID"),
         };
@@ -56,16 +59,20 @@ export const GET = withRoleAuth(["ADMIN", "PIMPINAN"], async () => {
 
     // Prepare HKI data
     const hkiData = pkms
-      .filter(pkm => pkm.hki)
+      .filter((pkm) => pkm.hki)
       .map((pkm, pkmIndex) => {
         const hki = pkm.hki!;
         return {
-          "No": pkmIndex + 1,
+          No: pkmIndex + 1,
           "ID PKM": pkm.id,
           "ID HKI": hki.id,
-          "Author": Array.isArray(hki.author) ? hki.author.join(", ") : hki.author,
+          Author: Array.isArray(hki.author)
+            ? hki.author.join(", ")
+            : hki.author,
           "Nomor Penciptaan": hki.nomorPenciptaan,
-          "Tanggal Permohonan": new Date(hki.tanggalPermohonan).toLocaleDateString("id-ID"),
+          "Tanggal Permohonan": new Date(
+            hki.tanggalPermohonan
+          ).toLocaleDateString("id-ID"),
           "Jenis Ciptaan": hki.jenisCiptaan,
           "Judul Ciptaan": hki.judulCiptaan,
           "Link Sertifikat": hki.linkSertifikat,
@@ -76,22 +83,26 @@ export const GET = withRoleAuth(["ADMIN", "PIMPINAN"], async () => {
 
     // Prepare buku data
     const bukuData = pkms
-      .filter(pkm => pkm.buku)
+      .filter((pkm) => pkm.buku)
       .map((pkm, pkmIndex) => {
         const buku = pkm.buku!;
         return {
-          "No": pkmIndex + 1,
+          No: pkmIndex + 1,
           "ID PKM": pkm.id,
           "ID Buku": buku.id,
-          "Author": Array.isArray(buku.author) ? buku.author.join(", ") : buku.author,
+          Author: Array.isArray(buku.author)
+            ? buku.author.join(", ")
+            : buku.author,
           "Judul Buku": buku.judulBuku,
-          "Penerbit": buku.penerbit,
-          "ISBN": buku.isbn,
-          "Tahun": buku.tahun,
+          Penerbit: buku.penerbit,
+          ISBN: buku.isbn,
+          Tahun: buku.tahun,
           "Jenis Buku": buku.jenisBuku,
           "Link Buku": buku.linkBuku,
           "Dibuat Oleh": pkm.createdBy.name,
-          "Tanggal Dibuat": new Date(buku.createdAt).toLocaleDateString("id-ID"),
+          "Tanggal Dibuat": new Date(buku.createdAt).toLocaleDateString(
+            "id-ID"
+          ),
         };
       });
 
@@ -102,10 +113,10 @@ export const GET = withRoleAuth(["ADMIN", "PIMPINAN"], async () => {
     const pkmWorksheet = XLSX.utils.json_to_sheet(pkmData);
     XLSX.utils.book_append_sheet(workbook, pkmWorksheet, "Data PKM");
 
-    // Add Publikasi sheet
-    if (publikasiData.length > 0) {
-      const publikasiWorksheet = XLSX.utils.json_to_sheet(publikasiData);
-      XLSX.utils.book_append_sheet(workbook, publikasiWorksheet, "Data Publikasi");
+    // Add Jurnal sheet
+    if (jurnalData.length > 0) {
+      const jurnalWorksheet = XLSX.utils.json_to_sheet(jurnalData);
+      XLSX.utils.book_append_sheet(workbook, jurnalWorksheet, "Data Jurnal");
     }
 
     // Add HKI sheet
@@ -121,18 +132,19 @@ export const GET = withRoleAuth(["ADMIN", "PIMPINAN"], async () => {
     }
 
     // Generate Excel file
-    const excelBuffer = XLSX.write(workbook, { 
-      type: "buffer", 
-      bookType: "xlsx" 
+    const excelBuffer = XLSX.write(workbook, {
+      type: "buffer",
+      bookType: "xlsx",
     });
 
     // Create filename with timestamp
-    const timestamp = new Date().toISOString().split('T')[0];
+    const timestamp = new Date().toISOString().split("T")[0];
     const filename = `PKM_Data_Admin_${timestamp}.xlsx`;
 
     return new NextResponse(excelBuffer, {
       headers: {
-        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Content-Type":
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "Content-Disposition": `attachment; filename="${filename}"`,
       },
     });
@@ -143,4 +155,4 @@ export const GET = withRoleAuth(["ADMIN", "PIMPINAN"], async () => {
       { status: 500 }
     );
   }
-}); 
+});

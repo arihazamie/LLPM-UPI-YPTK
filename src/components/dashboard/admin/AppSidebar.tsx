@@ -13,6 +13,7 @@ import {
   CameraIcon,
   MonitorIcon,
   PKMIcon,
+  PenelitianIcon,
   UsersIcon,
 } from "@/components/dashboard/admin/icons/icon";
 
@@ -76,6 +77,16 @@ const navGroups: NavGroup[] = [
         icon: <PKMIcon />,
         name: "PKM",
         tabKey: "pkm",
+      },
+    ],
+  },
+  {
+    title: "Penelitian",
+    items: [
+      {
+        icon: <PenelitianIcon />,
+        name: "Review Penelitian",
+        tabKey: "penelitian-review",
       },
     ],
   },
@@ -202,7 +213,7 @@ const AppSidebar: React.FC = () => {
     );
   };
 
-  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set(["Dashboard"])); // Default open groups
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set(["Dashboard", "Penelitian"])); // Default open groups
 
   const isActive = useCallback(
     (tabKey: string) => tabKey === activeTab,

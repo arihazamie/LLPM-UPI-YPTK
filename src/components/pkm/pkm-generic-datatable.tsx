@@ -2,7 +2,7 @@
 
 import { DataTable, Column } from "@/components/ui/data-table";
 import { User, Award, FileText, Book, Eye } from "lucide-react";
-import type { PKM, Publikasi, HKI, Buku } from "@/types/pkm-types";
+import type { PKM, Jurnal, HKI, Buku } from "@/types/pkm-types";
 import { ExternalLinkButton } from "./external-link-button";
 import { Button } from "@/components/ui/button";
 
@@ -11,8 +11,8 @@ interface PKMGenericDataTableProps {
   onEdit: (pkm: PKM) => void;
   onDelete: (pkm: PKM) => void;
   onViewDetail: (
-    type: "publikasi" | "hki" | "buku",
-    data: Publikasi | HKI | Buku,
+    type: "jurnal" | "hki" | "buku",
+    data: Jurnal | HKI | Buku,
     title: string
   ) => void;
   isLoading?: boolean;
@@ -43,10 +43,11 @@ export function PKMGenericDataTable({
     });
   };
 
-  // Cek apakah ada data publikasi, HKI, atau buku di seluruh dataset
-  const hasPublikasi = data.some((pkm) => pkm.publikasi);
-  const hasHKI = data.some((pkm) => pkm.hki);
-  const hasBuku = data.some((pkm) => pkm.buku);
+  // Cek apakah ada data jurnal, HKI, atau buku di seluruh dataset
+  // Always show these columns so users can see the status
+  const hasJurnal = true; // Always show jurnal column
+  const hasHKI = true; // Always show HKI column
+  const hasBuku = true; // Always show buku column
 
   const columns: Column<PKM>[] = [
     {
@@ -55,6 +56,13 @@ export function PKMGenericDataTable({
       sortable: true,
       render: (pkm: PKM) => `#${pkm.id}`,
       width: "80px",
+    },
+    {
+      key: "judul",
+      header: "Judul",
+      sortable: true,
+      render: (pkm: PKM) => pkm.judul,
+      width: "200px",
     },
     {
       key: "proposal",
@@ -80,33 +88,33 @@ export function PKMGenericDataTable({
         />
       ),
     },
-    // Hanya tampilkan kolom Publikasi jika ada data
-    ...(hasPublikasi
+    // Hanya tampilkan kolom Jurnal jika ada data
+    ...(hasJurnal
       ? [
           {
-            key: "publikasi",
-            header: "Publikasi",
+            key: "jurnal",
+            header: "Jurnal",
             render: (pkm: PKM) => (
               <div className="flex items-center space-x-2">
                 <div className="flex items-center space-x-1">
                   <Award className="w-4 h-4 text-red-500" />
                   <span className="text-sm">
-                    {pkm.publikasi ? (
+                    {pkm.jurnal ? (
                       <span className="text-red-600 font-medium">1</span>
                     ) : (
                       <span className="text-gray-500">0</span>
                     )}
                   </span>
                 </div>
-                {pkm.publikasi && (
+                {pkm.jurnal && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() =>
                       onViewDetail(
-                        "publikasi",
-                        pkm.publikasi!,
-                        `Detail Publikasi PKM #${pkm.id}`
+                        "jurnal",
+                        pkm.jurnal!,
+                        `Detail Jurnal PKM #${pkm.id}`
                       )
                     }
                     className="h-6 w-6 p-0 hover:bg-red-50">
@@ -226,7 +234,7 @@ export function PKMGenericDataTable({
     <DataTable
       data={data}
       columns={columns}
-      searchFields={["id", "proposal", "laporan"]}
+      searchFields={["id", "judul", "proposal", "laporan"]}
       searchPlaceholder="Cari PKM..."
       onEdit={onEdit}
       onDelete={onDelete}

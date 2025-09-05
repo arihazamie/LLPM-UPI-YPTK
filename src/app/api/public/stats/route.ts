@@ -9,8 +9,8 @@ export async function GET() {
 
     // Fetch all data without user filtering for public stats
     const [
-      publikasiAll,
-      publikasiThisYear,
+      jurnalAll,
+      jurnalThisYear,
       bukuAll,
       bukuThisYear,
       hkiAll,
@@ -24,9 +24,9 @@ export async function GET() {
       sintaAll,
       sintaThisYear,
     ] = await Promise.all([
-      // Total publikasi
-      prisma.publikasi.count(),
-      prisma.publikasi.count({
+      // Total jurnal
+      prisma.jurnal.count(),
+      prisma.jurnal.count({
         where: {
           createdAt: {
             gte: startOfYear,
@@ -75,12 +75,12 @@ export async function GET() {
         },
       }),
       // Scopus
-      prisma.publikasi.count({
+      prisma.jurnal.count({
         where: {
           kategori: "SCOPUS",
         },
       }),
-      prisma.publikasi.count({
+      prisma.jurnal.count({
         where: {
           kategori: "SCOPUS",
           createdAt: {
@@ -90,12 +90,12 @@ export async function GET() {
         },
       }),
       // Sinta
-      prisma.publikasi.count({
+      prisma.jurnal.count({
         where: {
           kategori: "SINTA",
         },
       }),
-      prisma.publikasi.count({
+      prisma.jurnal.count({
         where: {
           kategori: "SINTA",
           createdAt: {
@@ -107,9 +107,9 @@ export async function GET() {
     ]);
 
     const totals = {
-      publikasi: {
-        all: publikasiAll,
-        thisYear: publikasiThisYear,
+      jurnal: {
+        all: jurnalAll,
+        thisYear: jurnalThisYear,
         byKategori: {
           scopus: { all: scopusAll, thisYear: scopusThisYear },
           sinta: { all: sintaAll, thisYear: sintaThisYear },
@@ -120,9 +120,13 @@ export async function GET() {
       pkm: { all: pkmAll, thisYear: pkmThisYear },
       prestasi: { all: prestasiAll, thisYear: prestasiThisYear },
       all: {
-        totalAll: publikasiAll + bukuAll + hkiAll + pkmAll + prestasiAll,
+        totalAll: jurnalAll + bukuAll + hkiAll + pkmAll + prestasiAll,
         totalThisYear:
-          publikasiThisYear + bukuThisYear + hkiThisYear + pkmThisYear + prestasiThisYear,
+          jurnalThisYear +
+          bukuThisYear +
+          hkiThisYear +
+          pkmThisYear +
+          prestasiThisYear,
       },
     };
 
@@ -133,7 +137,14 @@ export async function GET() {
       {
         error: "Failed to fetch statistics",
         totals: {
-          publikasi: { all: 0, thisYear: 0, byKategori: { scopus: { all: 0, thisYear: 0 }, sinta: { all: 0, thisYear: 0 } } },
+          jurnal: {
+            all: 0,
+            thisYear: 0,
+            byKategori: {
+              scopus: { all: 0, thisYear: 0 },
+              sinta: { all: 0, thisYear: 0 },
+            },
+          },
           buku: { all: 0, thisYear: 0 },
           hki: { all: 0, thisYear: 0 },
           pkm: { all: 0, thisYear: 0 },
@@ -144,4 +155,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-} 
+}

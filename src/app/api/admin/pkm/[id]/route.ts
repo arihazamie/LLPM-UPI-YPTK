@@ -21,7 +21,7 @@ export const GET = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
     const pkm = await prisma.pKM.findUnique({
       where: { id },
       include: {
-        publikasi: true,
+        jurnal: true,
         hki: true,
         buku: true,
         createdBy: {

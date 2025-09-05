@@ -8,11 +8,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { X, Plus, ExternalLink } from "lucide-react";
-import type { PKM, Publikasi, HKI, Buku } from "@/types/pkm-types";
-import { PublikasiAddEditModal } from "./publikasi-add-edit-modal";
+import type { PKM, Jurnal, HKI, Buku } from "@/types/pkm-types";
+import { JurnalAddEditModal } from "./jurnal-add-edit-modal";
 import { HkiAddEditModal } from "./hki-add-edit-modal";
 import { BukuAddEditModal } from "./buku-add-edit-modal";
 
@@ -29,29 +30,32 @@ export function PKMAddEditModal({
   onSave,
   pkm,
 }: PKMAddEditModalProps) {
+  const [judul, setJudul] = useState("");
   const [proposal, setProposal] = useState("");
   const [laporan, setLaporan] = useState("");
-  const [publikasi, setPublikasi] = useState<Publikasi | undefined>(undefined);
+  const [jurnal, setJurnal] = useState<Jurnal | undefined>(undefined);
   const [hki, setHki] = useState<HKI | undefined>(undefined);
   const [buku, setBuku] = useState<Buku | undefined>(undefined);
   const [isSaving, setIsSaving] = useState(false);
 
-  const [showPublikasiModal, setShowPublikasiModal] = useState(false);
+  const [showJurnalModal, setShowJurnalModal] = useState(false);
   const [showHkiModal, setShowHkiModal] = useState(false);
   const [showBukuModal, setShowBukuModal] = useState(false);
 
   useEffect(() => {
     if (pkm) {
+      setJudul(pkm.judul || "");
       setProposal(pkm.proposal || "");
       setLaporan(pkm.laporan || "");
-      setPublikasi(pkm.publikasi || undefined);
+      setJurnal(pkm.jurnal || undefined);
       setHki(pkm.hki || undefined);
       setBuku(pkm.buku || undefined);
     } else {
       // Reset form when adding new PKM
+      setJudul("");
       setProposal("");
       setLaporan("");
-      setPublikasi(undefined);
+      setJurnal(undefined);
       setHki(undefined);
       setBuku(undefined);
     }
@@ -61,9 +65,10 @@ export function PKMAddEditModal({
     try {
       setIsSaving(true);
       await onSave({
+        judul,
         proposal,
         laporan,
-        publikasi,
+        jurnal,
         hki,
         buku,
       });
@@ -73,14 +78,14 @@ export function PKMAddEditModal({
     }
   };
 
-  const handleAddPublikasi = (newPublikasi: Partial<Publikasi>) => {
-    const publikasiWithId = {
-      ...newPublikasi,
+  const handleAddJurnal = (newJurnal: Partial<Jurnal>) => {
+    const jurnalWithId = {
+      ...newJurnal,
       id: Date.now().toString(),
       createdAt: new Date(),
       updatedAt: new Date(),
-    } as Publikasi;
-    setPublikasi(publikasiWithId);
+    } as Jurnal;
+    setJurnal(jurnalWithId);
   };
 
   const handleAddHki = (newHki: Partial<HKI>) => {
@@ -103,8 +108,8 @@ export function PKMAddEditModal({
     setBuku(bukuWithId);
   };
 
-  const removePublikasi = () => {
-    setPublikasi(undefined);
+  const removeJurnal = () => {
+    setJurnal(undefined);
   };
 
   const removeHki = () => {
@@ -126,6 +131,18 @@ export function PKMAddEditModal({
           </DialogHeader>
 
           <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
+            <div className="space-y-2">
+              <Label htmlFor="judul">Judul PKM *</Label>
+              <Input
+                id="judul"
+                value={judul}
+                onChange={(e) => setJudul(e.target.value)}
+                placeholder="Masukkan judul PKM"
+                required
+                disabled={isSaving}
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="proposal">Link Proposal *</Label>
               <div className="space-y-2">
@@ -210,29 +227,29 @@ export function PKMAddEditModal({
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label>Publikasi {publikasi ? "(1)" : "(0)"}</Label>
+                <Label>Jurnal {jurnal ? "(1)" : "(0)"}</Label>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setShowPublikasiModal(true)}
-                  disabled={!!publikasi}>
+                  onClick={() => setShowJurnalModal(true)}
+                  disabled={!!jurnal}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Tambah Publikasi
+                  Tambah Jurnal
                 </Button>
               </div>
-              {publikasi && (
+              {jurnal && (
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <div>
-                    <p className="font-medium">{publikasi.judul}</p>
+                    <p className="font-medium">{jurnal.judul}</p>
                     <p className="text-sm text-muted-foreground">
-                      {publikasi.namaJurnal} - {publikasi.kategori}
+                      {jurnal.namaJurnal} - {jurnal.kategori}
                     </p>
                   </div>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={removePublikasi}>
+                    onClick={removeJurnal}>
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
@@ -318,10 +335,10 @@ export function PKMAddEditModal({
         </DialogContent>
       </Dialog>
 
-      <PublikasiAddEditModal
-        isOpen={showPublikasiModal}
-        onClose={() => setShowPublikasiModal(false)}
-        onSave={handleAddPublikasi}
+      <JurnalAddEditModal
+        isOpen={showJurnalModal}
+        onClose={() => setShowJurnalModal(false)}
+        onSave={handleAddJurnal}
       />
       <HkiAddEditModal
         isOpen={showHkiModal}

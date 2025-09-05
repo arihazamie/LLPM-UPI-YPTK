@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { generateHkiId, generateBukuId, generatePublikasiId } from "@/lib/utils";
+import { generateHkiId, generateBukuId, generateJurnalId } from "@/lib/utils";
 import { withRoleAuth } from "@/lib/auth-helpers";
 
 // UPDATE PKM
@@ -26,7 +26,7 @@ export async function PUT(
           createdById: user.id,
         },
         include: {
-          publikasi: true,
+          jurnal: true,
           hki: true,
           buku: true,
         },
@@ -42,9 +42,9 @@ export async function PUT(
       const body = await request.json();
 
       // Validasi field yang diperlukan untuk PKM
-      if (!body.proposal || !body.laporan) {
+      if (!body.judul || !body.proposal || !body.laporan) {
         return NextResponse.json(
-          { message: "Proposal dan laporan wajib diisi" },
+          { message: "Judul, proposal, dan laporan wajib diisi" },
           { status: 400 }
         );
       }
@@ -55,12 +55,13 @@ export async function PUT(
         const pkm = await tx.pKM.update({
           where: { id },
           data: {
+            judul: body.judul,
             proposal: body.proposal,
             laporan: body.laporan,
             updatedAt: new Date(),
           },
           include: {
-            publikasi: true,
+            jurnal: true,
             hki: true,
             buku: true,
             createdBy: {
@@ -73,24 +74,25 @@ export async function PUT(
           },
         });
 
-        // Handle publikasi update
-        if (body.publikasi !== undefined) {
-          // Delete existing publikasi if any
-          if (existingPkm.publikasi) {
-            await tx.publikasi.delete({
-              where: { id: existingPkm.publikasi.id },
+        // Handle jurnal update
+        if (body.jurnal !== undefined) {
+          // Delete existing jurnal if any
+          if (existingPkm.jurnal) {
+            await tx.jurnal.delete({
+              where: { id: existingPkm.jurnal.id },
             });
           }
-          
-          // Create new publikasi if provided
-          if (body.publikasi) {
-            const publikasiId = await generatePublikasiId(tx);
-            await tx.publikasi.create({
+
+          // Create new jurnal if provided
+          if (body.jurnal) {
+            const jurnalId = await generateJurnalId(tx);
+            await tx.jurnal.create({
               data: {
-                id: publikasiId,
-                ...body.publikasi,
+                id: jurnalId,
+                ...body.jurnal,
                 pkmId: id,
                 createdById: pkm.createdById,
+                linkJurnal: body.jurnal.linkJurnal,
               },
             });
           }
@@ -104,7 +106,7 @@ export async function PUT(
               where: { id: existingPkm.hki.id },
             });
           }
-          
+
           // Create new HKI if provided
           if (body.hki) {
             const hkiId = await generateHkiId(tx);
@@ -114,6 +116,7 @@ export async function PUT(
                 ...body.hki,
                 pkmId: id,
                 createdById: pkm.createdById,
+                linkSertifikat: body.hki.linkSertifikat,
               },
             });
           }
@@ -127,7 +130,7 @@ export async function PUT(
               where: { id: existingPkm.buku.id },
             });
           }
-          
+
           // Create new buku if provided
           if (body.buku) {
             const bukuId = await generateBukuId(tx);
@@ -137,6 +140,7 @@ export async function PUT(
                 ...body.buku,
                 pkmId: id,
                 createdById: pkm.createdById,
+                linkBuku: body.buku.linkBuku,
               },
             });
           }
@@ -146,7 +150,7 @@ export async function PUT(
         return await tx.pKM.findUnique({
           where: { id },
           include: {
-            publikasi: true,
+            jurnal: true,
             hki: true,
             buku: true,
             createdBy: {
@@ -217,14 +221,14 @@ export async function DELETE(
       // Hapus PKM dan semua relasi yang terhubung dalam satu transaksi
       const deletedPkm = await prisma.$transaction(async (tx) => {
         // Hapus data relasi terlebih dahulu
-        await tx.publikasi.deleteMany({
+        await tx.jurnal.deleteMany({
           where: { pkmId: id },
         });
-        
+
         await tx.hKI.deleteMany({
           where: { pkmId: id },
         });
-        
+
         await tx.buku.deleteMany({
           where: { pkmId: id },
         });
@@ -236,7 +240,10 @@ export async function DELETE(
       });
 
       return NextResponse.json(
-        { message: "PKM dan semua data terkait berhasil dihapus", data: deletedPkm },
+        {
+          message: "PKM dan semua data terkait berhasil dihapus",
+          data: deletedPkm,
+        },
         { status: 200 }
       );
     } catch (error: unknown) {

@@ -25,12 +25,18 @@ model User {
   updatedAt DateTime @updatedAt
 
   posts       Post[]
-  publikasi   Publikasi[]
   prototypes  Prototype[]
   buku        Buku[]
-  hki         HKI[]
   prestasi    Prestasi[]
+  jurnal      Jurnal[]
+  hki         HKI[]
   pkm         PKM[]
+  penelitian  Penelitian[]
+  dosenPenelitian dosenPenelitian[]
+  
+  // Relasi untuk review dan approval penelitian
+  penelitianReviewed  Penelitian[] @relation("PenelitianReviewer")
+  penelitianApproved  Penelitian[] @relation("PenelitianApprover")
 }
 
 enum PostType {
@@ -64,36 +70,7 @@ model Post {
   @@index([createdAt]) // Index untuk mempercepat query berdasarkan tanggal dibuat
 }
 
-enum KategoriJurnal {
-  OJS
-  SINTA
-  INTERNASIONAL
-  WOS
-  SCOPUS
-}
 
-
-model Publikasi {
-  id              String          @id
-  author          String[]
-  judul           String
-  namaJurnal      String
-  publisher       String
-
-  kategori        KategoriJurnal  // contoh: "SINTA" atau "SCOPUS"
-  level           String?         // contoh: "1" untuk Sinta 1, "Q1" untuk Scopus Q1
-
-  pkmId           String?
-  pkm             PKM?            @relation(fields: [pkmId], references: [id])
-
-  createdById     String
-  createdBy       User            @relation(fields: [createdById], references: [id])
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@unique([pkmId])
-}
 
 enum JenisPrototype {
   ALAT
@@ -139,8 +116,8 @@ model Buku {
     jenisBuku         JenisBuku
     linkBuku          String
 
-  pkmId     String?
-  pkm       PKM?     @relation(fields: [pkmId], references: [id])
+    pkmId     String?
+    pkm       PKM?     @relation(fields: [pkmId], references: [id])
 
 
     createdById     String
@@ -163,12 +140,47 @@ model HKI {
   judulCiptaan      String
   linkSertifikat    String
 
-  pkmId     String?
-  pkm       PKM?     @relation(fields: [pkmId], references: [id])
+  pkmId             String?
+  pkm               PKM?     @relation(fields: [pkmId], references: [id])
 
 
-  createdById     String
-  createdBy       User     @relation(fields: [createdById], references: [id])
+  createdById       String
+  createdBy         User     @relation(fields: [createdById], references: [id])
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([pkmId])
+}
+
+
+enum KategoriJurnal {
+  OJS
+  SINTA
+  INTERNASIONAL
+  WOS
+  SCOPUS
+}
+
+
+// Model Jurnal
+model Jurnal {
+  id                String   @id
+  author            String[]
+  judul             String
+  namaJurnal        String
+  publisher         String
+
+  kategori          KategoriJurnal
+  level             String?
+
+  linkJurnal        String
+  
+  pkmId             String?
+  pkm               PKM?     @relation(fields: [pkmId], references: [id])
+
+  createdById       String
+  createdBy         User     @relation(fields: [createdById], references: [id])
 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -179,11 +191,12 @@ model HKI {
 // Model PKM
 model PKM {
   id          String   @id
+  judul       String  // wajib
   proposal    String   // wajib
   laporan     String   // wajib
 
   // Relasi luaran (opsional)
-  publikasi Publikasi?
+  jurnal    Jurnal?
   hki       HKI?
   buku      Buku?
 
@@ -206,9 +219,129 @@ model Prestasi {
   penyelenggara     String
   linkSertifikat    String
 
-  createdById     String
-  createdBy       User     @relation(fields: [createdById], references: [id])
+  createdById       String
+  createdBy         User     @relation(fields: [createdById], references: [id])
 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+}
+
+enum StatusPenelitian {
+  REVIEW
+  ACC_PROPOSAL
+
+  REVIEW_LAPORAN_KEMAJUAN_60
+  ACC_LAPORAN_KEMAJUAN_60 
+
+  REVIEW_LAPORAN_KEMAJUAN_100
+  ACC_LAPORAN_KEMAJUAN_100 
+
+  SELESAI 
+  DITOLAK
+}
+
+enum LuaranPenelitian {
+  SEMINAR_INTERNASIONAL_SCOPUS_ATLANTIS_WOS
+  ARTIKEL_JURNAL_NASIONAL_SINTA_5
+  ARTIKEL_JURNAL_NASIONAL_SINTA_4
+  ARTIKEL_JURNAL_NASIONAL_SINTA_3
+  ARTIKEL_JURNAL_NASIONAL_SINTA_2
+  PUBLIKASI_JURNAL_INTERNATIONAL_BEREPUTASI_SCOPUS_WOS
+  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q4_WOS
+  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q3_WOS
+  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q2_WOS
+  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q1_WOS
+  HKI_PATEN
+  BUKU_ISBN
+  PROTOTYPE
+}
+
+enum KategoriPenelitian {
+  PENELITIAN_DOSEN_PEMULA
+  PENELITIAN_TERAPAN
+  PENELITIAN_PENGEMBANGAN
+  PENELITIAN_UNGGULAN_PERGURUAN_TINGGI
+  PENELITIAN_GURU_BESAR_PERCEPATAN_PROFESOR
+  PENELITIAN_BEKERJASAMA_MITRA_NASIONAL
+  PENELITIAN_BEKERJASAMA_MITRA_INTERNASIONAL
+}
+
+// Model Penelitian
+model Penelitian {
+  id                  String   @id @default(cuid())
+
+  judulPenelitian     String  // wajib
+  kategoriPenelitian  KategoriPenelitian  // wajib - menggunakan enum
+  lamaKegiatan        String  // wajib
+  tahunKegiatan       Int  // wajib
+  anggaran            Int?  // wajib
+  sumberAnggaran      String?  // wajib
+  luaran              LuaranPenelitian[] // wajib - menggunakan enum array
+
+  statusPenelitian    StatusPenelitian @default(REVIEW)
+  
+  // Field untuk review dan approval oleh admin
+  reviewedById        String?  // ID admin yang melakukan review
+  reviewedBy          User?    @relation("PenelitianReviewer", fields: [reviewedById], references: [id])
+  reviewedAt          DateTime? // Tanggal review
+  reviewNotes         String?  // Catatan review dari admin
+  
+  approvedById        String?  // ID admin yang melakukan approval
+  approvedBy          User?    @relation("PenelitianApprover", fields: [approvedById], references: [id])
+  approvedAt          DateTime? // Tanggal approval
+  approvalNotes       String?  // Catatan approval dari admin
+ 
+  dosenPenelitian     dosenPenelitian[]
+
+  linkProposal            String //wajib
+  linkLaporanKemajuan     String?  //diisi setelah proposal disetujui
+  linkLaporanAkhir        String?  //diisi setelah penelitian selesai
+
+  createdById       String
+  createdBy         User     @relation(fields: [createdById], references: [id])
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+enum RoleDosenPenelitian {
+  KETUA
+  ANGGOTA
+}
+
+enum ProgramStudiDosenPenelitian {
+  D3_MANAJEMEN_INFORMATIKA
+  S1_SISTEM_INFORMASI
+  S1_SISTEM_KOMPUTER
+  S1_TEKNIK_INFORMATIKA
+  S1_MANAJEMEN
+  S1_AKUNTANSI
+  S1_TEKNIK_SIPIL
+  S1_TEKNIK_INDUSTRI
+  S1_PSIKOLOGI
+  S1_DESAIN_KOMUNIKASI_VISUAL
+  S1_PTIK
+  S1_BIMBINGAN_KONSELING
+  S1_BAHASA_INGGRIS
+  S2_TEKNIK_INFORMATIKA
+  S2_MANAJEMEN
+  S3_TEKNOLOGI_INFORMASI
+}
+
+model dosenPenelitian {
+  id                    String   @id
+
+  dosenId               String
+  dosen                 User     @relation(fields: [dosenId], references: [id])
+
+  namaDosen             String  // wajib
+  NIDN                  String  // wajib
+  roleDosenPenelitian   RoleDosenPenelitian  // wajib
+  programStudiDosenPenelitian ProgramStudiDosenPenelitian  // wajib
+
+  penelitianId          String
+  penelitian            Penelitian @relation(fields: [penelitianId], references: [id])
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }

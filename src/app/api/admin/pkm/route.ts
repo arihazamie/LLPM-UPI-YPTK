@@ -2,11 +2,16 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { KategoriJurnal, JenisBuku } from "@prisma/client";
-import { generatePkmId, generateHkiId, generateBukuId, generatePublikasiId } from "@/lib/utils";
+import {
+  generatePkmId,
+  generateHkiId,
+  generateBukuId,
+  generateJurnalId,
+} from "@/lib/utils";
 import { withRoleAuth } from "@/lib/auth-helpers";
 
 // --- Schemas ---
-const PublikasiInputSchema = z
+const JurnalInputSchema = z
   .object({
     judul: z.string().min(1),
     author: z.array(z.string()).min(1),
@@ -14,6 +19,7 @@ const PublikasiInputSchema = z
     publisher: z.string().min(1),
     kategori: z.nativeEnum(KategoriJurnal),
     level: z.string().optional(),
+    linkJurnal: z.string().min(1),
   })
   .strict();
 
@@ -42,9 +48,10 @@ const BukuInputSchema = z
 
 const PkmCreateSchema = z
   .object({
+    judul: z.string().min(1),
     proposal: z.string().min(1),
     laporan: z.string().min(1),
-    publikasi: PublikasiInputSchema.optional(),
+    jurnal: JurnalInputSchema.optional(),
     hki: HkiInputSchema.optional(),
     buku: BukuInputSchema.optional(),
   })
@@ -52,9 +59,10 @@ const PkmCreateSchema = z
 
 const PkmUpdateSchema = z
   .object({
+    judul: z.string().min(1).optional(),
     proposal: z.string().min(1).optional(),
     laporan: z.string().min(1).optional(),
-    publikasi: PublikasiInputSchema.optional(),
+    jurnal: JurnalInputSchema.optional(),
     hki: HkiInputSchema.optional(),
     buku: BukuInputSchema.optional(),
   })
@@ -71,24 +79,26 @@ export const POST = withRoleAuth(["ADMIN", "PIMPINAN"], async (req, user) => {
 
     // Generate custom IDs
     const pkmId = await generatePkmId(prisma);
-    
+
     // Generate IDs for related records if they exist
-    const publikasiId = body.publikasi ? await generatePublikasiId(prisma) : undefined;
+    const jurnalId = body.jurnal ? await generateJurnalId(prisma) : undefined;
     const hkiId = body.hki ? await generateHkiId(prisma) : undefined;
     const bukuId = body.buku ? await generateBukuId(prisma) : undefined;
 
     const created = await prisma.pKM.create({
       data: {
         id: pkmId,
+        judul: body.judul,
         proposal: body.proposal,
         laporan: body.laporan,
         createdById: user.id,
-        ...(body.publikasi && {
-          publikasi: {
+        ...(body.jurnal && {
+          jurnal: {
             create: {
-              id: publikasiId!,
-              ...body.publikasi,
+              id: jurnalId!,
+              ...body.jurnal,
               createdById: user.id,
+              linkJurnal: body.jurnal.linkJurnal,
             },
           },
         }),
@@ -111,9 +121,9 @@ export const POST = withRoleAuth(["ADMIN", "PIMPINAN"], async (req, user) => {
           },
         }),
       },
-      include: { 
-        publikasi: true, 
-        hki: true, 
+      include: {
+        jurnal: true,
+        hki: true,
         buku: true,
         createdBy: {
           select: { id: true, name: true, email: true },
@@ -165,15 +175,17 @@ export const GET = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
     // Build where clause
     const where: {
       OR?: Array<{
+        judul?: { contains: string; mode: "insensitive" };
         proposal?: { contains: string; mode: "insensitive" };
         laporan?: { contains: string; mode: "insensitive" };
         createdBy?: { name: { contains: string; mode: "insensitive" } };
       }>;
       createdById?: string;
     } = {};
-    
+
     if (search) {
       where.OR = [
+        { judul: { contains: search, mode: "insensitive" } },
         { proposal: { contains: search, mode: "insensitive" } },
         { laporan: { contains: search, mode: "insensitive" } },
         { createdBy: { name: { contains: search, mode: "insensitive" } } },
@@ -191,7 +203,7 @@ export const GET = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
     const pkms = await prisma.pKM.findMany({
       where,
       include: {
-        publikasi: true,
+        jurnal: true,
         hki: true,
         buku: true,
         createdBy: {
@@ -237,7 +249,7 @@ export const PUT = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
-    
+
     if (!id) {
       return NextResponse.json(
         {
@@ -249,12 +261,13 @@ export const PUT = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
     }
 
     const json = await req.json();
+    console.log("Received PKM update data:", json); // Debug log
     const body: PkmUpdateBody = PkmUpdateSchema.parse(json);
 
     // Check if PKM exists
     const existingPkm = await prisma.pKM.findUnique({
       where: { id },
-      include: { publikasi: true, hki: true, buku: true },
+      include: { jurnal: true, hki: true, buku: true },
     });
 
     if (!existingPkm) {
@@ -273,12 +286,13 @@ export const PUT = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
       const pkm = await tx.pKM.update({
         where: { id },
         data: {
+          ...(body.judul && { judul: body.judul }),
           ...(body.proposal && { proposal: body.proposal }),
           ...(body.laporan && { laporan: body.laporan }),
           updatedAt: new Date(),
         },
         include: {
-          publikasi: true,
+          jurnal: true,
           hki: true,
           buku: true,
           createdBy: {
@@ -291,24 +305,25 @@ export const PUT = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
         },
       });
 
-      // Handle publikasi update
-      if (body.publikasi !== undefined) {
-        // Delete existing publikasi if any
-        if (existingPkm.publikasi) {
-          await tx.publikasi.delete({
-            where: { id: existingPkm.publikasi.id },
+      // Handle jurnal update
+      if (body.jurnal !== undefined) {
+        // Delete existing jurnal if any
+        if (existingPkm.jurnal) {
+          await tx.jurnal.delete({
+            where: { id: existingPkm.jurnal.id },
           });
         }
-        
-        // Create new publikasi if provided
-        if (body.publikasi) {
-          const publikasiId = await generatePublikasiId(tx);
-          await tx.publikasi.create({
+
+        // Create new jurnal if provided
+        if (body.jurnal) {
+          const jurnalId = await generateJurnalId(tx);
+          await tx.jurnal.create({
             data: {
-              id: publikasiId,
-              ...body.publikasi,
+              id: jurnalId,
+              ...body.jurnal,
               pkmId: id,
               createdById: pkm.createdById,
+              linkJurnal: body.jurnal.linkJurnal,
             },
           });
         }
@@ -322,7 +337,7 @@ export const PUT = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
             where: { id: existingPkm.hki.id },
           });
         }
-        
+
         // Create new HKI if provided
         if (body.hki) {
           const hkiId = await generateHkiId(tx);
@@ -345,7 +360,7 @@ export const PUT = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
             where: { id: existingPkm.buku.id },
           });
         }
-        
+
         // Create new buku if provided
         if (body.buku) {
           const bukuId = await generateBukuId(tx);
@@ -364,7 +379,7 @@ export const PUT = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
       return await tx.pKM.findUnique({
         where: { id },
         include: {
-          publikasi: true,
+          jurnal: true,
           hki: true,
           buku: true,
           createdBy: {
@@ -377,6 +392,8 @@ export const PUT = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
         },
       });
     });
+
+    console.log("Updated PKM result:", updatedPkm); // Debug log
 
     return NextResponse.json({
       success: true,
@@ -413,7 +430,7 @@ export const DELETE = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
-    
+
     if (!id) {
       return NextResponse.json(
         {
@@ -427,7 +444,7 @@ export const DELETE = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
     // Check if PKM exists
     const existingPkm = await prisma.pKM.findUnique({
       where: { id },
-      include: { publikasi: true, hki: true, buku: true },
+      include: { jurnal: true, hki: true, buku: true },
     });
 
     if (!existingPkm) {

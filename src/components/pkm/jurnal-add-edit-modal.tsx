@@ -17,39 +17,79 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Plus } from "lucide-react";
-import { type Publikasi, KategoriJurnal } from "@/types/pkm-types";
+import { X, Plus, ExternalLink } from "lucide-react";
+import { type Jurnal, KategoriJurnal } from "@/types/pkm-types";
+import { toast } from "sonner";
 
-interface PublikasiAddEditModalProps {
+interface JurnalAddEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (publikasi: Partial<Publikasi>) => void;
-  publikasi?: Publikasi;
+  onSave: (jurnal: Partial<Jurnal>) => void;
+  jurnal?: Jurnal;
 }
 
-export function PublikasiAddEditModal({
+export function JurnalAddEditModal({
   isOpen,
   onClose,
   onSave,
-  publikasi,
-}: PublikasiAddEditModalProps) {
-  const [judul, setJudul] = useState(publikasi?.judul || "");
-  const [authors, setAuthors] = useState<string[]>(publikasi?.author || [""]);
-  const [namaJurnal, setNamaJurnal] = useState(publikasi?.namaJurnal || "");
-  const [publisher, setPublisher] = useState(publikasi?.publisher || "");
+  jurnal,
+}: JurnalAddEditModalProps) {
+  const [judul, setJudul] = useState(jurnal?.judul || "");
+  const [authors, setAuthors] = useState<string[]>(jurnal?.author || [""]);
+  const [namaJurnal, setNamaJurnal] = useState(jurnal?.namaJurnal || "");
+  const [publisher, setPublisher] = useState(jurnal?.publisher || "");
   const [peringkatJurnal, setPeringkatJurnal] = useState<KategoriJurnal>(
-    publikasi?.kategori || KategoriJurnal.OJS
+    jurnal?.kategori || KategoriJurnal.OJS
   );
-  const [level, setLevel] = useState(publikasi?.level || "");
+  const [level, setLevel] = useState(jurnal?.level || "");
+  const [linkJurnal, setLinkJurnal] = useState(jurnal?.linkJurnal || "");
 
   const handleSave = () => {
+    // Validation for required fields
+    if (!judul.trim()) {
+      toast.error("Judul jurnal harus diisi");
+      return;
+    }
+
+    if (!namaJurnal.trim()) {
+      toast.error("Nama jurnal harus diisi");
+      return;
+    }
+
+    if (!publisher.trim()) {
+      toast.error("Publisher harus diisi");
+      return;
+    }
+
+    const filteredAuthors = authors.filter((author) => author.trim() !== "");
+    if (filteredAuthors.length === 0) {
+      toast.error("Minimal harus ada satu penulis");
+      return;
+    }
+
+    if (!linkJurnal.trim()) {
+      toast.error("Link jurnal harus diisi");
+      return;
+    }
+
+    // Validation for SCOPUS and SINTA level
+    if (
+      (peringkatJurnal === KategoriJurnal.SCOPUS ||
+        peringkatJurnal === KategoriJurnal.SINTA) &&
+      !level.trim()
+    ) {
+      toast.error(`Level ${peringkatJurnal} harus dipilih`);
+      return;
+    }
+
     onSave({
-      judul,
-      author: authors.filter((author) => author.trim() !== ""),
-      namaJurnal,
-      publisher,
+      judul: judul.trim(),
+      author: filteredAuthors,
+      namaJurnal: namaJurnal.trim(),
+      publisher: publisher.trim(),
       kategori: peringkatJurnal,
-      level: level || undefined,
+      level: level.trim() || undefined,
+      linkJurnal: linkJurnal.trim(),
     });
     onClose();
     setJudul("");
@@ -58,6 +98,7 @@ export function PublikasiAddEditModal({
     setPublisher("");
     setPeringkatJurnal(KategoriJurnal.OJS);
     setLevel("");
+    setLinkJurnal("");
   };
 
   const addAuthor = () => {
@@ -106,19 +147,17 @@ export function PublikasiAddEditModal({
       onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            {publikasi ? "Edit Publikasi" : "Tambah Publikasi"}
-          </DialogTitle>
+          <DialogTitle>{jurnal ? "Edit Jurnal" : "Tambah Jurnal"}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
           <div className="space-y-2">
-            <Label htmlFor="judul">Judul Publikasi *</Label>
+            <Label htmlFor="judul">Judul Jurnal *</Label>
             <Input
               id="judul"
               value={judul}
               onChange={(e) => setJudul(e.target.value)}
-              placeholder="Masukkan judul publikasi"
+              placeholder="Masukkan judul jurnal"
               required
             />
           </div>
@@ -224,6 +263,43 @@ export function PublikasiAddEditModal({
               </Select>
             </div>
           )}
+
+          <div className="space-y-2">
+            <Label htmlFor="linkJurnal">Link Jurnal *</Label>
+            <Input
+              id="linkJurnal"
+              value={linkJurnal}
+              onChange={(e) => setLinkJurnal(e.target.value)}
+              placeholder="Masukkan link jurnal (https://...)"
+              required
+            />
+            {linkJurnal && (
+              <div className="flex items-center space-x-2">
+                <div
+                  className={`w-2 h-2 rounded-full ${
+                    linkJurnal.startsWith("http")
+                      ? "bg-green-500"
+                      : "bg-red-500"
+                  }`}
+                />
+                <span className="text-xs text-slate-600">
+                  {linkJurnal.startsWith("http")
+                    ? "Link valid"
+                    : "Link tidak valid - harus dimulai dengan http:// atau https://"}
+                </span>
+                {linkJurnal.startsWith("http") && (
+                  <a
+                    href={linkJurnal}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-600 hover:text-blue-800 underline flex items-center space-x-1">
+                    <span>Test Link</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex justify-end space-x-2 pt-4 border-t bg-background">

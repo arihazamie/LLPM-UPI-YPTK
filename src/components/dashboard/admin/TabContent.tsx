@@ -10,9 +10,12 @@ import WebinarTab from "./tabs/WebinarTab"
 import PKMTab from "./tabs/PKMTab"
 import ProfileTab from "./tabs/ProfileTab"
 import UsersTab from "./tabs/UsersTab"
+import PenelitianReviewTab from "./tabs/PenelitianReviewTab"
 
 export default function TabContent() {
   const { activeTab } = useSidebar()
+
+  console.log("Current activeTab:", activeTab); // Debug log
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -30,6 +33,14 @@ export default function TabContent() {
         return <WebinarTab />
       case "pkm":
         return <PKMTab />
+      case "penelitian-review":
+        return (
+          <div className="p-6">
+            <h1 className="text-2xl font-bold">Review Penelitian</h1>
+            <p>Tab penelitian berhasil dimuat!</p>
+            <PenelitianReviewTab />
+          </div>
+        )
       case "users":
         return <UsersTab />
       case "profile":

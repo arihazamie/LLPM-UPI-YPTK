@@ -35,6 +35,68 @@ export enum PostType {
   WEBINAR = "WEBINAR",
 }
 
+// Enum untuk Penelitian
+export enum StatusPenelitian {
+  REVIEW = "REVIEW",
+  ACC_PROPOSAL = "ACC_PROPOSAL",
+  REVIEW_LAPORAN_KEMAJUAN_60 = "REVIEW_LAPORAN_KEMAJUAN_60",
+  ACC_LAPORAN_KEMAJUAN_60 = "ACC_LAPORAN_KEMAJUAN_60",
+  REVIEW_LAPORAN_KEMAJUAN_100 = "REVIEW_LAPORAN_KEMAJUAN_100",
+  ACC_LAPORAN_KEMAJUAN_100 = "ACC_LAPORAN_KEMAJUAN_100",
+  SELESAI = "SELESAI",
+  DITOLAK = "DITOLAK",
+}
+
+export enum LuaranPenelitian {
+  SEMINAR_INTERNASIONAL_SCOPUS_ATLANTIS_WOS = "SEMINAR_INTERNASIONAL_SCOPUS_ATLANTIS_WOS",
+  ARTIKEL_JURNAL_NASIONAL_SINTA_5 = "ARTIKEL_JURNAL_NASIONAL_SINTA_5",
+  ARTIKEL_JURNAL_NASIONAL_SINTA_4 = "ARTIKEL_JURNAL_NASIONAL_SINTA_4",
+  ARTIKEL_JURNAL_NASIONAL_SINTA_3 = "ARTIKEL_JURNAL_NASIONAL_SINTA_3",
+  ARTIKEL_JURNAL_NASIONAL_SINTA_2 = "ARTIKEL_JURNAL_NASIONAL_SINTA_2",
+  PUBLIKASI_JURNAL_INTERNATIONAL_BEREPUTASI_SCOPUS_WOS = "PUBLIKASI_JURNAL_INTERNATIONAL_BEREPUTASI_SCOPUS_WOS",
+  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q4_WOS = "PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q4_WOS",
+  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q3_WOS = "PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q3_WOS",
+  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q2_WOS = "PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q2_WOS",
+  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q1_WOS = "PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q1_WOS",
+  HKI_PATEN = "HKI_PATEN",
+  BUKU_ISBN = "BUKU_ISBN",
+  PROTOTYPE = "PROTOTYPE",
+}
+
+export enum KategoriPenelitian {
+  PENELITIAN_DOSEN_PEMULA = "PENELITIAN_DOSEN_PEMULA",
+  PENELITIAN_TERAPAN = "PENELITIAN_TERAPAN",
+  PENELITIAN_PENGEMBANGAN = "PENELITIAN_PENGEMBANGAN",
+  PENELITIAN_UNGGULAN_PERGURUAN_TINGGI = "PENELITIAN_UNGGULAN_PERGURUAN_TINGGI",
+  PENELITIAN_GURU_BESAR_PERCEPATAN_PROFESOR = "PENELITIAN_GURU_BESAR_PERCEPATAN_PROFESOR",
+  PENELITIAN_BEKERJASAMA_MITRA_NASIONAL = "PENELITIAN_BEKERJASAMA_MITRA_NASIONAL",
+  PENELITIAN_BEKERJASAMA_MITRA_INTERNASIONAL = "PENELITIAN_BEKERJASAMA_MITRA_INTERNASIONAL",
+}
+
+export enum RoleDosenPenelitian {
+  KETUA = "KETUA",
+  ANGGOTA = "ANGGOTA",
+}
+
+export enum ProgramStudiDosenPenelitian {
+  D3_MANAJEMEN_INFORMATIKA = "D3_MANAJEMEN_INFORMATIKA",
+  S1_SISTEM_INFORMASI = "S1_SISTEM_INFORMASI",
+  S1_SISTEM_KOMPUTER = "S1_SISTEM_KOMPUTER",
+  S1_TEKNIK_INFORMATIKA = "S1_TEKNIK_INFORMATIKA",
+  S1_MANAJEMEN = "S1_MANAJEMEN",
+  S1_AKUNTANSI = "S1_AKUNTANSI",
+  S1_TEKNIK_SIPIL = "S1_TEKNIK_SIPIL",
+  S1_TEKNIK_INDUSTRI = "S1_TEKNIK_INDUSTRI",
+  S1_PSIKOLOGI = "S1_PSIKOLOGI",
+  S1_DESAIN_KOMUNIKASI_VISUAL = "S1_DESAIN_KOMUNIKASI_VISUAL",
+  S1_PTIK = "S1_PTIK",
+  S1_BIMBINGAN_KONSELING = "S1_BIMBINGAN_KONSELING",
+  S1_BAHASA_INGGRIS = "S1_BAHASA_INGGRIS",
+  S2_TEKNIK_INFORMATIKA = "S2_TEKNIK_INFORMATIKA",
+  S2_MANAJEMEN = "S2_MANAJEMEN",
+  S3_TEKNOLOGI_INFORMASI = "S3_TEKNOLOGI_INFORMASI",
+}
+
 export interface User {
   id: string;
   name: string;
@@ -60,7 +122,7 @@ export interface Post {
   updatedAt: Date;
 }
 
-export interface Publikasi {
+export interface Jurnal {
   id: string;
   author: string[];
   judul: string;
@@ -68,6 +130,7 @@ export interface Publikasi {
   publisher: string;
   kategori: KategoriJurnal;
   level?: string;
+  linkJurnal: string;
   pkmId?: string;
   pkm?: PKM;
   createdById: string;
@@ -109,35 +172,32 @@ export interface Buku {
   updatedAt: Date;
 }
 
-export interface PKM {
+export interface Prototype {
   id: string;
-  proposal: string;
-  laporan: string;
-  publikasi?: Publikasi; // Single publikasi instead of array
-  hki?: HKI; // Single HKI instead of array
-  buku?: Buku; // Single buku instead of array
+  author: string[];
+  namaPrototype: string;
+  fungsiPrototype: string;
+  penggunaUtama: string;
+  jenisPrototype: string[];
+  link: string;
   createdById: string;
   createdBy: User;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface Prototype {
+export interface PKM {
   id: string;
-  namaPrototype: string;
-  fungsiPrototype: string;
-  penggunaUtama: string;
-  author: string[];
-  jenisPrototype: string[];
-  link: string;
+  judul: string;
+  proposal: string;
+  laporan: string;
+  jurnal?: Jurnal;
+  hki?: HKI;
+  buku?: Buku;
+  createdById: string;
+  createdBy: User;
   createdAt: Date;
   updatedAt: Date;
-  createdById: string;
-  createdBy?: {
-    id: string;
-    name: string;
-    email: string;
-  };
 }
 
 export interface Prestasi {
@@ -151,6 +211,52 @@ export interface Prestasi {
   linkSertifikat: string;
   createdById: string;
   createdBy: User;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Penelitian {
+  id: string;
+  judulPenelitian: string;
+  kategoriPenelitian: KategoriPenelitian;
+  lamaKegiatan: string;
+  tahunKegiatan: number;
+  anggaran?: number;
+  sumberAnggaran?: string;
+  luaran: LuaranPenelitian[];
+  statusPenelitian: StatusPenelitian;
+
+  // Review dan approval fields
+  reviewedById?: string;
+  reviewedBy?: User;
+  reviewedAt?: Date;
+  reviewNotes?: string;
+
+  approvedById?: string;
+  approvedBy?: User;
+  approvedAt?: Date;
+  approvalNotes?: string;
+
+  dosenPenelitian: DosenPenelitian[];
+  linkProposal: string;
+  linkLaporanKemajuan?: string;
+  linkLaporanAkhir?: string;
+  createdById: string;
+  createdBy: User;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface DosenPenelitian {
+  id: string;
+  dosenId: string;
+  dosen: User;
+  namaDosen: string;
+  NIDN: string;
+  roleDosenPenelitian: RoleDosenPenelitian;
+  programStudiDosenPenelitian: ProgramStudiDosenPenelitian;
+  penelitianId: string;
+  penelitian: Penelitian;
   createdAt: Date;
   updatedAt: Date;
 }
