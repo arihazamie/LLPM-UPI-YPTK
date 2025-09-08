@@ -43,6 +43,11 @@ export function JurnalAddEditModal({
   );
   const [level, setLevel] = useState(jurnal?.level || "");
   const [linkJurnal, setLinkJurnal] = useState(jurnal?.linkJurnal || "");
+  const [tanggalPublisher, setTanggalPublisher] = useState(
+    jurnal?.tanggalPublisher
+      ? new Date(jurnal.tanggalPublisher).toISOString().split("T")[0]
+      : ""
+  );
 
   const handleSave = () => {
     // Validation for required fields
@@ -78,7 +83,7 @@ export function JurnalAddEditModal({
         peringkatJurnal === KategoriJurnal.SINTA) &&
       !level.trim()
     ) {
-      toast.error(`Level ${peringkatJurnal} harus dipilih`);
+      toast.error("Level harus dipilih");
       return;
     }
 
@@ -90,6 +95,9 @@ export function JurnalAddEditModal({
       kategori: peringkatJurnal,
       level: level.trim() || undefined,
       linkJurnal: linkJurnal.trim(),
+      tanggalPublisher: tanggalPublisher
+        ? new Date(tanggalPublisher)
+        : undefined,
     });
     onClose();
     setJudul("");
@@ -99,6 +107,7 @@ export function JurnalAddEditModal({
     setPeringkatJurnal(KategoriJurnal.OJS);
     setLevel("");
     setLinkJurnal("");
+    setTanggalPublisher("");
   };
 
   const addAuthor = () => {
@@ -181,7 +190,7 @@ export function JurnalAddEditModal({
                 <Input
                   value={author}
                   onChange={(e) => updateAuthor(index, e.target.value)}
-                  placeholder={`Penulis ${index + 1}`}
+                  placeholder="Penulis"
                   className="flex-1"
                 />
                 {authors.length > 1 && (
@@ -247,9 +256,7 @@ export function JurnalAddEditModal({
                 value={level}
                 onValueChange={setLevel}>
                 <SelectTrigger>
-                  <SelectValue
-                    placeholder={`Pilih level ${peringkatJurnal.toLowerCase()}`}
-                  />
+                  <SelectValue placeholder="Pilih level" />
                 </SelectTrigger>
                 <SelectContent>
                   {getLevelOptions().map((option) => (
@@ -275,13 +282,7 @@ export function JurnalAddEditModal({
             />
             {linkJurnal && (
               <div className="flex items-center space-x-2">
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    linkJurnal.startsWith("http")
-                      ? "bg-green-500"
-                      : "bg-red-500"
-                  }`}
-                />
+                <div className="w-2 h-2 rounded-full" />
                 <span className="text-xs text-slate-600">
                   {linkJurnal.startsWith("http")
                     ? "Link valid"
@@ -299,6 +300,17 @@ export function JurnalAddEditModal({
                 )}
               </div>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="tanggalPublisher">Tanggal Publisher Jurnal</Label>
+            <Input
+              id="tanggalPublisher"
+              type="date"
+              value={tanggalPublisher}
+              onChange={(e) => setTanggalPublisher(e.target.value)}
+              placeholder="Pilih tanggal publisher"
+            />
           </div>
         </div>
 

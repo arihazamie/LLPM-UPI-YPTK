@@ -1,10 +1,26 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -13,547 +29,607 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
 import {
   Search,
-  MoreHorizontal,
   Eye,
+  FileText,
+  Clock,
   CheckCircle,
   XCircle,
-  Calendar,
-  Users,
-  FileText,
-  BookOpen,
-  Clock,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
-import { toast } from "sonner";
-import type { Penelitian } from "@/types/pkm-types";
-import { StatusPenelitian, KategoriPenelitian } from "@/types/pkm-types";
-import { Skeleton } from "@/components/ui/skeleton";
-import PenelitianReviewModal from "../modals/PenelitianReviewModal";
 
-const getStatusColor = (status: StatusPenelitian) => {
-  switch (status) {
-    case StatusPenelitian.REVIEW:
-      return "bg-yellow-100 text-yellow-800 border-yellow-200";
-    case StatusPenelitian.ACC_PROPOSAL:
-      return "bg-blue-100 text-blue-800 border-blue-200";
-    case StatusPenelitian.REVIEW_LAPORAN_KEMAJUAN_60:
-      return "bg-orange-100 text-orange-800 border-orange-200";
-    case StatusPenelitian.ACC_LAPORAN_KEMAJUAN_60:
-      return "bg-indigo-100 text-indigo-800 border-indigo-200";
-    case StatusPenelitian.REVIEW_LAPORAN_KEMAJUAN_100:
-      return "bg-purple-100 text-purple-800 border-purple-200";
-    case StatusPenelitian.ACC_LAPORAN_KEMAJUAN_100:
-      return "bg-cyan-100 text-cyan-800 border-cyan-200";
-    case StatusPenelitian.SELESAI:
-      return "bg-green-100 text-green-800 border-green-200";
-    case StatusPenelitian.DITOLAK:
-      return "bg-red-100 text-red-800 border-red-200";
-    default:
-      return "bg-gray-100 text-gray-800 border-gray-200";
-  }
-};
+interface Penelitian {
+  id: string;
+  judulPenelitian: string;
+  abstrak: string;
+  statusPenelitian: string;
+  totalBudget: number;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  };
+  dosenPenelitian: Array<{
+    dosen: {
+      id: string;
+      name: string;
+      email: string;
+    };
+  }>;
+}
 
-const getStatusLabel = (status: StatusPenelitian) => {
-  switch (status) {
-    case StatusPenelitian.REVIEW:
-      return "Review Proposal";
-    case StatusPenelitian.ACC_PROPOSAL:
-      return "Proposal Disetujui";
-    case StatusPenelitian.REVIEW_LAPORAN_KEMAJUAN_60:
-      return "Review Laporan 60%";
-    case StatusPenelitian.ACC_LAPORAN_KEMAJUAN_60:
-      return "Laporan 60% Disetujui";
-    case StatusPenelitian.REVIEW_LAPORAN_KEMAJUAN_100:
-      return "Review Laporan 100%";
-    case StatusPenelitian.ACC_LAPORAN_KEMAJUAN_100:
-      return "Laporan 100% Disetujui";
-    case StatusPenelitian.SELESAI:
-      return "Selesai";
-    case StatusPenelitian.DITOLAK:
-      return "Ditolak";
-    default:
-      return status;
-  }
-};
+interface ApiResponse {
+  message: string;
+  data: Penelitian[];
+}
 
-const getKategoriLabel = (kategori: KategoriPenelitian) => {
-  switch (kategori) {
-    case KategoriPenelitian.PENELITIAN_DOSEN_PEMULA:
-      return "Dosen Pemula";
-    case KategoriPenelitian.PENELITIAN_TERAPAN:
-      return "Terapan";
-    case KategoriPenelitian.PENELITIAN_PENGEMBANGAN:
-      return "Pengembangan";
-    case KategoriPenelitian.PENELITIAN_UNGGULAN_PERGURUAN_TINGGI:
-      return "Unggulan PT";
-    case KategoriPenelitian.PENELITIAN_GURU_BESAR_PERCEPATAN_PROFESOR:
-      return "Guru Besar";
-    case KategoriPenelitian.PENELITIAN_BEKERJASAMA_MITRA_NASIONAL:
-      return "Mitra Nasional";
-    case KategoriPenelitian.PENELITIAN_BEKERJASAMA_MITRA_INTERNASIONAL:
-      return "Mitra Internasional";
-    default:
-      return kategori;
-  }
+const statusConfig = {
+  DIAJUKAN: {
+    label: "Menunggu Review",
+    color: "bg-yellow-100 text-yellow-800",
+    icon: Clock,
+  },
+  REVIEW: {
+    label: "Sedang Direview",
+    color: "bg-blue-100 text-blue-800",
+    icon: AlertCircle,
+  },
+  ACC_PROPOSAL: {
+    label: "Proposal Disetujui",
+    color: "bg-green-100 text-green-800",
+    icon: CheckCircle,
+  },
+  DITOLAK: {
+    label: "Ditolak",
+    color: "bg-red-100 text-red-800",
+    icon: XCircle,
+  },
+  REVIEW_LAPORAN_KEMAJUAN_60: {
+    label: "Review Laporan 60%",
+    color: "bg-blue-100 text-blue-800",
+    icon: AlertCircle,
+  },
+  ACC_LAPORAN_KEMAJUAN_60: {
+    label: "Laporan 60% Disetujui",
+    color: "bg-green-100 text-green-800",
+    icon: CheckCircle,
+  },
+  REVIEW_LAPORAN_KEMAJUAN_100: {
+    label: "Review Laporan 100%",
+    color: "bg-blue-100 text-blue-800",
+    icon: AlertCircle,
+  },
+  ACC_LAPORAN_KEMAJUAN_100: {
+    label: "Laporan 100% Disetujui",
+    color: "bg-green-100 text-green-800",
+    icon: CheckCircle,
+  },
+  SELESAI: {
+    label: "Selesai",
+    color: "bg-gray-100 text-gray-800",
+    icon: CheckCircle,
+  },
 };
 
 export default function PenelitianReviewTab() {
-  console.log("PenelitianReviewTab rendered"); // Debug log
-  const [penelitian, setPenelitian] = useState<Penelitian[]>([]);
-  const [filteredData, setFilteredData] = useState<Penelitian[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [selectedPenelitian, setSelectedPenelitian] =
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedSubmission, setSelectedSubmission] =
     useState<Penelitian | null>(null);
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
-  const fetchPenelitian = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch("/api/admin/penelitian");
-      if (!response.ok) {
-        throw new Error("Failed to fetch penelitian");
-      }
-      const data = await response.json();
-      setPenelitian(data.data || []);
-    } catch (error) {
-      console.error("Error fetching penelitian:", error);
-      toast.error("Gagal mengambil data penelitian");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewDecision, setReviewDecision] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [penelitianData, setPenelitianData] = useState<Penelitian[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchPenelitian();
+    fetchPenelitianData();
   }, []);
 
-  // Filter and search logic
-  useEffect(() => {
-    let filtered = penelitian;
+  const fetchPenelitianData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/admin/penelitian");
 
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (p) =>
-          p.judulPenelitian.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          p.createdBy.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          p.dosenPenelitian.some((d) =>
-            d.namaDosen.toLowerCase().includes(searchTerm.toLowerCase())
-          )
-      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+
+      const result: ApiResponse = await response.json();
+      setPenelitianData(result.data);
+    } catch (error) {
+      console.error("Error fetching penelitian data:", error);
+      // You could add toast notification here
+    } finally {
+      setLoading(false);
     }
-
-    // Filter by status
-    if (statusFilter !== "all") {
-      filtered = filtered.filter((p) => p.statusPenelitian === statusFilter);
-    }
-
-    setFilteredData(filtered);
-    setCurrentPage(1);
-  }, [penelitian, searchTerm, statusFilter]);
-
-  // Pagination logic
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = filteredData.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
-
-  const handleReview = (penelitian: Penelitian) => {
-    setSelectedPenelitian(penelitian);
-    setIsReviewModalOpen(true);
   };
 
-  const handleReviewSubmit = async (reviewData: {
-    status: StatusPenelitian;
-    reviewNotes: string;
-    approvalNotes?: string;
-  }) => {
-    if (!selectedPenelitian?.id) {
-      toast.error("Penelitian tidak ditemukan");
-      return false;
-    }
+  const filteredSubmissions = penelitianData.filter((submission) => {
+    const matchesSearch =
+      submission.judulPenelitian
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      submission.createdBy.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" || submission.statusPenelitian === statusFilter;
+    // Note: Category filtering removed as it's not in the API data structure
+    // You can add category field to the database if needed
+
+    return matchesSearch && matchesStatus;
+  });
+
+  const handleReviewSubmit = async () => {
+    if (!selectedSubmission || !reviewDecision) return;
 
     try {
-      console.log("Submitting review data:", {
-        penelitianId: selectedPenelitian.id,
-        reviewData,
-      });
+      setSubmitting(true);
 
       const response = await fetch(
-        `/api/admin/penelitian/${selectedPenelitian.id}/review`,
+        `/api/admin/penelitian/${selectedSubmission.id}/review`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(reviewData),
+          body: JSON.stringify({
+            status: reviewDecision,
+            reviewNotes: reviewComment,
+            approvalNotes: reviewComment, // Using same comment for approval notes
+          }),
         }
       );
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("Review submission failed:", {
-          status: response.status,
-          statusText: response.statusText,
-          errorData,
-        });
-        throw new Error(
-          `Failed to submit review: ${response.status} ${response.statusText}`
-        );
+        throw new Error("Failed to submit review");
       }
 
-      toast.success("Review berhasil disimpan");
-      setIsReviewModalOpen(false);
-      setSelectedPenelitian(null);
-      fetchPenelitian(); // Refresh data
-      return true;
+      const result = await response.json();
+      console.log("Review submitted successfully:", result);
+
+      // Refresh data after successful review
+      await fetchPenelitianData();
+
+      handleModalClose();
     } catch (error) {
       console.error("Error submitting review:", error);
-      toast.error(
-        `Gagal menyimpan review: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-      return false;
+      // You could add toast notification here
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  if (isLoading) {
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedSubmission(null);
+    setReviewComment("");
+    setReviewDecision("");
+  };
+
+  const handleOpenModal = (submission: Penelitian) => {
+    setSelectedSubmission(submission);
+    setIsModalOpen(true);
+  };
+
+  if (loading) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-96 w-full" />
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center gap-2">
+          <Loader2 className="w-6 h-6 animate-spin" />
+          <span>Memuat data penelitian...</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="p-6 space-y-6">
+      <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 className="text-3xl font-bold text-gray-900">
             Review Penelitian
           </h1>
-          <p className="text-muted-foreground">
-            Kelola dan review proposal penelitian yang diajukan dosen
+          <p className="text-gray-600 mt-2">
+            Kelola dan review proposal penelitian yang masuk
           </p>
         </div>
-      </div>
 
-      {/* Filters and Search */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <Input
-            placeholder="Cari berdasarkan judul, pembuat, atau nama dosen..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="pl-10"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-yellow-100 rounded-lg">
+                  <Clock className="w-5 h-5 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Menunggu Review</p>
+                  <p className="text-2xl font-bold">
+                    {
+                      penelitianData.filter(
+                        (s) => s.statusPenelitian === "DIAJUKAN"
+                      ).length
+                    }
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <AlertCircle className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Sedang Direview</p>
+                  <p className="text-2xl font-bold">
+                    {
+                      penelitianData.filter(
+                        (s) => s.statusPenelitian === "REVIEW"
+                      ).length
+                    }
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Disetujui</p>
+                  <p className="text-2xl font-bold">
+                    {
+                      penelitianData.filter(
+                        (s) => s.statusPenelitian === "ACC_PROPOSAL"
+                      ).length
+                    }
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-100 rounded-lg">
+                  <XCircle className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Ditolak</p>
+                  <p className="text-2xl font-bold">
+                    {
+                      penelitianData.filter(
+                        (s) => s.statusPenelitian === "DITOLAK"
+                      ).length
+                    }
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-        <div className="flex gap-2">
-          <select
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm">
-            <option value="all">Semua Status</option>
-            <option value={StatusPenelitian.REVIEW}>Review Proposal</option>
-            <option value={StatusPenelitian.ACC_PROPOSAL}>
-              Proposal Disetujui
-            </option>
-            <option value={StatusPenelitian.REVIEW_LAPORAN_KEMAJUAN_60}>
-              Review Laporan 60%
-            </option>
-            <option value={StatusPenelitian.ACC_LAPORAN_KEMAJUAN_60}>
-              Laporan 60% Disetujui
-            </option>
-            <option value={StatusPenelitian.REVIEW_LAPORAN_KEMAJUAN_100}>
-              Review Laporan 100%
-            </option>
-            <option value={StatusPenelitian.ACC_LAPORAN_KEMAJUAN_100}>
-              Laporan 100% Disetujui
-            </option>
-            <option value={StatusPenelitian.SELESAI}>Selesai</option>
-            <option value={StatusPenelitian.DITOLAK}>Ditolak</option>
-          </select>
-        </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Clock className="h-8 w-8 text-yellow-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  Menunggu Review
-                </p>
-                <p className="text-2xl font-bold">
-                  {
-                    penelitian.filter(
-                      (p) =>
-                        p.statusPenelitian === StatusPenelitian.REVIEW ||
-                        p.statusPenelitian ===
-                          StatusPenelitian.REVIEW_LAPORAN_KEMAJUAN_60 ||
-                        p.statusPenelitian ===
-                          StatusPenelitian.REVIEW_LAPORAN_KEMAJUAN_100
-                    ).length
-                  }
-                </p>
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    placeholder="Cari berdasarkan judul atau nama peneliti..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <CheckCircle className="h-8 w-8 text-blue-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  Sedang Berjalan
-                </p>
-                <p className="text-2xl font-bold">
-                  {
-                    penelitian.filter((p) =>
-                      [
-                        StatusPenelitian.ACC_PROPOSAL,
-                        StatusPenelitian.ACC_LAPORAN_KEMAJUAN_60,
-                        StatusPenelitian.ACC_LAPORAN_KEMAJUAN_100,
-                      ].includes(p.statusPenelitian)
-                    ).length
-                  }
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <BookOpen className="h-8 w-8 text-green-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Selesai</p>
-                <p className="text-2xl font-bold">
-                  {
-                    penelitian.filter(
-                      (p) => p.statusPenelitian === StatusPenelitian.SELESAI
-                    ).length
-                  }
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <FileText className="h-8 w-8 text-gray-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total</p>
-                <p className="text-2xl font-bold">{penelitian.length}</p>
-              </div>
+              <Select
+                value={statusFilter}
+                onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full md:w-48">
+                  <SelectValue placeholder="Filter Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Status</SelectItem>
+                  <SelectItem value="DIAJUKAN">Menunggu Review</SelectItem>
+                  <SelectItem value="REVIEW">Sedang Direview</SelectItem>
+                  <SelectItem value="ACC_PROPOSAL">
+                    Proposal Disetujui
+                  </SelectItem>
+                  <SelectItem value="DITOLAK">Ditolak</SelectItem>
+                  <SelectItem value="SELESAI">Selesai</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Table */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" />
-            Data Penelitian ({filteredData.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Penelitian</TableHead>
-                  <TableHead>Kategori</TableHead>
-                  <TableHead>Tim Peneliti</TableHead>
-                  <TableHead>Tahun</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Tanggal Diajukan</TableHead>
-                  <TableHead>Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={7}
-                      className="text-center py-8">
-                      <div className="flex flex-col items-center gap-2">
-                        <FileText className="h-8 w-8 text-gray-400" />
-                        <p className="text-gray-500">
-                          {searchTerm || statusFilter !== "all"
-                            ? "Tidak ada hasil yang ditemukan"
-                            : "Belum ada data penelitian"}
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Judul Penelitian</TableHead>
+                <TableHead>Peneliti</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Tanggal Submit</TableHead>
+                <TableHead>Budget</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Aksi</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredSubmissions.map((submission) => {
+                const StatusIcon =
+                  statusConfig[
+                    submission.statusPenelitian as keyof typeof statusConfig
+                  ]?.icon || AlertCircle;
+
+                return (
+                  <TableRow key={submission.id}>
+                    <TableCell className="font-medium">
+                      <div>
+                        <p className="font-semibold text-gray-900">
+                          {submission.judulPenelitian}
+                        </p>
+                        <p className="text-sm text-gray-600 line-clamp-1">
+                          {submission.abstrak}
                         </p>
                       </div>
                     </TableCell>
-                  </TableRow>
-                ) : (
-                  paginatedData.map((p) => (
-                    <TableRow key={p.id}>
-                      <TableCell>
-                        <div className="max-w-xs">
-                          <div className="font-medium truncate">
-                            {p.judulPenelitian}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            oleh {p.createdBy.name}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="text-xs">
-                          {getKategoriLabel(p.kategoriPenelitian)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Users className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm">
-                            {p.dosenPenelitian.length} dosen
-                          </span>
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          Ketua:{" "}
-                          {p.dosenPenelitian.find(
-                            (d) => d.roleDosenPenelitian === "KETUA"
-                          )?.namaDosen || "N/A"}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm">{p.tahunKegiatan}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getStatusColor(p.statusPenelitian)}>
-                          {getStatusLabel(p.statusPenelitian)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          {new Date(p.createdAt).toLocaleDateString("id-ID")}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleReview(p)}>
-                              <Eye className="h-4 w-4 mr-2" />
-                              Review & Detail
-                            </DropdownMenuItem>
-                            {p.statusPenelitian === StatusPenelitian.REVIEW && (
-                              <>
-                                <DropdownMenuItem
-                                  onClick={() => handleReview(p)}
-                                  className="text-green-600">
-                                  <CheckCircle className="h-4 w-4 mr-2" />
-                                  Setujui
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => handleReview(p)}
-                                  className="text-red-600">
-                                  <XCircle className="h-4 w-4 mr-2" />
-                                  Tolak
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                    <TableCell>{submission.createdBy.name}</TableCell>
+                    <TableCell>{submission.createdBy.email}</TableCell>
+                    <TableCell>
+                      {new Date(submission.createdAt).toLocaleDateString(
+                        "id-ID"
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      Rp{" "}
+                      {submission.totalBudget?.toLocaleString("id-ID") || "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        className={
+                          statusConfig[
+                            submission.statusPenelitian as keyof typeof statusConfig
+                          ]?.color || "bg-gray-100 text-gray-800"
+                        }>
+                        <StatusIcon className="w-3 h-3 mr-1" />
+                        {statusConfig[
+                          submission.statusPenelitian as keyof typeof statusConfig
+                        ]?.label || submission.statusPenelitian}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Dialog
+                        open={isModalOpen}
+                        onOpenChange={setIsModalOpen}>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenModal(submission)}>
+                            <Eye className="w-4 h-4 mr-2" />
+                            Review
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-gray-50">
+                          <DialogHeader>
+                            <DialogTitle>
+                              Review Proposal Penelitian
+                            </DialogTitle>
+                            <DialogDescription>
+                              Review dan berikan keputusan untuk proposal
+                              penelitian ini
+                            </DialogDescription>
+                          </DialogHeader>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between px-2 py-4">
-              <div className="text-sm text-gray-500">
-                Menampilkan {startIndex + 1} -{" "}
-                {Math.min(startIndex + itemsPerPage, filteredData.length)} dari{" "}
-                {filteredData.length} penelitian
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
-                  disabled={currentPage === 1}>
-                  Sebelumnya
-                </Button>
-                <span className="text-sm">
-                  Halaman {currentPage} dari {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                  }
-                  disabled={currentPage === totalPages}>
-                  Selanjutnya
-                </Button>
-              </div>
+                          {selectedSubmission && (
+                            <div className="space-y-6">
+                              <div className="space-y-4">
+                                <h3 className="text-lg font-semibold">
+                                  Detail Proposal
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div>
+                                    <Label className="text-sm font-medium">
+                                      Judul Penelitian
+                                    </Label>
+                                    <p className="text-sm text-gray-700 mt-1">
+                                      {selectedSubmission.judulPenelitian}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-sm font-medium">
+                                      Peneliti Utama
+                                    </Label>
+                                    <p className="text-sm text-gray-700 mt-1">
+                                      {selectedSubmission.createdBy.name}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-sm font-medium">
+                                      Email
+                                    </Label>
+                                    <p className="text-sm text-gray-700 mt-1">
+                                      {selectedSubmission.createdBy.email}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-sm font-medium">
+                                      Status Saat Ini
+                                    </Label>
+                                    <p className="text-sm text-gray-700 mt-1">
+                                      {statusConfig[
+                                        selectedSubmission.statusPenelitian as keyof typeof statusConfig
+                                      ]?.label ||
+                                        selectedSubmission.statusPenelitian}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-sm font-medium">
+                                      Budget
+                                    </Label>
+                                    <p className="text-sm text-gray-700 mt-1">
+                                      Rp{" "}
+                                      {selectedSubmission.totalBudget?.toLocaleString(
+                                        "id-ID"
+                                      ) || "N/A"}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-sm font-medium">
+                                      Tanggal Submit
+                                    </Label>
+                                    <p className="text-sm text-gray-700 mt-1">
+                                      {new Date(
+                                        selectedSubmission.createdAt
+                                      ).toLocaleDateString("id-ID")}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <Label className="text-sm font-medium">
+                                    Abstrak
+                                  </Label>
+                                  <p className="text-sm text-gray-700 mt-1 leading-relaxed">
+                                    {selectedSubmission.abstrak}
+                                  </p>
+                                </div>
+
+                                {selectedSubmission.dosenPenelitian.length >
+                                  0 && (
+                                  <div>
+                                    <Label className="text-sm font-medium">
+                                      Tim Peneliti
+                                    </Label>
+                                    <div className="mt-1 space-y-1">
+                                      {selectedSubmission.dosenPenelitian.map(
+                                        (member, index) => (
+                                          <p
+                                            key={index}
+                                            className="text-sm text-gray-700">
+                                            {member.dosen.name} (
+                                            {member.dosen.email})
+                                          </p>
+                                        )
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="border-t pt-4 space-y-4">
+                                <h3 className="text-lg font-semibold">
+                                  Form Review
+                                </h3>
+                                <div>
+                                  <Label htmlFor="decision">
+                                    Keputusan Review
+                                  </Label>
+                                  <Select
+                                    value={reviewDecision}
+                                    onValueChange={setReviewDecision}>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Pilih keputusan review" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="ACC_PROPOSAL">
+                                        Setujui Proposal
+                                      </SelectItem>
+                                      <SelectItem value="DITOLAK">
+                                        Tolak
+                                      </SelectItem>
+                                      <SelectItem value="REVIEW">
+                                        Perlu Review Lebih Lanjut
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+
+                                <div>
+                                  <Label htmlFor="comment">
+                                    Catatan Review
+                                  </Label>
+                                  <Textarea
+                                    id="comment"
+                                    placeholder="Berikan catatan dan saran untuk proposal ini..."
+                                    value={reviewComment}
+                                    onChange={(e) =>
+                                      setReviewComment(e.target.value)
+                                    }
+                                    rows={6}
+                                  />
+                                </div>
+
+                                <div className="flex justify-end gap-2">
+                                  <Button
+                                    variant="outline"
+                                    onClick={handleModalClose}
+                                    disabled={submitting}>
+                                    Batal
+                                  </Button>
+                                  <Button
+                                    onClick={handleReviewSubmit}
+                                    disabled={
+                                      !reviewDecision ||
+                                      !reviewComment ||
+                                      submitting
+                                    }>
+                                    {submitting ? (
+                                      <>
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                        Mengirim...
+                                      </>
+                                    ) : (
+                                      "Kirim Review"
+                                    )}
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </DialogContent>
+                      </Dialog>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+
+          {filteredSubmissions.length === 0 && (
+            <div className="p-8 text-center">
+              <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Tidak ada proposal ditemukan
+              </h3>
+              <p className="text-gray-600">
+                Coba ubah filter pencarian atau tunggu proposal baru masuk.
+              </p>
             </div>
           )}
         </CardContent>
       </Card>
-
-      {/* Review Modal */}
-      <PenelitianReviewModal
-        isOpen={isReviewModalOpen}
-        onClose={() => {
-          setIsReviewModalOpen(false);
-          setSelectedPenelitian(null);
-        }}
-        onSubmit={handleReviewSubmit}
-        penelitian={selectedPenelitian}
-      />
     </div>
   );
 }

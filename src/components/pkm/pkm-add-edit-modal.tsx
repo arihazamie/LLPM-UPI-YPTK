@@ -33,6 +33,7 @@ export function PKMAddEditModal({
   const [judul, setJudul] = useState("");
   const [proposal, setProposal] = useState("");
   const [laporan, setLaporan] = useState("");
+  const [tanggalPelaksanaan, setTanggalPelaksanaan] = useState("");
   const [jurnal, setJurnal] = useState<Jurnal | undefined>(undefined);
   const [hki, setHki] = useState<HKI | undefined>(undefined);
   const [buku, setBuku] = useState<Buku | undefined>(undefined);
@@ -47,6 +48,11 @@ export function PKMAddEditModal({
       setJudul(pkm.judul || "");
       setProposal(pkm.proposal || "");
       setLaporan(pkm.laporan || "");
+      setTanggalPelaksanaan(
+        pkm.tanggalPelaksanaan
+          ? new Date(pkm.tanggalPelaksanaan).toISOString().split("T")[0]
+          : ""
+      );
       setJurnal(pkm.jurnal || undefined);
       setHki(pkm.hki || undefined);
       setBuku(pkm.buku || undefined);
@@ -55,6 +61,7 @@ export function PKMAddEditModal({
       setJudul("");
       setProposal("");
       setLaporan("");
+      setTanggalPelaksanaan("");
       setJurnal(undefined);
       setHki(undefined);
       setBuku(undefined);
@@ -68,11 +75,14 @@ export function PKMAddEditModal({
         judul,
         proposal,
         laporan,
+        tanggalPelaksanaan: tanggalPelaksanaan
+          ? new Date(tanggalPelaksanaan)
+          : undefined,
         jurnal,
         hki,
         buku,
       });
-      onClose(); // hanya close setelah onSave selesai
+      onClose();
     } finally {
       setIsSaving(false);
     }
@@ -157,13 +167,7 @@ export function PKMAddEditModal({
                 />
                 {proposal && (
                   <div className="flex items-center space-x-2">
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        proposal.startsWith("http")
-                          ? "bg-green-500"
-                          : "bg-red-500"
-                      }`}
-                    />
+                    <div className="w-2 h-2 rounded-full" />
                     <span className="text-xs text-slate-600">
                       {proposal.startsWith("http")
                         ? "Link valid"
@@ -198,13 +202,7 @@ export function PKMAddEditModal({
                 />
                 {laporan && (
                   <div className="flex items-center space-x-2">
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        laporan.startsWith("http")
-                          ? "bg-green-500"
-                          : "bg-red-500"
-                      }`}
-                    />
+                    <div className="w-2 h-2 rounded-full" />
                     <span className="text-xs text-slate-600">
                       {laporan.startsWith("http")
                         ? "Link valid"
@@ -223,6 +221,19 @@ export function PKMAddEditModal({
                   </div>
                 )}
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tanggalPelaksanaan">
+                Tanggal Pelaksanaan Kegiatan
+              </Label>
+              <Input
+                id="tanggalPelaksanaan"
+                type="date"
+                value={tanggalPelaksanaan}
+                onChange={(e) => setTanggalPelaksanaan(e.target.value)}
+                disabled={isSaving}
+              />
             </div>
 
             <div className="space-y-3">

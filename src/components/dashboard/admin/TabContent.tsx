@@ -11,6 +11,7 @@ import PKMTab from "./tabs/PKMTab"
 import ProfileTab from "./tabs/ProfileTab"
 import UsersTab from "./tabs/UsersTab"
 import PenelitianReviewTab from "./tabs/PenelitianReviewTab"
+import PengabdianTab from "./tabs/PengabdianTab"
 
 export default function TabContent() {
   const { activeTab } = useSidebar()
@@ -41,6 +42,14 @@ export default function TabContent() {
             <PenelitianReviewTab />
           </div>
         )
+      case "pengabdian-review":
+        return (
+          <div className="p-6">
+            <h1 className="text-2xl font-bold">Review Pengabdian</h1>
+            <p>Tab pengabdian berhasil dimuat!</p>
+            <PengabdianTab />
+          </div>
+        )
       case "users":
         return <UsersTab />
       case "profile":
@@ -50,5 +59,9 @@ export default function TabContent() {
     }
   }
 
-  return <div>{renderTabContent()}</div>
+  return (
+    <div className="flex-1 overflow-auto">
+      {renderTabContent()}
+    </div>
+  )
 }

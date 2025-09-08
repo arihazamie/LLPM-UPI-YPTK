@@ -33,10 +33,17 @@ model User {
   pkm         PKM[]
   penelitian  Penelitian[]
   dosenPenelitian dosenPenelitian[]
-  
+
+  pengabdian Pengabdian[]
+  dosenPengabdian dosenPengabdian[]
   // Relasi untuk review dan approval penelitian
   penelitianReviewed  Penelitian[] @relation("PenelitianReviewer")
   penelitianApproved  Penelitian[] @relation("PenelitianApprover")
+
+  // Relasi untuk review dan approval pengabdian
+  pengabdianReviewed  Pengabdian[] @relation("PengabdianReviewer")
+  pengabdianApproved  Pengabdian[] @relation("PengabdianApprover")
+
 }
 
 enum PostType {
@@ -176,6 +183,9 @@ model Jurnal {
 
   linkJurnal        String
   
+  // Tambahan field tanggal publisher
+  tanggalPublisher  DateTime? // Tanggal publisher jurnal
+  
   pkmId             String?
   pkm               PKM?     @relation(fields: [pkmId], references: [id])
 
@@ -194,6 +204,9 @@ model PKM {
   judul       String  // wajib
   proposal    String   // wajib
   laporan     String   // wajib
+  
+  // Tambahan field tanggal
+  tanggalPelaksanaan DateTime? // Tanggal pelaksanaan kegiatan
 
   // Relasi luaran (opsional)
   jurnal    Jurnal?
@@ -345,3 +358,109 @@ model dosenPenelitian {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 }
+
+
+
+// Schema pengabdian untuk ditambahkan ke prisma/schema.prisma
+
+// Enum untuk Status Pengabdian
+enum StatusPengabdian {
+  REVIEW
+  ACC_PROPOSAL
+  REVIEW_LAPORAN_KEMAJUAN_60
+  ACC_LAPORAN_KEMAJUAN_60 
+  REVIEW_LAPORAN_KEMAJUAN_100
+  ACC_LAPORAN_KEMAJUAN_100 
+  SELESAI 
+  DITOLAK
+}
+
+// Enum untuk Luaran Pengabdian (sama dengan penelitian)
+enum LuaranPengabdian {
+  SEMINAR_INTERNASIONAL_SCOPUS_ATLANTIS_WOS
+  ARTIKEL_JURNAL_NASIONAL_SINTA_5
+  ARTIKEL_JURNAL_NASIONAL_SINTA_4
+  ARTIKEL_JURNAL_NASIONAL_SINTA_3
+  ARTIKEL_JURNAL_NASIONAL_SINTA_2
+  PUBLIKASI_JURNAL_INTERNATIONAL_BEREPUTASI_SCOPUS_WOS
+  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q4_WOS
+  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q3_WOS
+  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q2_WOS
+  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q1_WOS
+  HKI_PATEN
+  BUKU_ISBN
+  PROTOTYPE
+}
+
+// Enum untuk Kategori Pengabdian
+enum KategoriPengabdian {
+  PENGABDIAN_DOSEN_PEMULA
+  PENGABDIAN_TERAPAN
+  PENGABDIAN_PENGEMBANGAN
+  PENGABDIAN_UNGGULAN_PERGURUAN_TINGGI
+  PENGABDIAN_GURU_BESAR_PERCEPATAN_PROFESOR
+  PENGABDIAN_BEKERJASAMA_MITRA_NASIONAL
+  PENGABDIAN_BEKERJASAMA_MITRA_INTERNASIONAL
+}
+
+// Model Pengabdian
+model Pengabdian {
+  id                  String   @id @default(cuid())
+
+  judulPengabdian     String  // wajib
+  kategoriPengabdian  KategoriPengabdian  // wajib - menggunakan enum
+  lamaKegiatan        String  // wajib
+  tahunKegiatan       Int  // wajib
+  anggaran            Int?  // wajib
+  sumberAnggaran      String?  // wajib
+  luaran              LuaranPengabdian[] // wajib - menggunakan enum array
+
+  statusPengabdian    StatusPengabdian @default(REVIEW)
+  
+  // Field untuk review dan approval oleh admin
+  reviewedById        String?  // ID admin yang melakukan review
+  reviewedBy          User?    @relation("PengabdianReviewer", fields: [reviewedById], references: [id])
+  reviewedAt          DateTime? // Tanggal review
+  reviewNotes         String?  // Catatan review dari admin
+  
+  approvedById        String?  // ID admin yang melakukan approval
+  approvedBy          User?    @relation("PengabdianApprover", fields: [approvedById], references: [id])
+  approvedAt          DateTime? // Tanggal approval
+  approvalNotes       String?  // Catatan approval dari admin
+ 
+  dosenPengabdian     dosenPengabdian[]
+
+  linkProposal            String //wajib
+  linkLaporanKemajuan     String?  //diisi setelah proposal disetujui
+  linkLaporanAkhir        String?  //diisi setelah pengabdian selesai
+
+  createdById       String
+  createdBy         User     @relation(fields: [createdById], references: [id])
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+enum RoleDosenPengabdian {
+  KETUA
+  ANGGOTA
+}
+
+model dosenPengabdian {
+  id                    String   @id
+
+  dosenId               String
+  dosen                 User     @relation(fields: [dosenId], references: [id])
+
+  namaDosen             String  // wajib
+  NIDN                  String  // wajib
+  roleDosenPengabdian   RoleDosenPengabdian  // wajib
+  programStudiDosenPengabdian ProgramStudiDosenPenelitian  // wajib - reuse enum yang ada
+
+  pengabdianId          String
+  pengabdian            Pengabdian @relation(fields: [pengabdianId], references: [id])
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+

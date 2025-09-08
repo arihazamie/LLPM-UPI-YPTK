@@ -1,3 +1,4 @@
+// api/admin/users/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prismaEdge } from "@/lib/prisma-edge";
 import * as bcrypt from "bcryptjs";
@@ -21,13 +22,15 @@ export async function GET() {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "ADMIN") {
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     const users = await prismaEdge.user.findMany({
+      where: {
+        role: {
+          in: ["DOSEN"],
+        },
+      },
       select: {
         id: true,
         name: true,
@@ -57,10 +60,7 @@ export async function POST(request: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "ADMIN") {
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -188,4 +188,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

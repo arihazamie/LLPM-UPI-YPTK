@@ -44,19 +44,12 @@ export function PKMGenericDataTable({
   };
 
   // Cek apakah ada data jurnal, HKI, atau buku di seluruh dataset
-  // Always show these columns so users can see the status
-  const hasJurnal = true; // Always show jurnal column
-  const hasHKI = true; // Always show HKI column
-  const hasBuku = true; // Always show buku column
+  const hasJurnal = data.some((pkm) => pkm.jurnal);
+  const hasHKI = data.some((pkm) => pkm.hki);
+  const hasBuku = data.some((pkm) => pkm.buku);
 
   const columns: Column<PKM>[] = [
-    {
-      key: "id",
-      header: "ID",
-      sortable: true,
-      render: (pkm: PKM) => `#${pkm.id}`,
-      width: "80px",
-    },
+    // Menghapus kolom ID
     {
       key: "judul",
       header: "Judul",
@@ -234,7 +227,7 @@ export function PKMGenericDataTable({
     <DataTable
       data={data}
       columns={columns}
-      searchFields={["id", "judul", "proposal", "laporan"]}
+      searchFields={["judul", "proposal", "laporan"]}
       searchPlaceholder="Cari PKM..."
       onEdit={onEdit}
       onDelete={onDelete}

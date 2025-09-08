@@ -10,19 +10,23 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { NextResponse } from "next/server";
 
 interface PKMExcelExportButtonProps {
   disabled?: boolean;
   className?: string;
 }
 
-export function PKMExcelButton({ disabled = false, className = "bg-black drop-shadow-2xl transition-all duration-200" }: PKMExcelExportButtonProps) {
+export function PKMExcelButton({
+  disabled = false,
+  className = "bg-black drop-shadow-2xl transition-all duration-200",
+}: PKMExcelExportButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async () => {
     try {
       setIsExporting(true);
-      
+
       // Show loading toast
       const loadingToast = toast.loading("Menyiapkan file Excel...", {
         description: "Mengumpulkan data PKM...",
@@ -36,8 +40,14 @@ export function PKMExcelButton({ disabled = false, className = "bg-black drop-sh
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Gagal mengekspor data");
+        // Cek apakah response adalah JSON atau file
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Gagal mengekspor data");
+        } else {
+          throw new Error("Gagal mengekspor data");
+        }
       }
 
       // Get filename from response headers
@@ -62,10 +72,19 @@ export function PKMExcelButton({ disabled = false, className = "bg-black drop-sh
         description: `File ${filename} telah diunduh`,
       });
     } catch (error) {
-      console.error("Export error:", error);
-      toast.error("Gagal mengekspor data", {
-        description: error instanceof Error ? error.message : "Terjadi kesalahan saat mengekspor",
-      });
+      console.error("Error exporting PKM data:", error);
+      return new NextResponse(
+        JSON.stringify({
+          success: false,
+          message: "Gagal mengekspor data PKM",
+        }),
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
     } finally {
       setIsExporting(false);
     }
@@ -75,8 +94,7 @@ export function PKMExcelButton({ disabled = false, className = "bg-black drop-sh
     <Button
       onClick={handleExport}
       disabled={disabled || isExporting}
-      className={`bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 border-0 ${className}`}
-    >
+      className={`bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 border-0 ${className}`}>
       {isExporting ? (
         <>
           <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -96,9 +114,7 @@ export function PKMExcelButton({ disabled = false, className = "bg-black drop-sh
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="inline-block">
-              {buttonContent}
-            </div>
+            <div className="inline-block">{buttonContent}</div>
           </TooltipTrigger>
           <TooltipContent>
             <p>Tidak ada data untuk diekspor</p>
@@ -111,13 +127,11 @@ export function PKMExcelButton({ disabled = false, className = "bg-black drop-sh
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild>
-          {buttonContent}
-        </TooltipTrigger>
+        <TooltipTrigger asChild>{buttonContent}</TooltipTrigger>
         <TooltipContent>
           <p>Ekspor data PKM ke file Excel</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
-} 
+}

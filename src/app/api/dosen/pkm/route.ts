@@ -20,6 +20,7 @@ const JurnalInputSchema = z
     kategori: z.nativeEnum(KategoriJurnal),
     level: z.string().optional(),
     linkJurnal: z.string().min(1),
+    tanggalPublisher: z.coerce.date().optional(),
   })
   .strict();
 
@@ -51,6 +52,7 @@ const PkmCreateSchema = z
     judul: z.string().min(1),
     proposal: z.string().min(1),
     laporan: z.string().min(1),
+    tanggalPelaksanaan: z.coerce.date().optional(),
     jurnal: JurnalInputSchema.optional(),
     hki: HkiInputSchema.optional(),
     buku: BukuInputSchema.optional(),
@@ -65,7 +67,10 @@ export const POST = withRoleAuth(
   async (req, user) => {
     try {
       const json = await req.json();
+      console.log("Received JSON data:", JSON.stringify(json, null, 2));
+
       const body: PkmCreateBody = PkmCreateSchema.parse(json);
+      console.log("Parsed body:", JSON.stringify(body, null, 2));
 
       // Generate custom IDs
       const pkmId = await generatePkmId(prisma);
@@ -81,6 +86,7 @@ export const POST = withRoleAuth(
           judul: body.judul,
           proposal: body.proposal,
           laporan: body.laporan,
+          tanggalPelaksanaan: body.tanggalPelaksanaan,
           createdById: user.id,
           ...(body.jurnal && {
             jurnal: {
@@ -89,6 +95,7 @@ export const POST = withRoleAuth(
                 ...body.jurnal,
                 createdById: user.id,
                 linkJurnal: body.jurnal.linkJurnal,
+                tanggalPublisher: body.jurnal.tanggalPublisher,
               },
             },
           }),

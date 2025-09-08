@@ -15,16 +15,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 import { ExternalLink, Save } from "lucide-react";
-import type { Penelitian } from "@/types/pkm-types";
-import {
-  StatusPenelitian,
-  KategoriPenelitian,
-} from "@/types/pkm-types";
+import type { Pengabdian } from "@/types/pkm-types";
+import { StatusPengabdian, KategoriPengabdian } from "@/types/pkm-types";
 
-interface PenelitianDetailModalProps {
+interface PengabdianDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  penelitian?: Penelitian | null;
+  pengabdian?: Pengabdian | null;
   modalType: "60%" | "100%";
   onUpdate?: (data: {
     linkLaporanKemajuan?: string;
@@ -32,57 +29,61 @@ interface PenelitianDetailModalProps {
   }) => void;
 }
 
-const getKategoriLabel = (kategori: KategoriPenelitian) => {
+const getKategoriLabel = (kategori: KategoriPengabdian) => {
   switch (kategori) {
-    case KategoriPenelitian.PENELITIAN_DOSEN_PEMULA:
-      return "Penelitian Dosen Pemula";
-    case KategoriPenelitian.PENELITIAN_TERAPAN:
-      return "Penelitian Terapan";
-    case KategoriPenelitian.PENELITIAN_PENGEMBANGAN:
-      return "Penelitian Pengembangan";
-    case KategoriPenelitian.PENELITIAN_UNGGULAN_PERGURUAN_TINGGI:
-      return "Penelitian Unggulan Perguruan Tinggi";
-    case KategoriPenelitian.PENELITIAN_GURU_BESAR_PERCEPATAN_PROFESOR:
-      return "Penelitian Guru Besar Percepatan Profesor";
-    case KategoriPenelitian.PENELITIAN_BEKERJASAMA_MITRA_NASIONAL:
-      return "Penelitian Bekerjasama Mitra Nasional";
-    case KategoriPenelitian.PENELITIAN_BEKERJASAMA_MITRA_INTERNASIONAL:
-      return "Penelitian Bekerjasama Mitra Internasional";
+    case KategoriPengabdian.PENGABDIAN_MASYARAKAT:
+      return "Pengabdian Masyarakat";
+    case KategoriPengabdian.PENGABDIAN_DOSEN_PEMULA:
+      return "Pengabdian Dosen Pemula";
+    case KategoriPengabdian.PENGABDIAN_TERAPAN:
+      return "Pengabdian Terapan";
+    case KategoriPengabdian.PENGABDIAN_ILMU:
+      return "Pengabdian Keilmuan";
+    case KategoriPengabdian.PENGABDIAN_PENGEMBANGAN:
+      return "Pengabdian Pengembangan";
+    case KategoriPengabdian.PENGABDIAN_UNGGULAN_PERGURUAN_TINGGI:
+      return "Pengabdian Unggulan Perguruan Tinggi";
+    case KategoriPengabdian.PENGABDIAN_GURU_BESAR_PERCEPATAN_PROFESOR:
+      return "Pengabdian Guru Besar Percepatan Profesor";
+    case KategoriPengabdian.PENGABDIAN_BEKERJASAMA_MITRA_NASIONAL:
+      return "Pengabdian Bekerjasama Mitra Nasional";
+    case KategoriPengabdian.PENGABDIAN_BEKERJASAMA_MITRA_INTERNASIONAL:
+      return "Pengabdian Bekerjasama Mitra Internasional";
     default:
       return kategori;
   }
 };
 
-const getStatusLabel = (status: StatusPenelitian) => {
+const getStatusLabel = (status: StatusPengabdian) => {
   switch (status) {
-    case StatusPenelitian.REVIEW:
+    case StatusPengabdian.REVIEW:
       return "Review Proposal";
-    case StatusPenelitian.ACC_PROPOSAL:
+    case StatusPengabdian.ACC_PROPOSAL:
       return "Proposal Disetujui";
-    case StatusPenelitian.REVIEW_LAPORAN_KEMAJUAN_60:
+    case StatusPengabdian.REVIEW_LAPORAN_KEMAJUAN_60:
       return "Review Laporan 60%";
-    case StatusPenelitian.ACC_LAPORAN_KEMAJUAN_60:
+    case StatusPengabdian.ACC_LAPORAN_KEMAJUAN_60:
       return "Laporan 60% Disetujui";
-    case StatusPenelitian.REVIEW_LAPORAN_KEMAJUAN_100:
+    case StatusPengabdian.REVIEW_LAPORAN_KEMAJUAN_100:
       return "Review Laporan 100%";
-    case StatusPenelitian.ACC_LAPORAN_KEMAJUAN_100:
+    case StatusPengabdian.ACC_LAPORAN_KEMAJUAN_100:
       return "Laporan 100% Disetujui";
-    case StatusPenelitian.SELESAI:
+    case StatusPengabdian.SELESAI:
       return "Selesai";
-    case StatusPenelitian.DITOLAK:
+    case StatusPengabdian.DITOLAK:
       return "Ditolak";
     default:
       return status;
   }
 };
 
-export default function PenelitianDetailModal({
+export default function PengabdianDetailModal({
   isOpen,
   onClose,
-  penelitian,
+  pengabdian,
   modalType,
   onUpdate,
-}: PenelitianDetailModalProps) {
+}: PengabdianDetailModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form states untuk modal 60%
@@ -93,24 +94,24 @@ export default function PenelitianDetailModal({
   const [linkLaporanAkhir, setLinkLaporanAkhir] = useState("");
   const [linkLuaran, setLinkLuaran] = useState("");
 
-  if (!penelitian) return null;
+  if (!pengabdian) return null;
 
   const getRelevantLink = () => {
     if (modalType === "60%") {
-      return penelitian.linkLaporanKemajuan;
+      return pengabdian.linkLaporanKemajuan;
     } else {
-      return penelitian.linkLaporanAkhir;
+      return pengabdian.linkLaporanAkhir;
     }
   };
 
   // Check if user can input based on current status
   const canInput60 = () => {
-    return penelitian.statusPenelitian === StatusPenelitian.ACC_PROPOSAL;
+    return pengabdian.statusPengabdian === StatusPengabdian.ACC_PROPOSAL;
   };
 
   const canInput100 = () => {
     return (
-      penelitian.statusPenelitian === StatusPenelitian.ACC_LAPORAN_KEMAJUAN_60
+      pengabdian.statusPengabdian === StatusPengabdian.ACC_LAPORAN_KEMAJUAN_60
     );
   };
 
@@ -129,13 +130,13 @@ export default function PenelitianDetailModal({
         modalType === "60%"
           ? {
               linkLaporanKemajuan:
-                linkLaporanKemajuan || penelitian.linkLaporanKemajuan,
+                linkLaporanKemajuan || pengabdian.linkLaporanKemajuan,
             }
           : {
-              linkLaporanAkhir: linkLaporanAkhir || penelitian.linkLaporanAkhir,
+              linkLaporanAkhir: linkLaporanAkhir || pengabdian.linkLaporanAkhir,
             };
 
-      const response = await fetch(`/api/dosen/penelitian/${penelitian.id}`, {
+      const response = await fetch(`/api/admin/pengabdian/${pengabdian.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -145,7 +146,7 @@ export default function PenelitianDetailModal({
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update penelitian");
+        throw new Error(errorData.message || "Failed to update pengabdian");
       }
 
       toast.success(
@@ -167,7 +168,7 @@ export default function PenelitianDetailModal({
         setLinkLuaran("");
       }
     } catch (error) {
-      console.error("Error updating penelitian:", error);
+      console.error("Error updating pengabdian:", error);
       toast.error("Gagal menyimpan data");
     } finally {
       setIsSubmitting(false);
@@ -181,46 +182,46 @@ export default function PenelitianDetailModal({
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">
-            Detail Penelitian - {modalType}
+            Detail Pengabdian - {modalType}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Informasi Penelitian */}
+          {/* Informasi Pengabdian */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label className="text-sm font-medium text-gray-700">
-                Judul Penelitian
+                Judul Pengabdian
               </Label>
               <p className="text-sm text-gray-900 mt-1">
-                {penelitian.judulPenelitian}
+                {pengabdian.judulPengabdian}
               </p>
             </div>
 
             <div>
               <Label className="text-sm font-medium text-gray-700">
-                Kategori Penelitian
+                Kategori Pengabdian
               </Label>
               <p className="text-sm text-gray-900 mt-1">
-                {getKategoriLabel(penelitian.kategoriPenelitian)}
+                {getKategoriLabel(pengabdian.kategoriPengabdian)}
               </p>
             </div>
 
             <div>
               <Label className="text-sm font-medium text-gray-700">
-                Status Penelitian
+                Status Pengabdian
               </Label>
               <div className="mt-1">
                 <Badge
                   variant="outline"
                   className={
-                    penelitian.statusPenelitian === StatusPenelitian.SELESAI
+                    pengabdian.statusPengabdian === StatusPengabdian.SELESAI
                       ? "bg-green-100 text-green-800 border-green-200"
-                      : penelitian.statusPenelitian === StatusPenelitian.DITOLAK
+                      : pengabdian.statusPengabdian === StatusPengabdian.DITOLAK
                       ? "bg-red-100 text-red-800 border-red-200"
                       : "bg-blue-100 text-blue-800 border-blue-200"
                   }>
-                  {getStatusLabel(penelitian.statusPenelitian)}
+                  {getStatusLabel(pengabdian.statusPengabdian)}
                 </Badge>
               </div>
             </div>
@@ -230,7 +231,7 @@ export default function PenelitianDetailModal({
                 Tahun Kegiatan
               </Label>
               <p className="text-sm text-gray-900 mt-1">
-                {penelitian.tahunKegiatan}
+                {pengabdian.tahunKegiatan}
               </p>
             </div>
           </div>
@@ -291,7 +292,7 @@ export default function PenelitianDetailModal({
                 </Label>
                 <Textarea
                   id="statusLuaran"
-                  placeholder="Deskripsikan status luaran penelitian (opsional)"
+                  placeholder="Deskripsikan status luaran pengabdian (opsional)"
                   value={statusLuaran}
                   onChange={(e) => setStatusLuaran(e.target.value)}
                   disabled={!isInputEnabled() || isSubmitting}
@@ -311,7 +312,7 @@ export default function PenelitianDetailModal({
                 <Input
                   id="linkLuaran"
                   type="url"
-                  placeholder="Masukkan link luaran penelitian"
+                  placeholder="Masukkan link luaran pengabdian"
                   value={linkLuaran}
                   onChange={(e) => setLinkLuaran(e.target.value)}
                   disabled={!isInputEnabled() || isSubmitting}
@@ -321,13 +322,13 @@ export default function PenelitianDetailModal({
             )}
           </div>
 
-          {/* Tim Penelitian */}
+          {/* Tim Pengabdian */}
           <div>
             <Label className="text-sm font-medium text-gray-700">
-              Tim Penelitian
+              Tim Pengabdian
             </Label>
             <div className="mt-2 space-y-2">
-              {penelitian.dosenPenelitian.map((dosen, index) => (
+              {pengabdian.dosenPengabdian.map((dosen, index) => (
                 <div
                   key={index}
                   className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -335,8 +336,8 @@ export default function PenelitianDetailModal({
                     <p className="font-medium text-sm">{dosen.namaDosen}</p>
                     <p className="text-xs text-gray-600">NIDN: {dosen.NIDN}</p>
                     <p className="text-xs text-gray-600">
-                      {dosen.roleDosenPenelitian} -{" "}
-                      {dosen.programStudiDosenPenelitian}
+                      {dosen.roleDosenPengabdian} -{" "}
+                      {dosen.programStudiDosenPengabdian}
                     </p>
                   </div>
                 </div>
@@ -344,13 +345,13 @@ export default function PenelitianDetailModal({
             </div>
           </div>
 
-          {/* Luaran Penelitian */}
+          {/* Luaran Pengabdian */}
           <div>
             <Label className="text-sm font-medium text-gray-700">
               Luaran yang Diharapkan
             </Label>
             <div className="mt-2 flex flex-wrap gap-2">
-              {penelitian.luaran.map((luaran, index) => (
+              {pengabdian.luaran.map((luaran, index) => (
                 <Badge
                   key={index}
                   variant="secondary">

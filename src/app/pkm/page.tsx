@@ -70,6 +70,7 @@ export default function PKMPage() {
         judul: pkmData.judul || "",
         proposal: pkmData.proposal || "",
         laporan: pkmData.laporan || "",
+        tanggalPelaksanaan: pkmData.tanggalPelaksanaan ? new Date(pkmData.tanggalPelaksanaan).toISOString().split('T')[0] : undefined,
         ...(pkmData.jurnal && {
           jurnal: {
             judul: pkmData.jurnal.judul,
@@ -78,6 +79,8 @@ export default function PKMPage() {
             publisher: pkmData.jurnal.publisher,
             kategori: pkmData.jurnal.kategori,
             level: pkmData.jurnal.level,
+            linkJurnal: pkmData.jurnal.linkJurnal,
+            tanggalPublisher: pkmData.jurnal.tanggalPublisher,
           },
         }),
         ...(pkmData.hki && {
@@ -144,6 +147,7 @@ export default function PKMPage() {
         judul: pkmData.judul || "",
         proposal: pkmData.proposal || "",
         laporan: pkmData.laporan || "",
+        tanggalPelaksanaan: pkmData.tanggalPelaksanaan ? new Date(pkmData.tanggalPelaksanaan).toISOString().split('T')[0] : undefined,
         ...(pkmData.jurnal && {
           jurnal: {
             judul: pkmData.jurnal.judul,
@@ -152,6 +156,8 @@ export default function PKMPage() {
             publisher: pkmData.jurnal.publisher,
             kategori: pkmData.jurnal.kategori,
             level: pkmData.jurnal.level,
+            linkJurnal: pkmData.jurnal.linkJurnal,
+            tanggalPublisher: pkmData.jurnal.tanggalPublisher,
           },
         }),
         ...(pkmData.hki && {

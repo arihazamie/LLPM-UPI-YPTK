@@ -1,19 +1,19 @@
-// api/admin/penelitian/[id]/review/route.ts
+// api/admin/pengabdian/[id]/review/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { StatusPenelitian } from "@prisma/client";
+import { StatusPengabdian } from "@prisma/client";
 
 // Validation schema
 const ReviewSchema = z.object({
-  status: z.nativeEnum(StatusPenelitian),
+  status: z.nativeEnum(StatusPengabdian),
   reviewNotes: z.string().min(1, "Catatan review wajib diisi"),
   approvalNotes: z.string().optional(),
 });
 
-// PUT - Admin review penelitian
+// PUT - Admin review pengabdian
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -57,13 +57,13 @@ export async function PUT(
 
     const { status, reviewNotes, approvalNotes } = validation.data;
 
-    // Check if penelitian exists
-    const existingPenelitian = await prisma.penelitian.findUnique({
+    // Check if pengabdian exists
+    const existingPengabdian = await prisma.pengabdian.findUnique({
       where: { id },
       select: {
         id: true,
-        statusPenelitian: true,
-        judulPenelitian: true,
+        statusPengabdian: true,
+        judulPengabdian: true,
         createdBy: {
           select: {
             name: true,
@@ -73,16 +73,16 @@ export async function PUT(
       },
     });
 
-    if (!existingPenelitian) {
+    if (!existingPengabdian) {
       return NextResponse.json(
-        { message: "Penelitian tidak ditemukan" },
+        { message: "Pengabdian tidak ditemukan" },
         { status: 404 }
       );
     }
 
     // Prepare update data based on status
     let updateData: {
-      statusPenelitian: StatusPenelitian;
+      statusPengabdian: StatusPengabdian;
       updatedAt: Date;
       reviewedById?: string;
       reviewedAt?: Date;
@@ -91,11 +91,11 @@ export async function PUT(
       approvedAt?: Date;
       approvalNotes?: string | null;
     } = {
-      statusPenelitian: status,
+      statusPengabdian: status,
       updatedAt: new Date(),
     };
 
-    // Logic untuk review berdasarkan alur penelitian
+    // Logic untuk review berdasarkan alur pengabdian
     if (status === "ACC_PROPOSAL") {
       // Admin menyetujui proposal - dari REVIEW ke ACC_PROPOSAL
       updateData = {
@@ -130,7 +130,7 @@ export async function PUT(
         approvalNotes: approvalNotes || null,
       };
     } else if (status === "SELESAI") {
-      // Admin menyelesaikan penelitian - dari ACC_LAPORAN_KEMAJUAN_100 ke SELESAI
+      // Admin menyelesaikan pengabdian - dari ACC_LAPORAN_KEMAJUAN_100 ke SELESAI
       updateData = {
         ...updateData,
         reviewedById: session.user.id,
@@ -158,7 +158,7 @@ export async function PUT(
       };
     }
 
-    const updatedPenelitian = await prisma.penelitian.update({
+    const updatedPengabdian = await prisma.pengabdian.update({
       where: { id },
       data: updateData,
       include: {
@@ -170,7 +170,7 @@ export async function PUT(
             role: true,
           },
         },
-        dosenPenelitian: {
+        dosenPengabdian: {
           include: {
             dosen: {
               select: {
@@ -200,15 +200,15 @@ export async function PUT(
 
     // Log the review action
     console.log(
-      `Admin ${session.user.name} reviewed penelitian ${existingPenelitian.judulPenelitian} - Status: ${status}`
+      `Admin ${session.user.name} reviewed pengabdian ${existingPengabdian.judulPengabdian} - Status: ${status}`
     );
 
     return NextResponse.json({
-      message: "Review penelitian berhasil disimpan",
-      data: updatedPenelitian,
+      message: "Review pengabdian berhasil disimpan",
+      data: updatedPengabdian,
     });
   } catch (error) {
-    console.error("Error reviewing penelitian:", error);
+    console.error("Error reviewing pengabdian:", error);
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }

@@ -1,10 +1,10 @@
-// api/admin/penelitian/route.ts
+// api/admin/pengabdian/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/prisma";
 
-// GET - Fetch all penelitian for admin review
+// GET - Fetch all pengabdian for admin review
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -26,7 +26,7 @@ export async function GET() {
       );
     }
 
-    const penelitian = await prisma.penelitian.findMany({
+    const pengabdian = await prisma.pengabdian.findMany({
       include: {
         createdBy: {
           select: {
@@ -36,7 +36,7 @@ export async function GET() {
             role: true,
           },
         },
-        dosenPenelitian: {
+        dosenPengabdian: {
           include: {
             dosen: {
               select: {
@@ -50,7 +50,7 @@ export async function GET() {
       },
       orderBy: [
         {
-          statusPenelitian: "asc", // DIAJUKAN first
+          statusPengabdian: "asc",
         },
         {
           createdAt: "desc",
@@ -58,12 +58,16 @@ export async function GET() {
       ],
     });
 
+    console.log(
+      `GET /api/admin/pengabdian - Found ${pengabdian.length} pengabdian for admin review`
+    );
+
     return NextResponse.json({
-      message: "Data penelitian berhasil diambil",
-      data: penelitian,
+      message: "Pengabdian berhasil diambil",
+      data: pengabdian,
     });
   } catch (error) {
-    console.error("Error fetching penelitian for admin:", error);
+    console.error("Error fetching pengabdian:", error);
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }
