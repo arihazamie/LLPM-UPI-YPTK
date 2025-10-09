@@ -12,8 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { X, Plus, ExternalLink } from "lucide-react";
-import type { PKM, Jurnal, HKI, Buku } from "@/types/pkm-types";
-import { JurnalAddEditModal } from "./jurnal-add-edit-modal";
+import type { PKM, HKI, Buku, PkmArtikel as Artikel } from "@/types/pkm-types";
+import { ArtikelAddEditModal } from "./artikel-add-edit-modal";
 import { HkiAddEditModal } from "./hki-add-edit-modal";
 import { BukuAddEditModal } from "./buku-add-edit-modal";
 
@@ -34,12 +34,12 @@ export function PKMAddEditModal({
   const [proposal, setProposal] = useState("");
   const [laporan, setLaporan] = useState("");
   const [tanggalPelaksanaan, setTanggalPelaksanaan] = useState("");
-  const [jurnal, setJurnal] = useState<Jurnal | undefined>(undefined);
-  const [hki, setHki] = useState<HKI | undefined>(undefined);
-  const [buku, setBuku] = useState<Buku | undefined>(undefined);
+  const [artikel, setArtikel] = useState<Artikel[]>([]);
+  const [hki, setHki] = useState<HKI[]>([]);
+  const [buku, setBuku] = useState<Buku[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
-  const [showJurnalModal, setShowJurnalModal] = useState(false);
+  const [showArtikelModal, setShowArtikelModal] = useState(false);
   const [showHkiModal, setShowHkiModal] = useState(false);
   const [showBukuModal, setShowBukuModal] = useState(false);
 
@@ -53,18 +53,18 @@ export function PKMAddEditModal({
           ? new Date(pkm.tanggalPelaksanaan).toISOString().split("T")[0]
           : ""
       );
-      setJurnal(pkm.jurnal || undefined);
-      setHki(pkm.hki || undefined);
-      setBuku(pkm.buku || undefined);
+      setArtikel(pkm.artikel || []);
+      setHki(pkm.hki || []);
+      setBuku(pkm.buku || []);
     } else {
       // Reset form when adding new PKM
       setJudul("");
       setProposal("");
       setLaporan("");
       setTanggalPelaksanaan("");
-      setJurnal(undefined);
-      setHki(undefined);
-      setBuku(undefined);
+      setArtikel([]);
+      setHki([]);
+      setBuku([]);
     }
   }, [pkm, isOpen]);
 
@@ -78,7 +78,7 @@ export function PKMAddEditModal({
         tanggalPelaksanaan: tanggalPelaksanaan
           ? new Date(tanggalPelaksanaan)
           : undefined,
-        jurnal,
+        artikel,
         hki,
         buku,
       });
@@ -88,14 +88,14 @@ export function PKMAddEditModal({
     }
   };
 
-  const handleAddJurnal = (newJurnal: Partial<Jurnal>) => {
-    const jurnalWithId = {
-      ...newJurnal,
+  const handleAddArtikel = (newArtikel: Partial<Artikel>) => {
+    const artikelWithId = {
+      ...newArtikel,
       id: Date.now().toString(),
       createdAt: new Date(),
       updatedAt: new Date(),
-    } as Jurnal;
-    setJurnal(jurnalWithId);
+    } as Artikel;
+    setArtikel((prev) => [...prev, artikelWithId]);
   };
 
   const handleAddHki = (newHki: Partial<HKI>) => {
@@ -105,7 +105,7 @@ export function PKMAddEditModal({
       createdAt: new Date(),
       updatedAt: new Date(),
     } as HKI;
-    setHki(hkiWithId);
+    setHki((prev) => [...prev, hkiWithId]);
   };
 
   const handleAddBuku = (newBuku: Partial<Buku>) => {
@@ -115,19 +115,19 @@ export function PKMAddEditModal({
       createdAt: new Date(),
       updatedAt: new Date(),
     } as Buku;
-    setBuku(bukuWithId);
+    setBuku((prev) => [...prev, bukuWithId]);
   };
 
-  const removeJurnal = () => {
-    setJurnal(undefined);
+  const removeArtikel = (id: string) => {
+    setArtikel((prev) => prev.filter((a) => a.id !== id));
   };
 
-  const removeHki = () => {
-    setHki(undefined);
+  const removeHki = (id: string) => {
+    setHki((prev) => prev.filter((h) => h.id !== id));
   };
 
-  const removeBuku = () => {
-    setBuku(undefined);
+  const removeBuku = (id: string) => {
+    setBuku((prev) => prev.filter((b) => b.id !== id));
   };
 
   return (
@@ -238,93 +238,108 @@ export function PKMAddEditModal({
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label>Jurnal {jurnal ? "(1)" : "(0)"}</Label>
+                <Label>Artikel ({artikel.length})</Label>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setShowJurnalModal(true)}
-                  disabled={!!jurnal}>
+                  onClick={() => setShowArtikelModal(true)}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Tambah Jurnal
+                  Tambah Artikel
                 </Button>
               </div>
-              {jurnal && (
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium">{jurnal.judul}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {jurnal.namaJurnal} - {jurnal.kategori}
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={removeJurnal}>
-                    <X className="w-4 h-4" />
-                  </Button>
+              {artikel.length > 0 && (
+                <div className="space-y-2">
+                  {artikel.map((a) => (
+                    <div
+                      key={a.id}
+                      className="flex items-center justify-between p-3 border rounded-lg">
+                      <div>
+                        <p className="font-medium">{a.judul}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {a.namaArtikel} - {a.kategori}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeArtikel(a.id)}>
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label>HKI {hki ? "(1)" : "(0)"}</Label>
+                <Label>HKI ({hki.length})</Label>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setShowHkiModal(true)}
-                  disabled={!!hki}>
+                  onClick={() => setShowHkiModal(true)}>
                   <Plus className="w-4 h-4 mr-2" />
                   Tambah HKI
                 </Button>
               </div>
-              {hki && (
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium">{hki.judulCiptaan}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {hki.nomorPenciptaan} - {hki.jenisCiptaan}
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={removeHki}>
-                    <X className="w-4 h-4" />
-                  </Button>
+              {hki.length > 0 && (
+                <div className="space-y-2">
+                  {hki.map((h) => (
+                    <div
+                      key={h.id}
+                      className="flex items-center justify-between p-3 border rounded-lg">
+                      <div>
+                        <p className="font-medium">{h.judulCiptaan}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {h.nomorPenciptaan} - {h.jenisCiptaan}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeHki(h.id)}>
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label>Buku {buku ? "(1)" : "(0)"}</Label>
+                <Label>Buku ({buku.length})</Label>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setShowBukuModal(true)}
-                  disabled={!!buku}>
+                  onClick={() => setShowBukuModal(true)}>
                   <Plus className="w-4 h-4 mr-2" />
                   Tambah Buku
                 </Button>
               </div>
-              {buku && (
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium">{buku.judulBuku}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {buku.penerbit} - {buku.tahun} - {buku.jenisBuku}
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={removeBuku}>
-                    <X className="w-4 h-4" />
-                  </Button>
+              {buku.length > 0 && (
+                <div className="space-y-2">
+                  {buku.map((b) => (
+                    <div
+                      key={b.id}
+                      className="flex items-center justify-between p-3 border rounded-lg">
+                      <div>
+                        <p className="font-medium">{b.judulBuku}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {b.penerbit} - {b.tahun} - {b.jenisBuku}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeBuku(b.id)}>
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -346,10 +361,10 @@ export function PKMAddEditModal({
         </DialogContent>
       </Dialog>
 
-      <JurnalAddEditModal
-        isOpen={showJurnalModal}
-        onClose={() => setShowJurnalModal(false)}
-        onSave={handleAddJurnal}
+      <ArtikelAddEditModal
+        isOpen={showArtikelModal}
+        onClose={() => setShowArtikelModal(false)}
+        onSave={handleAddArtikel}
       />
       <HkiAddEditModal
         isOpen={showHkiModal}

@@ -16,8 +16,6 @@ const poppins = Poppins({
   variable: "--font-poppins",
 });
 
-
-
 export default function AdminDashboardLayout({
   children,
 }: Readonly<{

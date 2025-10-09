@@ -35,7 +35,9 @@ export async function PUT(
       dosenPenelitian,
       linkProposal,
       linkLaporanKemajuan,
+      statusLuaran,
       linkLaporanAkhir,
+      linkLuaran,
     } = body;
 
     // Check if penelitian exists and belongs to the user
@@ -53,19 +55,24 @@ export async function PUT(
       );
     }
 
-    // Check if this is a partial update (only laporan kemajuan/akhir)
+    // Check if this is a partial update (only laporan kemajuan/akhir/statusLuaran/linkLuaran)
     const isPartialUpdate =
-      (linkLaporanKemajuan !== undefined || linkLaporanAkhir !== undefined) &&
+      (linkLaporanKemajuan !== undefined ||
+        statusLuaran !== undefined ||
+        linkLaporanAkhir !== undefined ||
+        linkLuaran !== undefined) &&
       !judulPenelitian &&
       !kategoriPenelitian &&
       !lamaKegiatan &&
       !tahunKegiatan;
 
     if (isPartialUpdate) {
-      // Handle partial update for laporan kemajuan/akhir only
+      // Handle partial update for laporan kemajuan/akhir/statusLuaran/linkLuaran only
       const updateData: {
         linkLaporanKemajuan?: string;
+        statusLuaran?: string;
         linkLaporanAkhir?: string;
+        linkLuaran?: string;
         statusPenelitian?: StatusPenelitian;
       } = {};
 
@@ -73,25 +80,32 @@ export async function PUT(
       if (linkLaporanKemajuan !== undefined) {
         updateData.linkLaporanKemajuan = linkLaporanKemajuan;
 
-        // Jika dosen upload laporan kemajuan dan status saat ini ACC_PROPOSAL, ubah ke REVIEW_LAPORAN_KEMAJUAN_60
+        // Jika dosen upload laporan kemajuan dan status saat ini ACC_PROPOSAL, ubah ke REVIEW_LAPORAN_KEMAJUAN
         if (
           existingPenelitian.statusPenelitian === "ACC_PROPOSAL" &&
           linkLaporanKemajuan
         ) {
           updateData.statusPenelitian = "REVIEW_LAPORAN_KEMAJUAN_60";
         }
-        // Jika dosen upload laporan kemajuan lagi dan status saat ini ACC_LAPORAN_KEMAJUAN_60, ubah ke REVIEW_LAPORAN_KEMAJUAN_100
-        else if (
+      }
+
+      if (statusLuaran !== undefined) {
+        updateData.statusLuaran = statusLuaran;
+      }
+
+      if (linkLaporanAkhir !== undefined) {
+        updateData.linkLaporanAkhir = linkLaporanAkhir;
+        // Jika dosen upload laporan akhir dan status saat ini ACC_LAPORAN_KEMAJUAN, ubah ke REVIEW_LAPORAN_KEMAJUAN_100
+        if (
           existingPenelitian.statusPenelitian === "ACC_LAPORAN_KEMAJUAN_60" &&
-          linkLaporanKemajuan
+          linkLaporanAkhir
         ) {
           updateData.statusPenelitian = "REVIEW_LAPORAN_KEMAJUAN_100";
         }
       }
 
-      if (linkLaporanAkhir !== undefined) {
-        updateData.linkLaporanAkhir = linkLaporanAkhir;
-        // Laporan akhir tidak mengubah status otomatis, akan diubah oleh admin saat review
+      if (linkLuaran !== undefined) {
+        updateData.linkLuaran = linkLuaran;
       }
 
       const updatedPenelitian = await prisma.penelitian.update({
@@ -181,7 +195,9 @@ export async function PUT(
       luaran: LuaranPenelitian[];
       linkProposal: string;
       linkLaporanKemajuan?: string;
+      statusLuaran?: string;
       linkLaporanAkhir?: string;
+      linkLuaran?: string;
       statusPenelitian?: StatusPenelitian;
       dosenPenelitian?: {
         create: Array<{
@@ -219,18 +235,15 @@ export async function PUT(
       ) {
         updateData.statusPenelitian = "REVIEW_LAPORAN_KEMAJUAN_60";
       }
-      // Jika dosen upload laporan kemajuan lagi dan status saat ini ACC_LAPORAN_KEMAJUAN_60, ubah ke REVIEW_LAPORAN_KEMAJUAN_100
-      else if (
-        existingPenelitian.statusPenelitian === "ACC_LAPORAN_KEMAJUAN_60" &&
-        linkLaporanKemajuan
-      ) {
-        updateData.statusPenelitian = "REVIEW_LAPORAN_KEMAJUAN_100";
-      }
     }
 
     if (linkLaporanAkhir !== undefined) {
       updateData.linkLaporanAkhir = linkLaporanAkhir;
       // Laporan akhir tidak mengubah status otomatis, akan diubah oleh admin saat review
+    }
+
+    if (linkLuaran !== undefined) {
+      updateData.linkLuaran = linkLuaran;
     }
 
     // Add dosenPenelitian if provided

@@ -70,3 +70,54 @@ export async function GET() {
     );
   }
 }
+
+// DELETE - Hapus penelitian by id (query param ?id=)
+export async function DELETE(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { role: true },
+    });
+
+    if (!user || user.role !== "ADMIN") {
+      return NextResponse.json(
+        { message: "Forbidden - Admin access required" },
+        { status: 403 }
+      );
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { message: "ID penelitian diperlukan" },
+        { status: 400 }
+      );
+    }
+
+    const existing = await prisma.penelitian.findUnique({ where: { id } });
+    if (!existing) {
+      return NextResponse.json(
+        { message: "Penelitian tidak ditemukan" },
+        { status: 404 }
+      );
+    }
+
+    await prisma.penelitian.delete({ where: { id } });
+
+    return NextResponse.json({ message: "Penelitian berhasil dihapus" });
+  } catch (error) {
+    console.error("Error deleting penelitian:", error);
+    return NextResponse.json(
+      { message: "Gagal menghapus penelitian" },
+      { status: 500 }
+    );
+  }
+}

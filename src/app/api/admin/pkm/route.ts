@@ -1,25 +1,25 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { KategoriJurnal, JenisBuku } from "@prisma/client";
+import { KategoriArtikel, JenisBuku } from "@prisma/client";
 import {
   generatePkmId,
   generateHkiId,
   generateBukuId,
-  generateJurnalId,
+  generateArtikelId,
 } from "@/lib/utils";
 import { withRoleAuth } from "@/lib/auth-helpers";
 
 // --- Schemas ---
-const JurnalInputSchema = z
+const ArtikelInputSchema = z
   .object({
     judul: z.string().min(1),
     author: z.array(z.string()).min(1),
-    namaJurnal: z.string().min(1),
+    namaArtikel: z.string().min(1),
     publisher: z.string().min(1),
-    kategori: z.nativeEnum(KategoriJurnal),
+    kategori: z.nativeEnum(KategoriArtikel),
     level: z.string().optional(),
-    linkJurnal: z.string().min(1),
+    linkArtikel: z.string().min(1),
   })
   .strict();
 
@@ -51,7 +51,7 @@ const PkmCreateSchema = z
     judul: z.string().min(1),
     proposal: z.string().min(1),
     laporan: z.string().min(1),
-    jurnal: JurnalInputSchema.optional(),
+    artikel: ArtikelInputSchema.optional(),
     hki: HkiInputSchema.optional(),
     buku: BukuInputSchema.optional(),
   })
@@ -62,7 +62,7 @@ const PkmUpdateSchema = z
     judul: z.string().min(1).optional(),
     proposal: z.string().min(1).optional(),
     laporan: z.string().min(1).optional(),
-    jurnal: JurnalInputSchema.optional(),
+    artikel: ArtikelInputSchema.optional(),
     hki: HkiInputSchema.optional(),
     buku: BukuInputSchema.optional(),
   })
@@ -81,7 +81,9 @@ export const POST = withRoleAuth(["ADMIN", "PIMPINAN"], async (req, user) => {
     const pkmId = await generatePkmId(prisma);
 
     // Generate IDs for related records if they exist
-    const jurnalId = body.jurnal ? await generateJurnalId(prisma) : undefined;
+    const artikelId = body.artikel
+      ? await generateArtikelId(prisma)
+      : undefined;
     const hkiId = body.hki ? await generateHkiId(prisma) : undefined;
     const bukuId = body.buku ? await generateBukuId(prisma) : undefined;
 
@@ -92,13 +94,13 @@ export const POST = withRoleAuth(["ADMIN", "PIMPINAN"], async (req, user) => {
         proposal: body.proposal,
         laporan: body.laporan,
         createdById: user.id,
-        ...(body.jurnal && {
-          jurnal: {
+        ...(body.artikel && {
+          artikel: {
             create: {
-              id: jurnalId!,
-              ...body.jurnal,
+              id: artikelId!,
+              ...body.artikel,
               createdById: user.id,
-              linkJurnal: body.jurnal.linkJurnal,
+              linkArtikel: body.artikel.linkArtikel,
             },
           },
         }),
@@ -122,7 +124,7 @@ export const POST = withRoleAuth(["ADMIN", "PIMPINAN"], async (req, user) => {
         }),
       },
       include: {
-        jurnal: true,
+        artikel: true,
         hki: true,
         buku: true,
         createdBy: {
@@ -203,7 +205,7 @@ export const GET = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
     const pkms = await prisma.pKM.findMany({
       where,
       include: {
-        jurnal: true,
+        artikel: true,
         hki: true,
         buku: true,
         createdBy: {
@@ -267,7 +269,7 @@ export const PUT = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
     // Check if PKM exists
     const existingPkm = await prisma.pKM.findUnique({
       where: { id },
-      include: { jurnal: true, hki: true, buku: true },
+      include: { artikel: true, hki: true, buku: true },
     });
 
     if (!existingPkm) {
@@ -292,7 +294,7 @@ export const PUT = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
           updatedAt: new Date(),
         },
         include: {
-          jurnal: true,
+          artikel: true,
           hki: true,
           buku: true,
           createdBy: {
@@ -306,24 +308,24 @@ export const PUT = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
       });
 
       // Handle jurnal update
-      if (body.jurnal !== undefined) {
+      if (body.artikel !== undefined) {
         // Delete existing jurnal if any
-        if (existingPkm.jurnal) {
-          await tx.jurnal.delete({
-            where: { id: existingPkm.jurnal.id },
+        if (existingPkm.artikel) {
+          await tx.artikel.delete({
+            where: { id: existingPkm.artikel[0].id },
           });
         }
 
         // Create new jurnal if provided
-        if (body.jurnal) {
-          const jurnalId = await generateJurnalId(tx);
-          await tx.jurnal.create({
+        if (body.artikel) {
+          const artikelId = await generateArtikelId(tx);
+          await tx.artikel.create({
             data: {
-              id: jurnalId,
-              ...body.jurnal,
+              id: artikelId,
+              ...body.artikel,
               pkmId: id,
               createdById: pkm.createdById,
-              linkJurnal: body.jurnal.linkJurnal,
+              linkArtikel: body.artikel.linkArtikel,
             },
           });
         }
@@ -334,7 +336,7 @@ export const PUT = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
         // Delete existing HKI if any
         if (existingPkm.hki) {
           await tx.hKI.delete({
-            where: { id: existingPkm.hki.id },
+            where: { id: existingPkm.hki[0].id },
           });
         }
 
@@ -357,7 +359,7 @@ export const PUT = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
         // Delete existing buku if any
         if (existingPkm.buku) {
           await tx.buku.delete({
-            where: { id: existingPkm.buku.id },
+            where: { id: existingPkm.buku[0].id },
           });
         }
 
@@ -379,7 +381,7 @@ export const PUT = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
       return await tx.pKM.findUnique({
         where: { id },
         include: {
-          jurnal: true,
+          artikel: true,
           hki: true,
           buku: true,
           createdBy: {
@@ -444,7 +446,7 @@ export const DELETE = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
     // Check if PKM exists
     const existingPkm = await prisma.pKM.findUnique({
       where: { id },
-      include: { jurnal: true, hki: true, buku: true },
+      include: { artikel: true, hki: true, buku: true },
     });
 
     if (!existingPkm) {

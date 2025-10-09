@@ -82,6 +82,8 @@ export async function POST(request: NextRequest) {
       luaran,
       dosenPenelitian,
       linkProposal,
+      linkLaporanKemajuan,
+      statusLuaran,
     } = body;
 
     // Validation
@@ -142,7 +144,8 @@ export async function POST(request: NextRequest) {
         luaran: luaran || [],
         statusPenelitian: "REVIEW", // Otomatis diajukan setelah dosen submit
         linkProposal,
-        linkLaporanKemajuan: null, // Optional untuk laporan kemajuan
+        linkLaporanKemajuan: linkLaporanKemajuan || null,
+        statusLuaran: statusLuaran || null,
         linkLaporanAkhir: null, // Akan diisi saat status LAPORAN_AKHIR
         createdById: session.user.id,
         dosenPenelitian: {

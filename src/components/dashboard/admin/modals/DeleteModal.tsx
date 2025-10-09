@@ -12,6 +12,7 @@ interface DeleteModalProps {
   title: string;
   type: PostType;
   loading?: boolean;
+  labelOverride?: string;
 }
 
 export function DeleteModal({
@@ -21,6 +22,7 @@ export function DeleteModal({
   title,
   type,
   loading = false,
+  labelOverride,
 }: DeleteModalProps) {
   const getTypeLabel = (type: PostType) => {
     switch (type) {
@@ -38,6 +40,8 @@ export function DeleteModal({
         return "Konten";
     }
   };
+
+  const label = labelOverride ?? getTypeLabel(type);
 
   return (
     <Modal
@@ -69,7 +73,7 @@ export function DeleteModal({
 
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Hapus {getTypeLabel(type)}?
+              Hapus {label}?
             </h3>
             <p className="text-gray-600 text-sm">
               Apakah Anda yakin ingin menghapus {`"${title}"`}? Tindakan ini

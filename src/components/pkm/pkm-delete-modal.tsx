@@ -1,26 +1,46 @@
-"use client"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { AlertTriangleIcon } from "lucide-react"
-import Image from "next/image"
+"use client";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { AlertTriangleIcon } from "lucide-react";
+import Image from "next/image";
 
 interface PKMDeleteModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onConfirm: () => void
-  title: string
-  loading?: boolean
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  loading?: boolean;
 }
 
-export function PKMDeleteModal({ isOpen, onClose, onConfirm, title, loading = false }: PKMDeleteModalProps) {
+export function PKMDeleteModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  loading = false,
+}: PKMDeleteModalProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={onClose}>
       <DialogContent className="max-w-md p-6">
         <DialogHeader>
           <div className="flex items-center space-x-4 pb-4 border-b border-gray-200">
-            <Image src="/logo.png" alt="UPI YPTK Logo" width={48} height={48} />
+            <Image
+              src="/logo.png"
+              alt="UPI YPTK Logo"
+              width={48}
+              height={48}
+            />
             <div>
-              <DialogTitle className="text-xl font-bold text-gray-900">Konfirmasi Hapus</DialogTitle>
+              <DialogTitle className="text-xl font-bold text-gray-900">
+                Konfirmasi Hapus
+              </DialogTitle>
               <p className="text-sm text-gray-600">LPPM UPI YPTK Padang</p>
             </div>
           </div>
@@ -34,10 +54,13 @@ export function PKMDeleteModal({ isOpen, onClose, onConfirm, title, loading = fa
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Hapus PKM?</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Hapus PKM?
+              </h3>
               <p className="text-gray-600 text-sm">
-                Apakah Anda yakin ingin menghapus PKM {`"${title}"`}? Semua data terkait termasuk jurnal, HKI, dan
-                buku akan ikut terhapus. Tindakan ini tidak dapat dibatalkan.
+                Apakah Anda yakin ingin menghapus PKM {`"${title}"`}? Semua data
+                terkait termasuk artikel, HKI, dan buku akan ikut terhapus.
+                Tindakan ini tidak dapat dibatalkan.
               </p>
             </div>
           </div>
@@ -48,16 +71,18 @@ export function PKMDeleteModal({ isOpen, onClose, onConfirm, title, loading = fa
               variant="outline"
               onClick={onClose}
               className="border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
-              disabled={loading}
-            >
+              disabled={loading}>
               Batal
             </Button>
-            <Button onClick={onConfirm} className="bg-red-500 hover:bg-red-600 text-white" disabled={loading}>
+            <Button
+              onClick={onConfirm}
+              className="bg-red-500 hover:bg-red-600 text-white"
+              disabled={loading}>
               {loading ? "Menghapus..." : "Hapus"}
             </Button>
           </div>
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

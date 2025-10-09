@@ -7,43 +7,14 @@ datasource db {
   url      = env("PRISMA_DATABASE_URL")
 }
 
+/* =====================================
+   ENUM SECTION
+===================================== */
+
 enum Role {
   PIMPINAN
   ADMIN
   DOSEN
-}
-
-// Model User
-model User {
-  id        String   @id
-  name      String   @unique
-  email     String?  @unique
-  nohp      String?  @unique
-  password  String
-  role      Role
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  posts       Post[]
-  prototypes  Prototype[]
-  buku        Buku[]
-  prestasi    Prestasi[]
-  jurnal      Jurnal[]
-  hki         HKI[]
-  pkm         PKM[]
-  penelitian  Penelitian[]
-  dosenPenelitian dosenPenelitian[]
-
-  pengabdian Pengabdian[]
-  dosenPengabdian dosenPengabdian[]
-  // Relasi untuk review dan approval penelitian
-  penelitianReviewed  Penelitian[] @relation("PenelitianReviewer")
-  penelitianApproved  Penelitian[] @relation("PenelitianApprover")
-
-  // Relasi untuk review dan approval pengabdian
-  pengabdianReviewed  Pengabdian[] @relation("PengabdianReviewer")
-  pengabdianApproved  Pengabdian[] @relation("PengabdianApprover")
-
 }
 
 enum PostType {
@@ -54,31 +25,6 @@ enum PostType {
   WEBINAR
 }
 
-// Model Post
-model Post {
-  id        String   @id @default(cuid()) // ID unik konten
-  type      PostType // Jenis konten: Agenda, Artikel, Berita, Pengumuman, Webinar
-  title     String   // Judul konten
-  content   String   // Isi utama konten (HTML atau Markdown)
-  thumbnail String?  // Gambar utama / cover konten (opsional)
-
-  // Khusus untuk tipe Agenda & Webinar
-  location  String?    // Lokasi acara (opsional)
-  startDate DateTime?  // Tanggal mulai acara (opsional)
-  endDate   DateTime?  // Tanggal selesai acara (opsional)
-
-  authorId  String   // ID penulis konten
-  author    User     @relation(fields: [authorId], references: [id]) // Relasi ke tabel User
-
-  createdAt DateTime @default(now())   // Waktu pembuatan konten
-  updatedAt DateTime @updatedAt        // Waktu terakhir update konten
-
-  @@index([type])      // Index untuk mempercepat query berdasarkan tipe konten
-  @@index([createdAt]) // Index untuk mempercepat query berdasarkan tanggal dibuat
-}
-
-
-
 enum JenisPrototype {
   ALAT
   APLIKASI
@@ -88,80 +34,12 @@ enum JenisPrototype {
   METODE
 }
 
-// Model Prototype
-model Prototype {
-    id                String   @id @default(cuid())
-
-    author            String[]
-    namaPrototype     String
-    fungsiPrototype   String
-    penggunaUtama     String
-    jenisPrototype    String[]
-    link              String
-
-    createdById     String
-    createdBy       User     @relation(fields: [createdById], references: [id])
-
-    createdAt         DateTime @default(now())
-    updatedAt         DateTime @updatedAt
-}
-
 enum JenisBuku {
   BUKU_AJAR
   REFERENSI
 }
 
-// Model Buku
-model Buku {
-    id                String   @id
-
-    author            String[]
-    judulBuku         String
-    penerbit          String
-    isbn              String
-    tahun             Int
-    jenisBuku         JenisBuku
-    linkBuku          String
-
-    pkmId     String?
-    pkm       PKM?     @relation(fields: [pkmId], references: [id])
-
-
-    createdById     String
-    createdBy       User     @relation(fields: [createdById], references: [id])
-
-    createdAt         DateTime @default(now())
-    updatedAt         DateTime @updatedAt
-
-    @@unique([pkmId])
-}
-
-// Model HKI
-model HKI {
-  id                String   @id
-
-  author            String[]
-  nomorPenciptaan   String
-  tanggalPermohonan DateTime
-  jenisCiptaan      String
-  judulCiptaan      String
-  linkSertifikat    String
-
-  pkmId             String?
-  pkm               PKM?     @relation(fields: [pkmId], references: [id])
-
-
-  createdById       String
-  createdBy         User     @relation(fields: [createdById], references: [id])
-
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  @@unique([pkmId])
-}
-
-
-enum KategoriJurnal {
+enum KategoriArtikel {
   OJS
   SINTA
   INTERNASIONAL
@@ -169,87 +47,14 @@ enum KategoriJurnal {
   SCOPUS
 }
 
-
-// Model Jurnal
-model Jurnal {
-  id                String   @id
-  author            String[]
-  judul             String
-  namaJurnal        String
-  publisher         String
-
-  kategori          KategoriJurnal
-  level             String?
-
-  linkJurnal        String
-  
-  // Tambahan field tanggal publisher
-  tanggalPublisher  DateTime? // Tanggal publisher jurnal
-  
-  pkmId             String?
-  pkm               PKM?     @relation(fields: [pkmId], references: [id])
-
-  createdById       String
-  createdBy         User     @relation(fields: [createdById], references: [id])
-
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  @@unique([pkmId])
-}
-
-// Model PKM
-model PKM {
-  id          String   @id
-  judul       String  // wajib
-  proposal    String   // wajib
-  laporan     String   // wajib
-  
-  // Tambahan field tanggal
-  tanggalPelaksanaan DateTime? // Tanggal pelaksanaan kegiatan
-
-  // Relasi luaran (opsional)
-  jurnal    Jurnal?
-  hki       HKI?
-  buku      Buku?
-
-  createdById String
-  createdBy   User     @relation(fields: [createdById], references: [id])
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-// Model Prestasi
-model Prestasi {
-  id                String   @id @default(cuid())
-
-  namaPrestasi      String
-  jenisPretasi      String
-  peringkatJuara    String
-  tingkat           String
-  tanggal           DateTime
-  penyelenggara     String
-  linkSertifikat    String
-
-  createdById       String
-  createdBy         User     @relation(fields: [createdById], references: [id])
-
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-}
-
 enum StatusPenelitian {
   REVIEW
   ACC_PROPOSAL
-
   REVIEW_LAPORAN_KEMAJUAN_60
-  ACC_LAPORAN_KEMAJUAN_60 
-
+  ACC_LAPORAN_KEMAJUAN_60
   REVIEW_LAPORAN_KEMAJUAN_100
-  ACC_LAPORAN_KEMAJUAN_100 
-
-  SELESAI 
+  REVIEW_LAPORAN_AKHIR
+  SELESAI
   DITOLAK
 }
 
@@ -279,44 +84,6 @@ enum KategoriPenelitian {
   PENELITIAN_BEKERJASAMA_MITRA_INTERNASIONAL
 }
 
-// Model Penelitian
-model Penelitian {
-  id                  String   @id @default(cuid())
-
-  judulPenelitian     String  // wajib
-  kategoriPenelitian  KategoriPenelitian  // wajib - menggunakan enum
-  lamaKegiatan        String  // wajib
-  tahunKegiatan       Int  // wajib
-  anggaran            Int?  // wajib
-  sumberAnggaran      String?  // wajib
-  luaran              LuaranPenelitian[] // wajib - menggunakan enum array
-
-  statusPenelitian    StatusPenelitian @default(REVIEW)
-  
-  // Field untuk review dan approval oleh admin
-  reviewedById        String?  // ID admin yang melakukan review
-  reviewedBy          User?    @relation("PenelitianReviewer", fields: [reviewedById], references: [id])
-  reviewedAt          DateTime? // Tanggal review
-  reviewNotes         String?  // Catatan review dari admin
-  
-  approvedById        String?  // ID admin yang melakukan approval
-  approvedBy          User?    @relation("PenelitianApprover", fields: [approvedById], references: [id])
-  approvedAt          DateTime? // Tanggal approval
-  approvalNotes       String?  // Catatan approval dari admin
- 
-  dosenPenelitian     dosenPenelitian[]
-
-  linkProposal            String //wajib
-  linkLaporanKemajuan     String?  //diisi setelah proposal disetujui
-  linkLaporanAkhir        String?  //diisi setelah penelitian selesai
-
-  createdById       String
-  createdBy         User     @relation(fields: [createdById], references: [id])
-
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-}
-
 enum RoleDosenPenelitian {
   KETUA
   ANGGOTA
@@ -341,41 +108,17 @@ enum ProgramStudiDosenPenelitian {
   S3_TEKNOLOGI_INFORMASI
 }
 
-model dosenPenelitian {
-  id                    String   @id
-
-  dosenId               String
-  dosen                 User     @relation(fields: [dosenId], references: [id])
-
-  namaDosen             String  // wajib
-  NIDN                  String  // wajib
-  roleDosenPenelitian   RoleDosenPenelitian  // wajib
-  programStudiDosenPenelitian ProgramStudiDosenPenelitian  // wajib
-
-  penelitianId          String
-  penelitian            Penelitian @relation(fields: [penelitianId], references: [id])
-
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-}
-
-
-
-// Schema pengabdian untuk ditambahkan ke prisma/schema.prisma
-
-// Enum untuk Status Pengabdian
 enum StatusPengabdian {
   REVIEW
   ACC_PROPOSAL
   REVIEW_LAPORAN_KEMAJUAN_60
-  ACC_LAPORAN_KEMAJUAN_60 
+  ACC_LAPORAN_KEMAJUAN_60
   REVIEW_LAPORAN_KEMAJUAN_100
-  ACC_LAPORAN_KEMAJUAN_100 
+  REVIEW_LAPORAN_AKHIR
   SELESAI 
   DITOLAK
 }
 
-// Enum untuk Luaran Pengabdian (sama dengan penelitian)
 enum LuaranPengabdian {
   SEMINAR_INTERNASIONAL_SCOPUS_ATLANTIS_WOS
   ARTIKEL_JURNAL_NASIONAL_SINTA_5
@@ -392,10 +135,11 @@ enum LuaranPengabdian {
   PROTOTYPE
 }
 
-// Enum untuk Kategori Pengabdian
 enum KategoriPengabdian {
+  PENGABDIAN_MASYARAKAT
   PENGABDIAN_DOSEN_PEMULA
   PENGABDIAN_TERAPAN
+  PENGABDIAN_ILMU
   PENGABDIAN_PENGEMBANGAN
   PENGABDIAN_UNGGULAN_PERGURUAN_TINGGI
   PENGABDIAN_GURU_BESAR_PERCEPATAN_PROFESOR
@@ -403,64 +147,284 @@ enum KategoriPengabdian {
   PENGABDIAN_BEKERJASAMA_MITRA_INTERNASIONAL
 }
 
-// Model Pengabdian
-model Pengabdian {
-  id                  String   @id @default(cuid())
-
-  judulPengabdian     String  // wajib
-  kategoriPengabdian  KategoriPengabdian  // wajib - menggunakan enum
-  lamaKegiatan        String  // wajib
-  tahunKegiatan       Int  // wajib
-  anggaran            Int?  // wajib
-  sumberAnggaran      String?  // wajib
-  luaran              LuaranPengabdian[] // wajib - menggunakan enum array
-
-  statusPengabdian    StatusPengabdian @default(REVIEW)
-  
-  // Field untuk review dan approval oleh admin
-  reviewedById        String?  // ID admin yang melakukan review
-  reviewedBy          User?    @relation("PengabdianReviewer", fields: [reviewedById], references: [id])
-  reviewedAt          DateTime? // Tanggal review
-  reviewNotes         String?  // Catatan review dari admin
-  
-  approvedById        String?  // ID admin yang melakukan approval
-  approvedBy          User?    @relation("PengabdianApprover", fields: [approvedById], references: [id])
-  approvedAt          DateTime? // Tanggal approval
-  approvalNotes       String?  // Catatan approval dari admin
- 
-  dosenPengabdian     dosenPengabdian[]
-
-  linkProposal            String //wajib
-  linkLaporanKemajuan     String?  //diisi setelah proposal disetujui
-  linkLaporanAkhir        String?  //diisi setelah pengabdian selesai
-
-  createdById       String
-  createdBy         User     @relation(fields: [createdById], references: [id])
-
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-}
-
 enum RoleDosenPengabdian {
   KETUA
   ANGGOTA
 }
 
-model dosenPengabdian {
-  id                    String   @id
+/* =====================================
+   MODEL SECTION
+===================================== */
 
-  dosenId               String
-  dosen                 User     @relation(fields: [dosenId], references: [id])
+/* ---------- USER ---------- */
+model User {
+  id        String   @id
+  name      String   @unique
+  email     String?  @unique
+  nohp      String?  @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  namaDosen             String  // wajib
-  NIDN                  String  // wajib
-  roleDosenPengabdian   RoleDosenPengabdian  // wajib
-  programStudiDosenPengabdian ProgramStudiDosenPenelitian  // wajib - reuse enum yang ada
+  // Relasi konten dan luaran
+  posts         Post[]
+  prototypes    Prototype[]
+  buku          Buku[]
+  prestasi      Prestasi[]
+  artikel       Artikel[]
+  artikel1      Artikel1[]
+  hki           HKI[]
+  pkm           PKM[]
+  penelitian    Penelitian[]
+  dosenPenelitian dosenPenelitian[]
+  pengabdian    Pengabdian[]
+  dosenPengabdian dosenPengabdian[]
 
-  pengabdianId          String
-  pengabdian            Pengabdian @relation(fields: [pengabdianId], references: [id])
-
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  // Relasi untuk review & approval
+  penelitianReviewed  Penelitian[] @relation("PenelitianReviewer")
+  penelitianApproved  Penelitian[] @relation("PenelitianApprover")
+  pengabdianReviewed  Pengabdian[] @relation("PengabdianReviewer")
+  pengabdianApproved  Pengabdian[] @relation("PengabdianApprover")
 }
 
+/* ---------- POST ---------- */
+model Post {
+  id          String   @id @default(cuid())
+  type        PostType
+  title       String
+  content     String
+  thumbnail   String?
+  location    String?
+  startDate   DateTime?
+  endDate     DateTime?
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type])
+  @@index([createdAt])
+}
+
+/* ---------- PROTOTYPE ---------- */
+model Prototype {
+  id              String   @id @default(cuid())
+  author          String[]
+  namaPrototype   String
+  fungsiPrototype String
+  penggunaUtama   String
+  jenisPrototype  String[]
+  link            String
+  createdById     String
+  createdBy       User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+/* ---------- BUKU ---------- */
+model Buku {
+  id          String   @id
+  author      String[]
+  judulBuku   String
+  penerbit    String
+  isbn        String
+  tahun       Int
+  jenisBuku   JenisBuku
+  linkBuku    String
+  pkmId       String?
+  pkm         PKM?     @relation(fields: [pkmId], references: [id], onDelete: Cascade)
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/* ---------- HKI ---------- */
+model HKI {
+  id                String   @id
+  author            String[]
+  nomorPenciptaan   String
+  tanggalPermohonan DateTime
+  jenisCiptaan      String
+  judulCiptaan      String
+  linkSertifikat    String
+  pkmId             String?
+  pkm               PKM?     @relation(fields: [pkmId], references: [id], onDelete: Cascade)
+  createdById       String
+  createdBy         User     @relation(fields: [createdById], references: [id])
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+/* ---------- ARTIKEL ---------- */
+model Artikel {
+  id               String   @id
+  author           String[]
+  judul            String
+  namaArtikel      String
+  publisher        String
+  kategori         KategoriArtikel
+  level            String?
+  linkArtikel      String
+  tanggalPublisher DateTime?
+  pkmId            String?
+  pkm              PKM?     @relation(fields: [pkmId], references: [id], onDelete: Cascade)
+  createdById      String
+  createdBy        User     @relation(fields: [createdById], references: [id])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+/* ---------- PKM ---------- */
+model PKM {
+  id                  String   @id
+  judul               String
+  proposal            String
+  laporan             String
+  tanggalPelaksanaan  DateTime?
+  artikel             Artikel[]
+  hki                 HKI[]
+  buku                Buku[]
+  createdById         String
+  createdBy           User     @relation(fields: [createdById], references: [id])
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+/* ---------- PRESTASI ---------- */
+model Prestasi {
+  id              String   @id @default(cuid())
+  namaPrestasi    String
+  jenisPretasi    String
+  peringkatJuara  String
+  tingkat         String
+  tanggal         DateTime
+  penyelenggara   String
+  linkSertifikat  String
+  createdById     String
+  createdBy       User     @relation(fields: [createdById], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+/* ---------- PENELITIAN ---------- */
+model Penelitian {
+  id                  String   @id @default(cuid())
+  judulPenelitian     String
+  kategoriPenelitian  KategoriPenelitian
+  lamaKegiatan        String
+  tahunKegiatan       Int
+  anggaran            Int?
+  sumberAnggaran      String?
+  luaran              LuaranPenelitian[]
+  statusPenelitian    StatusPenelitian @default(REVIEW)
+  
+  // Review & Approval
+  reviewedById        String?
+  reviewedBy          User?    @relation("PenelitianReviewer", fields: [reviewedById], references: [id])
+  reviewedAt          DateTime?
+  reviewNotes         String?
+  approvedById        String?
+  approvedBy          User?    @relation("PenelitianApprover", fields: [approvedById], references: [id])
+  approvedAt          DateTime?
+  approvalNotes       String?
+
+  // Dosen & Luaran
+  dosenPenelitian     dosenPenelitian[]
+  linkProposal        String
+  linkLaporanKemajuan String?
+  statusLuaran        String?
+  linkLaporanAkhir    String?
+  linkLuaran          String?
+
+  createdById         String
+  createdBy           User     @relation(fields: [createdById], references: [id])
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+/* ---------- DOSEN PENELITIAN ---------- */
+model dosenPenelitian {
+  id                           String   @id
+  dosenId                      String
+  dosen                        User     @relation(fields: [dosenId], references: [id])
+  namaDosen                    String
+  NIDN                         String
+  noHp                         String?
+  roleDosenPenelitian          RoleDosenPenelitian
+  programStudiDosenPenelitian  ProgramStudiDosenPenelitian
+  penelitianId                 String
+  penelitian                   Penelitian @relation(fields: [penelitianId], references: [id])
+  createdAt                    DateTime @default(now())
+  updatedAt                    DateTime @updatedAt
+}
+
+/* ---------- PENGABDIAN ---------- */
+model Pengabdian {
+  id                  String   @id @default(cuid())
+  judulPengabdian     String
+  kategoriPengabdian  KategoriPengabdian
+  lamaKegiatan        String
+  tahunKegiatan       Int
+  anggaran            Int?
+  sumberAnggaran      String?
+  luaran              LuaranPengabdian[]
+  statusPengabdian    StatusPengabdian @default(REVIEW)
+  
+  // Review & Approval
+  reviewedById        String?
+  reviewedBy          User?    @relation("PengabdianReviewer", fields: [reviewedById], references: [id])
+  reviewedAt          DateTime?
+  reviewNotes         String?
+  approvedById        String?
+  approvedBy          User?    @relation("PengabdianApprover", fields: [approvedById], references: [id])
+  approvedAt          DateTime?
+  approvalNotes       String?
+
+  // Dosen & Luaran
+  dosenPengabdian     dosenPengabdian[]
+  linkProposal        String
+  linkLaporanKemajuan String?
+  statusLuaran        String?
+  linkLaporanAkhir    String?
+  linkLuaran          String?
+
+  createdById         String
+  createdBy           User     @relation(fields: [createdById], references: [id])
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+/* ---------- DOSEN PENGABDIAN ---------- */
+model dosenPengabdian {
+  id                           String   @id
+  dosenId                      String
+  dosen                        User     @relation(fields: [dosenId], references: [id])
+  namaDosen                    String
+  NIDN                         String
+  noHp                         String?
+  roleDosenPengabdian          RoleDosenPengabdian
+  programStudiDosenPengabdian  ProgramStudiDosenPenelitian
+  pengabdianId                 String
+  pengabdian                   Pengabdian @relation(fields: [pengabdianId], references: [id])
+  createdAt                    DateTime @default(now())
+  updatedAt                    DateTime @updatedAt
+}
+
+// ---------- Artikel ----------
+model Artikel1 {
+  id              String   @id @default(cuid())
+  judul           String
+  author          String[]
+  namaArtikel     String
+  publisher       String
+  kategori        KategoriArtikel
+  level           String
+  linkArtikel     String
+  tanggalPublisher DateTime
+  createdById     String
+  createdBy       User     @relation(fields: [createdById], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

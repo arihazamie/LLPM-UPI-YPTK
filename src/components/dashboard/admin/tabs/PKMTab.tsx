@@ -18,8 +18,8 @@ import {
 } from "lucide-react";
 import { useModal } from "@/hooks/useModal";
 import { useState, useEffect } from "react";
-import type { PKM, Jurnal, HKI, Buku } from "@/types/pkm-types";
-import { KategoriJurnal, JenisBuku } from "@/types/pkm-types";
+import type { PKM, Artikel, HKI, Buku } from "@/types/pkm-types";
+import { KategoriArtikel, JenisBuku } from "@/types/pkm-types";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,13 +45,13 @@ export default function PKMTab() {
   const [judul, setJudul] = useState("");
   const [proposal, setProposal] = useState("");
   const [laporan, setLaporan] = useState("");
-  const [jurnal, setJurnal] = useState<Jurnal | undefined>(undefined);
+  const [artikel, setArtikel] = useState<Artikel | undefined>(undefined);
   const [hki, setHki] = useState<HKI | undefined>(undefined);
   const [buku, setBuku] = useState<Buku | undefined>(undefined);
   const [isSaving, setIsSaving] = useState(false);
 
   // Sub-modals
-  const [showJurnalModal, setShowJurnalModal] = useState(false);
+  const [showArtikelModal, setShowArtikelModal] = useState(false);
   const [showHkiModal, setShowHkiModal] = useState(false);
   const [showBukuModal, setShowBukuModal] = useState(false);
 
@@ -90,7 +90,7 @@ export default function PKMTab() {
     setJudul("");
     setProposal("");
     setLaporan("");
-    setJurnal(undefined);
+    setArtikel(undefined);
     setHki(undefined);
     setBuku(undefined);
     addEditModal.openModal();
@@ -103,7 +103,7 @@ export default function PKMTab() {
     setJudul(pkm.judul || "");
     setProposal(pkm.proposal || "");
     setLaporan(pkm.laporan || "");
-    setJurnal(pkm.jurnal || undefined);
+    setArtikel(pkm.artikel || undefined);
     setHki(pkm.hki || undefined);
     setBuku(pkm.buku || undefined);
     addEditModal.openModal();
@@ -135,15 +135,15 @@ export default function PKMTab() {
         judul: judul.trim(),
         proposal: proposal.trim(),
         laporan: laporan.trim(),
-        ...(jurnal && {
-          jurnal: {
-            judul: jurnal.judul,
-            author: jurnal.author,
-            namaJurnal: jurnal.namaJurnal,
-            publisher: jurnal.publisher,
-            kategori: jurnal.kategori,
-            level: jurnal.level,
-            linkJurnal: jurnal.linkJurnal,
+        ...(artikel && {
+          artikel: {
+            judul: artikel.judul,
+            author: artikel.author,
+            namaArtikel: artikel.namaArtikel,
+            publisher: artikel.publisher,
+            kategori: artikel.kategori,
+            level: artikel.level,
+            linkArtikel: artikel.linkArtikel,
           },
         }),
         ...(hki && {
@@ -174,7 +174,7 @@ export default function PKMTab() {
 
       // Debug logging
       console.log("PKM Data being sent:", pkmData);
-      console.log("Jurnal state:", jurnal);
+      console.log("Artikel state:", artikel);
       console.log("Modal mode:", modalMode);
 
       const url =
@@ -258,14 +258,14 @@ export default function PKMTab() {
   };
 
   // Helper functions for managing related data
-  const handleAddJurnal = (newJurnal: Partial<Jurnal>) => {
-    const jurnalWithId = {
-      ...newJurnal,
+  const handleAddArtikel = (newArtikel: Partial<Artikel>) => {
+    const artikelWithId = {
+      ...newArtikel,
       id: Date.now().toString(),
       createdAt: new Date(),
       updatedAt: new Date(),
-    } as Jurnal;
-    setJurnal(jurnalWithId);
+    } as Artikel;
+    setArtikel(artikelWithId);
   };
 
   const handleAddHki = (newHki: Partial<HKI>) => {
@@ -338,7 +338,7 @@ export default function PKMTab() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {pkms.reduce((acc, pkm) => acc + (pkm.jurnal ? 1 : 0), 0)}
+              {pkms.reduce((acc, pkm) => acc + (pkm.artikel ? 1 : 0), 0)}
             </div>
             <p className="text-xs text-muted-foreground">Total publikasi</p>
           </CardContent>
@@ -504,29 +504,29 @@ export default function PKMTab() {
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label>Jurnal {jurnal ? "(1)" : "(0)"}</Label>
+                  <Label>Artikel {artikel ? "(1)" : "(0)"}</Label>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowJurnalModal(true)}
-                    disabled={!!jurnal}>
+                    onClick={() => setShowArtikelModal(true)}
+                    disabled={!!artikel}>
                     <PlusIcon className="w-4 h-4 mr-2" />
-                    Tambah Jurnal
+                    Tambah Artikel
                   </Button>
                 </div>
-                {jurnal && (
+                {artikel && (
                   <div className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
-                      <p className="font-medium">{jurnal.judul}</p>
+                      <p className="font-medium">{artikel.judul}</p>
                       <p className="text-sm text-muted-foreground">
-                        {jurnal.namaJurnal} - {jurnal.kategori}
+                        {artikel.namaArtikel} - {artikel.kategori}
                       </p>
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setJurnal(undefined)}>
+                      onClick={() => setArtikel(undefined)}>
                       <X className="w-4 h-4" />
                     </Button>
                   </div>
@@ -619,7 +619,7 @@ export default function PKMTab() {
       )}
 
       {/* Publikasi Modal */}
-      {showJurnalModal && (
+      {showArtikelModal && (
         <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl shadow-xl">
             <div className="flex justify-between items-center mb-4">
@@ -627,16 +627,16 @@ export default function PKMTab() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowJurnalModal(false)}>
+                onClick={() => setShowArtikelModal(false)}>
                 ✕
               </Button>
             </div>
-            <JurnalForm
+            <ArtikelForm
               onSave={(data) => {
-                handleAddJurnal(data);
-                setShowJurnalModal(false);
+                handleAddArtikel(data);
+                setShowArtikelModal(false);
               }}
-              onCancel={() => setShowJurnalModal(false)}
+              onCancel={() => setShowArtikelModal(false)}
             />
           </div>
         </div>
@@ -763,36 +763,37 @@ export default function PKMTab() {
                 </div>
               </div>
 
-              {selectedPkm.jurnal && (
+              {selectedPkm.artikel && (
                 <div>
                   <h3 className="font-semibold mb-2">Publikasi</h3>
                   <div className="border rounded p-3 mb-2">
                     <p>
-                      <strong>Judul:</strong> {selectedPkm.jurnal.judul}
+                      <strong>Judul:</strong> {selectedPkm.artikel.judul}
                     </p>
                     <p>
-                      <strong>Jurnal:</strong> {selectedPkm.jurnal.namaJurnal}
+                      <strong>Jurnal:</strong> {selectedPkm.artikel.namaArtikel}
                     </p>
                     <p>
-                      <strong>Publisher:</strong> {selectedPkm.jurnal.publisher}
+                      <strong>Publisher:</strong>{" "}
+                      {selectedPkm.artikel.publisher}
                     </p>
                     <p>
-                      <strong>Kategori:</strong> {selectedPkm.jurnal.kategori}
+                      <strong>Kategori:</strong> {selectedPkm.artikel.kategori}
                     </p>
-                    {selectedPkm.jurnal.level && (
+                    {selectedPkm.artikel.level && (
                       <p>
-                        <strong>Level:</strong> {selectedPkm.jurnal.level}
+                        <strong>Level:</strong> {selectedPkm.artikel.level}
                       </p>
                     )}
-                    {selectedPkm.jurnal.linkJurnal && (
+                    {selectedPkm.artikel.linkArtikel && (
                       <p>
-                        <strong>Link Jurnal:</strong>{" "}
+                        <strong>Link Artikel:</strong>{" "}
                         <a
-                          href={selectedPkm.jurnal.linkJurnal}
+                          href={selectedPkm.artikel.linkArtikel}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-600 hover:text-blue-800 underline">
-                          Lihat Jurnal
+                          Lihat Artikel
                         </a>
                       </p>
                     )}
@@ -862,27 +863,29 @@ export default function PKMTab() {
 }
 
 // Publikasi Form Component
-function JurnalForm({
+function ArtikelForm({
   onSave,
   onCancel,
 }: {
-  onSave: (data: Partial<Jurnal>) => void;
+  onSave: (data: Partial<Artikel>) => void;
   onCancel: () => void;
 }) {
   const [judul, setJudul] = useState("");
   const [authors, setAuthors] = useState<string[]>([""]);
-  const [namaJurnal, setNamaJurnal] = useState("");
+  const [namaArtikel, setNamaArtikel] = useState("");
   const [publisher, setPublisher] = useState("");
-  const [kategori, setKategori] = useState<KategoriJurnal>(KategoriJurnal.OJS);
+  const [kategori, setKategori] = useState<KategoriArtikel>(
+    KategoriArtikel.OJS
+  );
   const [level, setLevel] = useState("");
-  const [linkJurnal, setLinkJurnal] = useState("");
+  const [linkArtikel, setLinkArtikel] = useState("");
 
   const handleSave = () => {
     if (
       !judul.trim() ||
-      !namaJurnal.trim() ||
+      !namaArtikel.trim() ||
       !publisher.trim() ||
-      !linkJurnal.trim()
+      !linkArtikel.trim()
     ) {
       toast.error("Semua field wajib diisi");
       return;
@@ -891,11 +894,11 @@ function JurnalForm({
     onSave({
       judul: judul.trim(),
       author: authors.filter((author) => author.trim() !== ""),
-      namaJurnal: namaJurnal.trim(),
+      namaArtikel: namaArtikel.trim(),
       publisher: publisher.trim(),
       kategori,
       level: level || undefined,
-      linkJurnal: linkJurnal.trim(),
+      linkArtikel: linkArtikel.trim(),
     });
   };
 
@@ -916,14 +919,14 @@ function JurnalForm({
   };
 
   const getLevelOptions = () => {
-    if (kategori === KategoriJurnal.SCOPUS) {
+    if (kategori === KategoriArtikel.SCOPUS) {
       return [
         { value: "Q1", label: "Q1" },
         { value: "Q2", label: "Q2" },
         { value: "Q3", label: "Q3" },
         { value: "Q4", label: "Q4" },
       ];
-    } else if (kategori === KategoriJurnal.SINTA) {
+    } else if (kategori === KategoriArtikel.SINTA) {
       return [
         { value: "SINTA 1", label: "Sinta 1" },
         { value: "SINTA 2", label: "Sinta 2" },
@@ -983,12 +986,12 @@ function JurnalForm({
       </div>
 
       <div>
-        <Label htmlFor="namaJurnal">Nama Jurnal *</Label>
+        <Label htmlFor="namaArtikel">Nama Artikel *</Label>
         <Input
-          id="namaJurnal"
-          value={namaJurnal}
-          onChange={(e) => setNamaJurnal(e.target.value)}
-          placeholder="Masukkan nama jurnal"
+          id="namaArtikel"
+          value={namaArtikel}
+          onChange={(e) => setNamaArtikel(e.target.value)}
+          placeholder="Masukkan nama artikel"
         />
       </div>
 
@@ -1003,15 +1006,15 @@ function JurnalForm({
       </div>
 
       <div>
-        <Label htmlFor="kategori">Kategori Jurnal *</Label>
+        <Label htmlFor="kategori">Kategori Artikel *</Label>
         <Select
           value={kategori}
-          onValueChange={(value) => setKategori(value as KategoriJurnal)}>
+          onValueChange={(value) => setKategori(value as KategoriArtikel)}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {Object.values(KategoriJurnal).map((kat) => (
+            {Object.values(KategoriArtikel).map((kat) => (
               <SelectItem
                 key={kat}
                 value={kat}>
@@ -1045,28 +1048,28 @@ function JurnalForm({
       )}
 
       <div>
-        <Label htmlFor="linkJurnal">Link Jurnal *</Label>
+        <Label htmlFor="linkArtikel">Link Artikel *</Label>
         <Input
-          id="linkJurnal"
-          value={linkJurnal}
-          onChange={(e) => setLinkJurnal(e.target.value)}
-          placeholder="Masukkan link jurnal (https://...)"
+          id="linkArtikel"
+          value={linkArtikel}
+          onChange={(e) => setLinkArtikel(e.target.value)}
+          placeholder="Masukkan link artikel (https://...)"
         />
-        {linkJurnal && (
+        {linkArtikel && (
           <div className="flex items-center space-x-2 mt-1">
             <div
               className={`w-2 h-2 rounded-full ${
-                linkJurnal.startsWith("http") ? "bg-green-500" : "bg-red-500"
+                linkArtikel.startsWith("http") ? "bg-green-500" : "bg-red-500"
               }`}
             />
             <span className="text-xs text-slate-600">
-              {linkJurnal.startsWith("http")
+              {linkArtikel.startsWith("http")
                 ? "Link valid"
                 : "Link tidak valid - harus dimulai dengan http:// atau https://"}
             </span>
-            {linkJurnal.startsWith("http") && (
+            {linkArtikel.startsWith("http") && (
               <a
-                href={linkJurnal}
+                href={linkArtikel}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs text-blue-600 hover:text-blue-800 underline flex items-center space-x-1">

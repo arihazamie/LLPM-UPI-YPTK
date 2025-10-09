@@ -32,6 +32,7 @@ import {
 import {
   Search,
   Eye,
+  Trash2,
   Calendar,
   User,
   DollarSign,
@@ -42,6 +43,8 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { DeleteModal } from "@/components/dashboard/admin/modals/DeleteModal";
+import { PostType } from "@/types/post-type";
 
 // Types based on Prisma schema
 type StatusPengabdian =
@@ -144,6 +147,10 @@ export default function PengabdianReviewTab() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingDelete, setPendingDelete] =
+    useState<PengabdianSubmission | null>(null);
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -319,6 +326,33 @@ export default function PengabdianReviewTab() {
         return <AlertCircle className="h-4 w-4" />;
       default:
         return <Clock className="h-4 w-4" />;
+    }
+  };
+
+  const requestDelete = (submission: PengabdianSubmission) => {
+    setPendingDelete(submission);
+    setConfirmOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      setDeletingId(id);
+      const resp = await fetch(`/api/admin/pengabdian?id=${id}`, {
+        method: "DELETE",
+      });
+      if (!resp.ok) throw new Error("Gagal menghapus pengabdian");
+      setSubmissions((prev) => prev.filter((s) => s.id !== id));
+      setFilteredSubmissions((prev) => prev.filter((s) => s.id !== id));
+      toast({ title: "Berhasil", description: "Pengabdian dihapus" });
+    } catch (e) {
+      console.error(e);
+      toast({
+        title: "Error",
+        description: "Gagal menghapus pengabdian",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -809,6 +843,15 @@ export default function PengabdianReviewTab() {
                           )}
                         </DialogContent>
                       </Dialog>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="ml-2"
+                        onClick={() => requestDelete(submission)}
+                        disabled={deletingId === submission.id}>
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Hapus
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -825,6 +868,19 @@ export default function PengabdianReviewTab() {
           </div>
         </CardContent>
       </Card>
+
+      <DeleteModal
+        isOpen={confirmOpen}
+        onClose={() => {
+          setConfirmOpen(false);
+          setPendingDelete(null);
+        }}
+        onConfirm={() => pendingDelete && handleDelete(pendingDelete.id)}
+        title={pendingDelete?.judulPengabdian || ""}
+        type={PostType.ARTIKEL}
+        loading={!!(pendingDelete && deletingId === pendingDelete.id)}
+        labelOverride="Pengabdian"
+      />
     </div>
   );
 }

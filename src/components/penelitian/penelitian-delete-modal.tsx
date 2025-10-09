@@ -55,36 +55,33 @@ export function PenelitianDeleteModal({
               <h4 className="font-medium text-slate-800 mb-2">
                 Detail Penelitian:
               </h4>
-              <div className="space-y-1 text-sm text-slate-600">
-                <p>
-                  <span className="font-medium">Judul:</span>{" "}
-                  {penelitian.judulPenelitian}
-                </p>
-                <p>
-                  <span className="font-medium">Kategori:</span>{" "}
-                  {penelitian.kategoriPenelitian}
-                </p>
-                <p>
-                  <span className="font-medium">Status:</span>{" "}
-                  {penelitian.statusPenelitian}
-                </p>
-                <p>
-                  <span className="font-medium">Tahun Kegiatan:</span>{" "}
-                  {penelitian.tahunKegiatan}
-                </p>
-              </div>
+              <p className="text-sm text-slate-600 mb-1">
+                <span className="font-medium">Judul:</span>{" "}
+                {penelitian.judulPenelitian}
+              </p>
+              <p className="text-sm text-slate-600 mb-1">
+                <span className="font-medium">Kategori:</span>{" "}
+                {penelitian.kategoriPenelitian.replace(/_/g, " ")}
+              </p>
+              <p className="text-sm text-slate-600 mb-1">
+                <span className="font-medium">Tahun:</span>{" "}
+                {penelitian.tahunKegiatan}
+              </p>
+              <p className="text-sm text-slate-600">
+                <span className="font-medium">Status:</span>{" "}
+                {penelitian.statusPenelitian.replace(/_/g, " ")}
+              </p>
             </div>
           )}
 
-          <div className="flex justify-end space-x-3 pt-4">
+          <div className="flex justify-end space-x-2">
             <Button
-              type="button"
               variant="outline"
-              onClick={onClose}>
+              onClick={onClose}
+              className="text-slate-600 hover:text-slate-800">
               Batal
             </Button>
             <Button
-              type="button"
               variant="destructive"
               onClick={handleDelete}
               className="bg-red-600 hover:bg-red-700">

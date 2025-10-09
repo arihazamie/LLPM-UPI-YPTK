@@ -1,7 +1,6 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
@@ -12,21 +11,14 @@ interface DosenOnlyProps {
 
 export default function DosenOnly({ children }: DosenOnlyProps) {
   const { data: session, status } = useSession();
-  const router = useRouter();
 
   useEffect(() => {
     if (status === "loading") return;
 
     if (!session?.user) {
-      router.push("/login");
       return;
     }
-
-    if (session.user.role !== "DOSEN") {
-      router.push("/dashboard");
-      return;
-    }
-  }, [session, status, router]);
+  }, [session, status]);
 
   if (status === "loading") {
     return (
@@ -76,4 +68,4 @@ export default function DosenOnly({ children }: DosenOnlyProps) {
   }
 
   return <>{children}</>;
-} 
+}

@@ -15,7 +15,7 @@ export default function ClientWrapper({
   const pathname = usePathname();
 
   // Semua path yang ingin skip layout
-  const hideLayoutOn = ["/dashboard/admin"];
+  const hideLayoutOn = ["/dashboard/admin", "/simlit/pengabdian/surat-tugas"];
   const shouldHide = hideLayoutOn.some((prefix) => pathname.startsWith(prefix));
 
   if (shouldHide) {

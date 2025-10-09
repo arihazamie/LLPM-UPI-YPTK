@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { generateHkiId, generateBukuId, generateJurnalId } from "@/lib/utils";
+import { generateHkiId, generateBukuId, generateArtikelId } from "@/lib/utils";
 import { withRoleAuth } from "@/lib/auth-helpers";
 
 // UPDATE PKM
@@ -26,7 +26,7 @@ export async function PUT(
           createdById: user.id,
         },
         include: {
-          jurnal: true,
+          artikel: true,
           hki: true,
           buku: true,
         },
@@ -61,7 +61,7 @@ export async function PUT(
             updatedAt: new Date(),
           },
           include: {
-            jurnal: true,
+            artikel: true,
             hki: true,
             buku: true,
             createdBy: {
@@ -74,75 +74,104 @@ export async function PUT(
           },
         });
 
-        // Handle jurnal update
-        if (body.jurnal !== undefined) {
-          // Delete existing jurnal if any
-          if (existingPkm.jurnal) {
-            await tx.jurnal.delete({
-              where: { id: existingPkm.jurnal.id },
-            });
-          }
+        // Handle artikel update (array)
+        if (body.artikel !== undefined) {
+          // Hapus semua artikel lama milik PKM ini
+          await tx.artikel.deleteMany({ where: { pkmId: id } });
 
-          // Create new jurnal if provided
-          if (body.jurnal) {
-            const jurnalId = await generateJurnalId(tx);
-            await tx.jurnal.create({
-              data: {
-                id: jurnalId,
-                ...body.jurnal,
-                pkmId: id,
-                createdById: pkm.createdById,
-                linkJurnal: body.jurnal.linkJurnal,
-              },
-            });
+          // Buat ulang jika ada artikel baru
+          if (Array.isArray(body.artikel) && body.artikel.length > 0) {
+            const artikelData = await Promise.all(
+              body.artikel.map(
+                async (a: {
+                  author: string;
+                  judul: string;
+                  namaArtikel: string;
+                  publisher: string;
+                  kategori: string;
+                  level?: string | null;
+                  linkArtikel: string;
+                  tanggalPublisher?: string | null;
+                }) => ({
+                  id: await generateArtikelId(tx),
+                  author: a.author,
+                  judul: a.judul,
+                  namaArtikel: a.namaArtikel,
+                  publisher: a.publisher,
+                  kategori: a.kategori,
+                  level: a.level ?? null,
+                  linkArtikel: a.linkArtikel,
+                  tanggalPublisher: a.tanggalPublisher ?? null,
+                  pkmId: id,
+                  createdById: pkm.createdById,
+                })
+              )
+            );
+            await tx.artikel.createMany({ data: artikelData });
           }
         }
 
-        // Handle HKI update
+        // Handle HKI update (array)
         if (body.hki !== undefined) {
-          // Delete existing HKI if any
-          if (existingPkm.hki) {
-            await tx.hKI.delete({
-              where: { id: existingPkm.hki.id },
-            });
-          }
+          await tx.hKI.deleteMany({ where: { pkmId: id } });
 
-          // Create new HKI if provided
-          if (body.hki) {
-            const hkiId = await generateHkiId(tx);
-            await tx.hKI.create({
-              data: {
-                id: hkiId,
-                ...body.hki,
-                pkmId: id,
-                createdById: pkm.createdById,
-                linkSertifikat: body.hki.linkSertifikat,
-              },
-            });
+          if (Array.isArray(body.hki) && body.hki.length > 0) {
+            const hkiData = await Promise.all(
+              body.hki.map(
+                async (h: {
+                  author: string;
+                  nomorPenciptaan: string;
+                  tanggalPermohonan: string;
+                  jenisCiptaan: string;
+                  judulCiptaan: string;
+                  linkSertifikat: string;
+                }) => ({
+                  id: await generateHkiId(tx),
+                  author: h.author,
+                  nomorPenciptaan: h.nomorPenciptaan,
+                  tanggalPermohonan: new Date(h.tanggalPermohonan),
+                  jenisCiptaan: h.jenisCiptaan,
+                  judulCiptaan: h.judulCiptaan,
+                  linkSertifikat: h.linkSertifikat,
+                  pkmId: id,
+                  createdById: pkm.createdById,
+                })
+              )
+            );
+            await tx.hKI.createMany({ data: hkiData });
           }
         }
 
-        // Handle buku update
+        // Handle buku update (array)
         if (body.buku !== undefined) {
-          // Delete existing buku if any
-          if (existingPkm.buku) {
-            await tx.buku.delete({
-              where: { id: existingPkm.buku.id },
-            });
-          }
+          await tx.buku.deleteMany({ where: { pkmId: id } });
 
-          // Create new buku if provided
-          if (body.buku) {
-            const bukuId = await generateBukuId(tx);
-            await tx.buku.create({
-              data: {
-                id: bukuId,
-                ...body.buku,
-                pkmId: id,
-                createdById: pkm.createdById,
-                linkBuku: body.buku.linkBuku,
-              },
-            });
+          if (Array.isArray(body.buku) && body.buku.length > 0) {
+            const bukuData = await Promise.all(
+              body.buku.map(
+                async (b: {
+                  author: string;
+                  judulBuku: string;
+                  penerbit: string;
+                  isbn: string;
+                  tahun: number;
+                  jenisBuku: string;
+                  linkBuku: string;
+                }) => ({
+                  id: await generateBukuId(tx),
+                  author: b.author,
+                  judulBuku: b.judulBuku,
+                  penerbit: b.penerbit,
+                  isbn: b.isbn,
+                  tahun: b.tahun,
+                  jenisBuku: b.jenisBuku,
+                  linkBuku: b.linkBuku,
+                  pkmId: id,
+                  createdById: pkm.createdById,
+                })
+              )
+            );
+            await tx.buku.createMany({ data: bukuData });
           }
         }
 
@@ -150,7 +179,7 @@ export async function PUT(
         return await tx.pKM.findUnique({
           where: { id },
           include: {
-            jurnal: true,
+            artikel: true,
             hki: true,
             buku: true,
             createdBy: {
@@ -221,7 +250,7 @@ export async function DELETE(
       // Hapus PKM dan semua relasi yang terhubung dalam satu transaksi
       const deletedPkm = await prisma.$transaction(async (tx) => {
         // Hapus data relasi terlebih dahulu
-        await tx.jurnal.deleteMany({
+        await tx.artikel.deleteMany({
           where: { pkmId: id },
         });
 

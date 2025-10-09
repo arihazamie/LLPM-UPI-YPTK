@@ -20,15 +20,15 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface Jurnal {
+interface Artikel {
   id: string;
   judul: string;
   author: string[];
-  namaJurnal: string;
+  namaArtikel: string;
   publisher: string;
   kategori: string;
   level?: string;
-  linkJurnal: string;
+  linkArtikel: string;
 }
 
 interface HKI {
@@ -55,14 +55,14 @@ interface Buku {
 interface DetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  type: "jurnal" | "hki" | "buku";
-  data: unknown;
+  type: "artikel" | "hki" | "buku";
+  data: unknown[] | null | undefined;
   title: string;
 }
 
 const getTypeIcon = (type: string) => {
   switch (type) {
-    case "jurnal":
+    case "artikel":
       return <Award className="w-5 h-5 text-red-500" />;
     case "hki":
       return <FileText className="w-5 h-5 text-yellow-500" />;
@@ -75,7 +75,7 @@ const getTypeIcon = (type: string) => {
 
 const getTypeColor = (type: string) => {
   switch (type) {
-    case "jurnal":
+    case "artikel":
       return "bg-red-50 border-red-200 text-red-700";
     case "hki":
       return "bg-yellow-50 border-yellow-200 text-yellow-700";
@@ -101,25 +101,25 @@ export function DetailModal({
     });
   };
 
-  const renderJurnal = (jurnal: Jurnal) => (
+  const renderArtikel = (artikel: Artikel) => (
     <Card
-      key={jurnal.id}
+      key={artikel.id}
       className="mb-4 border-l-4 border-l-red-500">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-semibold text-gray-900">
-          {jurnal.judul}
+          {artikel.judul}
         </CardTitle>
         <div className="flex flex-wrap gap-2 mt-2">
           <Badge
             variant="outline"
             className="bg-red-50 text-red-700 border-red-200">
-            {jurnal.kategori}
+            {artikel.kategori}
           </Badge>
-          {jurnal.level && (
+          {artikel.level && (
             <Badge
               variant="outline"
               className="bg-blue-50 text-blue-700 border-blue-200">
-              Level: {jurnal.level}
+              Level: {artikel.level}
             </Badge>
           )}
         </div>
@@ -134,15 +134,17 @@ export function DetailModal({
               </span>
             </div>
             <p className="text-sm text-gray-600 ml-6">
-              {jurnal.author.join(", ")}
+              {artikel.author.join(", ")}
             </p>
           </div>
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
               <Book className="w-4 h-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">Jurnal:</span>
+              <span className="text-sm font-medium text-gray-700">
+                Artikel:
+              </span>
             </div>
-            <p className="text-sm text-gray-600 ml-6">{jurnal.namaJurnal}</p>
+            <p className="text-sm text-gray-600 ml-6">{artikel.namaArtikel}</p>
           </div>
         </div>
         <div className="space-y-2">
@@ -152,17 +154,17 @@ export function DetailModal({
               Publisher:
             </span>
           </div>
-          <p className="text-sm text-gray-600 ml-6">{jurnal.publisher}</p>
+          <p className="text-sm text-gray-600 ml-6">{artikel.publisher}</p>
         </div>
-        {jurnal.linkJurnal && (
+        {artikel.linkArtikel && (
           <div className="pt-2">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => window.open(jurnal.linkJurnal, "_blank")}
+              onClick={() => window.open(artikel.linkArtikel, "_blank")}
               className="w-full">
               <ExternalLink className="w-4 h-4 mr-2" />
-              Lihat Jurnal
+              Lihat Artikel
             </Button>
           </div>
         )}
@@ -304,7 +306,7 @@ export function DetailModal({
   );
 
   const renderContent = () => {
-    if (!data) {
+    if (!data || (Array.isArray(data) && data.length === 0)) {
       return (
         <div className="flex flex-col items-center justify-center py-12">
           <div
@@ -325,9 +327,11 @@ export function DetailModal({
 
     return (
       <div className="space-y-4">
-        {type === "jurnal" && renderJurnal(data as Jurnal)}
-        {type === "hki" && renderHKI(data as HKI)}
-        {type === "buku" && renderBuku(data as Buku)}
+        {type === "artikel" &&
+          (data as unknown[]).map((a) => renderArtikel(a as Artikel))}
+        {type === "hki" && (data as unknown[]).map((h) => renderHKI(h as HKI))}
+        {type === "buku" &&
+          (data as unknown[]).map((b) => renderBuku(b as Buku))}
       </div>
     );
   };
@@ -344,7 +348,7 @@ export function DetailModal({
             <Badge
               variant="secondary"
               className="ml-2">
-              {data ? "1" : "0"} item
+              {Array.isArray(data) ? data.length : 0} item
             </Badge>
           </DialogTitle>
         </DialogHeader>

@@ -6,6 +6,14 @@ export enum PostType {
   WEBINAR = "WEBINAR",
 }
 
+export enum KategoriArtikel {
+  OJS = "OJS",
+  SINTA = "SINTA",
+  INTERNASIONAL = "INTERNASIONAL",
+  WOS = "WOS",
+  SCOPUS = "SCOPUS",
+}
+
 export interface Post {
   id: string;
   type: PostType;
@@ -46,6 +54,41 @@ export interface CreatePostData {
 }
 
 export interface UpdatePostData extends Partial<CreatePostData> {
+  id: string;
+}
+
+export interface Artikel {
+  id: string;
+  judul: string;
+  penulis: string[];
+  kategori: KategoriArtikel;
+  abstrak: string;
+  konten: string;
+  tanggalPublikasi: Date;
+  linkPublikasi?: string;
+  thumbnail?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  authorId: string;
+  author: {
+    id: string;
+    name: string | null;
+    email: string;
+  };
+}
+
+export interface CreateArtikelData {
+  judul: string;
+  penulis: string[];
+  kategori: KategoriArtikel;
+  abstrak: string;
+  konten: string;
+  tanggalPublikasi: string;
+  linkPublikasi?: string;
+  thumbnail?: File | null;
+}
+
+export interface UpdateArtikelData extends Partial<CreateArtikelData> {
   id: string;
 }
 

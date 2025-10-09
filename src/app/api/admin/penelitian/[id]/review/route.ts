@@ -118,19 +118,8 @@ export async function PUT(
         approvedAt: new Date(),
         approvalNotes: approvalNotes || null,
       };
-    } else if (status === "ACC_LAPORAN_KEMAJUAN_100") {
-      // Admin menyetujui laporan kemajuan 100% - dari REVIEW_LAPORAN_KEMAJUAN_100 ke ACC_LAPORAN_KEMAJUAN_100
-      updateData = {
-        ...updateData,
-        reviewedById: session.user.id,
-        reviewedAt: new Date(),
-        reviewNotes: reviewNotes,
-        approvedById: session.user.id,
-        approvedAt: new Date(),
-        approvalNotes: approvalNotes || null,
-      };
     } else if (status === "SELESAI") {
-      // Admin menyelesaikan penelitian - dari ACC_LAPORAN_KEMAJUAN_100 ke SELESAI
+      // Admin menyelesaikan penelitian - dari ACC_LAPORAN_KEMAJUAN_60 ke SELESAI (setelah dosen upload laporan akhir)
       updateData = {
         ...updateData,
         reviewedById: session.user.id,

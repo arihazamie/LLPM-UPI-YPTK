@@ -15,6 +15,7 @@ import {
   Globe,
   Star,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
@@ -63,6 +64,8 @@ const Home = () => {
   const stats = statsData?.totals;
   const currentYear = new Date().getFullYear();
 
+  // helper to detect numeric values from displayValue
+
   const displayValue = (
     value: number | string | null | undefined,
     isLoading: boolean,
@@ -88,6 +91,27 @@ const Home = () => {
               style={{ animationDuration: "20s" }}></div>
           </div>
         </div>
+
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <Image
+            src={"/logo.png"}
+            alt=""
+            width={200}
+            height={200}
+            role="presentation"
+            className="absolute left-[-60px] top-1/2 -translate-y-1/2 w-56 md:w-80 lg:w-96 opacity-10 grayscale contrast-75"
+          />
+          <Image
+            src={"/yptk.png"}
+            alt=""
+            width={400}
+            height={400}
+            role="presentation"
+            className="absolute right-[-60px] top-1/2 -translate-y-1/2 w-56 md:w-80 lg:w-96 opacity-10 grayscale contrast-75"
+          />
+        </div>
+
+        <div className="absolute inset-0 pointer-events-none" />
 
         <div className="relative container mx-auto px-6 py-32">
           <div className="text-center space-y-12">
@@ -156,7 +180,6 @@ const Home = () => {
             </p>
           </div>
 
-          {/* Clean stats grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
             {[
               {
@@ -168,8 +191,12 @@ const Home = () => {
                   error
                 ),
                 total: displayValue(stats?.publikasi?.all, loading, error),
-                color: "text-blue-600",
-                bgColor: "bg-blue-50",
+                container: "bg-red-600 text-white",
+                chip: "bg-white/15 text-white/80",
+                iconWrap: "bg-white/15 text-white",
+                meta: "text-white/85",
+                barTrack: "bg-white/20",
+                barFill: "bg-white",
                 description: "Karya ilmiah terpublikasi",
               },
               {
@@ -177,8 +204,12 @@ const Home = () => {
                 title: "Buku",
                 thisYear: displayValue(stats?.buku?.thisYear, loading, error),
                 total: displayValue(stats?.buku?.all, loading, error),
-                color: "text-green-600",
-                bgColor: "bg-green-50",
+                container: "bg-amber-500 text-white",
+                chip: "bg-black/10 text-white/90",
+                iconWrap: "bg-white/15 text-white",
+                meta: "text-white/90",
+                barTrack: "bg-white/25",
+                barFill: "bg-white",
                 description: "Buku referensi",
               },
               {
@@ -186,8 +217,12 @@ const Home = () => {
                 title: "HKI",
                 thisYear: displayValue(stats?.hki?.thisYear, loading, error),
                 total: displayValue(stats?.hki?.all, loading, error),
-                color: "text-purple-600",
-                bgColor: "bg-purple-50",
+                container: "bg-red-700 text-white",
+                chip: "bg-white/15 text-white/80",
+                iconWrap: "bg-white/15 text-white",
+                meta: "text-white/85",
+                barTrack: "bg-white/20",
+                barFill: "bg-white",
                 description: "Hak Kekayaan Intelektual",
               },
               {
@@ -195,53 +230,81 @@ const Home = () => {
                 title: "PKM",
                 thisYear: displayValue(stats?.pkm?.thisYear, loading, error),
                 total: displayValue(stats?.pkm?.all, loading, error),
-                color: "text-orange-600",
-                bgColor: "bg-orange-50",
+                container: "bg-amber-600 text-white",
+                chip: "bg-black/10 text-white/90",
+                iconWrap: "bg-white/15 text-white",
+                meta: "text-white/90",
+                barTrack: "bg-white/25",
+                barFill: "bg-white",
                 description: "Pengabdian Kepada Masyarakat",
               },
-            ].map((stat, index) => (
-              <div
-                key={index}
-                className="group bg-white border border-slate-200 rounded-xl p-6 hover:shadow-lg hover:border-slate-300 transition-all duration-300">
+            ].map((stat, index) => {
+              const ty = stat.thisYear;
+              const tt = stat.total;
+              const ratio =
+                typeof ty === "number" && typeof tt === "number" && tt > 0
+                  ? Math.min(100, Math.round((ty / tt) * 100))
+                  : null;
+
+              return (
                 <div
-                  className={`w-12 h-12 ${stat.bgColor} rounded-lg flex items-center justify-center mb-4 group-hover:scale-105 transition-transform duration-300`}>
-                  <stat.icon className={`h-6 w-6 ${stat.color}`} />
-                </div>
-
-                <div className="space-y-2 mb-3">
-                  <div className="flex items-baseline space-x-2">
-                    <h3
-                      className={`font-bold text-slate-900 ${
-                        stat.thisYear === "Belum ada data"
-                          ? "text-sm"
-                          : "text-2xl"
-                      }`}>
-                      {stat.thisYear}
-                    </h3>
-                    <span className="text-sm text-slate-500">
-                      /{currentYear}
-                    </span>
+                  key={index}
+                  className={`group relative rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${stat.container}`}>
+                  <div
+                    className={`absolute right-3 top-3 inline-flex items-center gap-1 rounded-full px-2 py-1 ${stat.chip}`}>
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-300"></span>
+                    <span className="text-[10px] leading-3">Live</span>
                   </div>
-                  <div className="flex items-center space-x-1 text-slate-500">
-                    <Globe className="h-3 w-3" />
-                    <span
-                      className={`${
-                        stat.total === "Belum ada data" ? "text-xs" : "text-xs"
-                      }`}>
-                      Total: {stat.total}
-                    </span>
-                  </div>
-                </div>
 
-                <h4 className="font-semibold text-slate-900 mb-1">
-                  {stat.title}
-                </h4>
-                <p className="text-sm text-slate-600">{stat.description}</p>
-              </div>
-            ))}
+                  <div
+                    className={`w-12 h-12 ${stat.iconWrap} rounded-lg flex items-center justify-center mb-4 group-hover:scale-105 transition-transform duration-300`}>
+                    <stat.icon className="h-6 w-6" />
+                  </div>
+
+                  <div className="space-y-2 mb-3">
+                    <div className="flex items-baseline space-x-2">
+                      <h3
+                        className={`font-bold ${
+                          stat.thisYear === "Belum ada data"
+                            ? "text-sm"
+                            : "text-2xl"
+                        }`}>
+                        {stat.thisYear}
+                      </h3>
+                      <span className={`text-sm ${stat.meta}`}>
+                        /{currentYear}
+                      </span>
+                    </div>
+                    <div className={`flex items-center gap-2 ${stat.meta}`}>
+                      <Globe className="h-3 w-3" />
+                      <span className="text-xs">Total: {stat.total}</span>
+                    </div>
+                  </div>
+
+                  <h4 className="font-semibold mb-1">{stat.title}</h4>
+                  <p className="text-sm opacity-90 mb-4">{stat.description}</p>
+
+                  {ratio !== null && (
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-xs opacity-90">
+                        <span>Progress / Total</span>
+                        <span className="font-medium">{ratio}%</span>
+                      </div>
+                      <div
+                        className={`h-2 w-full rounded-full overflow-hidden ${stat.barTrack}`}>
+                        <div
+                          className={`h-full ${stat.barFill}`}
+                          style={{ width: `${ratio}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
-          <div className="bg-slate-50 rounded-2xl p-8 mb-16">
+          <div className="rounded-2xl p-8 mb-16 bg-slate-50">
             <div className="text-center mb-8">
               <h3 className="text-2xl font-bold text-slate-900 mb-2">
                 Detail Publikasi
@@ -252,23 +315,24 @@ const Home = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-xl p-6 border border-slate-200">
+              {/* SCOPUS - red surface */}
+              <div className="rounded-xl p-6 bg-red-600 text-white">
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                    <Star className="h-5 w-5 text-red-600" />
+                  <div className="w-10 h-10 bg-white/15 rounded-lg flex items-center justify-center">
+                    <Star className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-slate-900">SCOPUS</h4>
-                    <p className="text-sm text-slate-600">
+                    <h4 className="font-semibold">SCOPUS</h4>
+                    <p className="text-sm text-white/80">
                       Jurnal terindeks SCOPUS
                     </p>
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-600">Tahun {currentYear}:</span>
+                    <span className="text-white/85">Tahun {currentYear}:</span>
                     <span
-                      className={`font-bold text-red-600 ${
+                      className={`font-bold ${
                         displayValue(
                           stats?.publikasi?.byKategori?.scopus?.thisYear,
                           loading,
@@ -285,8 +349,8 @@ const Home = () => {
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-600">Total:</span>
-                    <span className="font-semibold text-slate-900">
+                    <span className="text-white/85">Total:</span>
+                    <span className="font-semibold">
                       {displayValue(
                         stats?.publikasi?.byKategori?.scopus?.all,
                         loading,
@@ -297,23 +361,24 @@ const Home = () => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl p-6 border border-slate-200">
+              {/* SINTA - amber surface */}
+              <div className="rounded-xl p-6 bg-amber-500 text-white">
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                    <Trophy className="h-5 w-5 text-yellow-600" />
+                  <div className="w-10 h-10 bg-white/15 rounded-lg flex items-center justify-center">
+                    <Trophy className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-slate-900">SINTA</h4>
-                    <p className="text-sm text-slate-600">
+                    <h4 className="font-semibold">SINTA</h4>
+                    <p className="text-sm text-white/90">
                       Jurnal terindeks SINTA
                     </p>
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-600">Tahun {currentYear}:</span>
+                    <span className="text-white/90">Tahun {currentYear}:</span>
                     <span
-                      className={`font-bold text-yellow-600 ${
+                      className={`font-bold ${
                         displayValue(
                           stats?.publikasi?.byKategori?.sinta?.thisYear,
                           loading,
@@ -330,8 +395,8 @@ const Home = () => {
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-600">Total:</span>
-                    <span className="font-semibold text-slate-900">
+                    <span className="text-white/90">Total:</span>
+                    <span className="font-semibold">
                       {displayValue(
                         stats?.publikasi?.byKategori?.sinta?.all,
                         loading,
@@ -345,7 +410,13 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-slate-900 rounded-xl p-6 text-white">
+            <div className="relative bg-slate-900 rounded-xl p-6 text-white">
+              <div className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-300"></span>
+                <span className="text-[10px] leading-3 text-white/80">
+                  Realtime
+                </span>
+              </div>
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center">
                   <TrendingUp className="h-6 w-6 text-white" />
@@ -367,7 +438,13 @@ const Home = () => {
               <p className="text-slate-300 text-sm">Pencapaian tahun ini</p>
             </div>
 
-            <div className="bg-red-600 rounded-xl p-6 text-white">
+            <div className="relative bg-red-600 rounded-xl p-6 text-white">
+              <div className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-yellow-200"></span>
+                <span className="text-[10px] leading-3 text-white/90">
+                  Highlight
+                </span>
+              </div>
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center">
                   <Award className="h-6 w-6 text-white" />
@@ -389,7 +466,13 @@ const Home = () => {
               <p className="text-red-100 text-sm">Prestasi {currentYear}</p>
             </div>
 
-            <div className="bg-yellow-500 rounded-xl p-6 text-white">
+            <div className="relative bg-yellow-500 rounded-xl p-6 text-white">
+              <div className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-black/10 px-2 py-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-white/80"></span>
+                <span className="text-[10px] leading-3 text-white/90">
+                  Summary
+                </span>
+              </div>
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center">
                   <Globe className="h-6 w-6 text-white" />
@@ -418,3 +501,19 @@ const Home = () => {
 };
 
 export default Home;
+<style
+  jsx
+  global>{`
+  /* gentle vertical float animation for header logos */
+  @keyframes floatY {
+    0% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-6px) rotate(1deg);
+    }
+    100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+  }
+`}</style>;

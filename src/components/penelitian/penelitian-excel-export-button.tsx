@@ -9,12 +9,14 @@ interface PenelitianExcelExportButtonProps {
   disabled?: boolean;
 }
 
-export function PenelitianExcelExportButton({ disabled }: PenelitianExcelExportButtonProps) {
+export function PenelitianExcelExportButton({
+  disabled,
+}: PenelitianExcelExportButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async () => {
     setIsExporting(true);
-    
+
     try {
       const response = await fetch("/api/dosen/export/penelitian-excel", {
         method: "GET",
@@ -28,12 +30,14 @@ export function PenelitianExcelExportButton({ disabled }: PenelitianExcelExportB
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `penelitian-upi-yptk-${new Date().toISOString().split('T')[0]}.xlsx`;
+        a.download = `penelitian-upi-yptk-${
+          new Date().toISOString().split("T")[0]
+        }.xlsx`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
-        
+
         toast.success("Data penelitian berhasil diekspor ke Excel");
       } else {
         const error = await response.json();
@@ -50,17 +54,12 @@ export function PenelitianExcelExportButton({ disabled }: PenelitianExcelExportB
 
   return (
     <Button
+      variant="outline"
       onClick={handleExport}
       disabled={disabled || isExporting}
-      variant="outline"
-      className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-800"
-    >
-      {isExporting ? (
-        <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin mr-2" />
-      ) : (
-        <FileSpreadsheet className="w-4 h-4 mr-2" />
-      )}
+      className="flex items-center gap-2">
+      <FileSpreadsheet className="h-4 w-4" />
       {isExporting ? "Mengekspor..." : "Export Excel"}
     </Button>
   );
-} 
+}

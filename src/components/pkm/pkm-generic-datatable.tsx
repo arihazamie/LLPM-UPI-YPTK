@@ -2,7 +2,7 @@
 
 import { DataTable, Column } from "@/components/ui/data-table";
 import { User, Award, FileText, Book, Eye } from "lucide-react";
-import type { PKM, Jurnal, HKI, Buku } from "@/types/pkm-types";
+import type { PKM, Artikel, HKI, Buku } from "@/types/pkm-types";
 import { ExternalLinkButton } from "./external-link-button";
 import { Button } from "@/components/ui/button";
 
@@ -11,8 +11,8 @@ interface PKMGenericDataTableProps {
   onEdit: (pkm: PKM) => void;
   onDelete: (pkm: PKM) => void;
   onViewDetail: (
-    type: "jurnal" | "hki" | "buku",
-    data: Jurnal | HKI | Buku,
+    type: "artikel" | "hki" | "buku",
+    data: (Artikel | HKI | Buku)[],
     title: string
   ) => void;
   isLoading?: boolean;
@@ -43,10 +43,10 @@ export function PKMGenericDataTable({
     });
   };
 
-  // Cek apakah ada data jurnal, HKI, atau buku di seluruh dataset
-  const hasJurnal = data.some((pkm) => pkm.jurnal);
-  const hasHKI = data.some((pkm) => pkm.hki);
-  const hasBuku = data.some((pkm) => pkm.buku);
+  // Cek apakah ada data artikel, HKI, atau buku di seluruh dataset
+  const hasArtikel = data.some((pkm) => pkm.artikel && pkm.artikel.length > 0);
+  const hasHKI = data.some((pkm) => pkm.hki && pkm.hki.length > 0);
+  const hasBuku = data.some((pkm) => pkm.buku && pkm.buku.length > 0);
 
   const columns: Column<PKM>[] = [
     // Menghapus kolom ID
@@ -81,33 +81,35 @@ export function PKMGenericDataTable({
         />
       ),
     },
-    // Hanya tampilkan kolom Jurnal jika ada data
-    ...(hasJurnal
+    // Hanya tampilkan kolom Artikel jika ada data
+    ...(hasArtikel
       ? [
           {
-            key: "jurnal",
-            header: "Jurnal",
+            key: "artikel",
+            header: "Artikel",
             render: (pkm: PKM) => (
               <div className="flex items-center space-x-2">
                 <div className="flex items-center space-x-1">
                   <Award className="w-4 h-4 text-red-500" />
                   <span className="text-sm">
-                    {pkm.jurnal ? (
-                      <span className="text-red-600 font-medium">1</span>
+                    {pkm.artikel && pkm.artikel.length > 0 ? (
+                      <span className="text-red-600 font-medium">
+                        {pkm.artikel.length}
+                      </span>
                     ) : (
                       <span className="text-gray-500">0</span>
                     )}
                   </span>
                 </div>
-                {pkm.jurnal && (
+                {pkm.artikel && pkm.artikel.length > 0 && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() =>
                       onViewDetail(
-                        "jurnal",
-                        pkm.jurnal!,
-                        `Detail Jurnal PKM #${pkm.id}`
+                        "artikel",
+                        pkm.artikel!,
+                        `Detail Artikel PKM #${pkm.id}`
                       )
                     }
                     className="h-6 w-6 p-0 hover:bg-red-50">
@@ -131,14 +133,16 @@ export function PKMGenericDataTable({
                 <div className="flex items-center space-x-1">
                   <FileText className="w-4 h-4 text-yellow-500" />
                   <span className="text-sm">
-                    {pkm.hki ? (
-                      <span className="text-red-600 font-medium">1</span>
+                    {pkm.hki && pkm.hki.length > 0 ? (
+                      <span className="text-red-600 font-medium">
+                        {pkm.hki.length}
+                      </span>
                     ) : (
                       <span className="text-gray-500">0</span>
                     )}
                   </span>
                 </div>
-                {pkm.hki && (
+                {pkm.hki && pkm.hki.length > 0 && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -166,14 +170,16 @@ export function PKMGenericDataTable({
                 <div className="flex items-center space-x-1">
                   <Book className="w-4 h-4 text-orange-500" />
                   <span className="text-sm">
-                    {pkm.buku ? (
-                      <span className="text-red-600 font-medium">1</span>
+                    {pkm.buku && pkm.buku.length > 0 ? (
+                      <span className="text-red-600 font-medium">
+                        {pkm.buku.length}
+                      </span>
                     ) : (
                       <span className="text-gray-500">0</span>
                     )}
                   </span>
                 </div>
-                {pkm.buku && (
+                {pkm.buku && pkm.buku.length > 0 && (
                   <Button
                     variant="ghost"
                     size="sm"

@@ -58,40 +58,36 @@ const getKategoriLabel = (kategori: KategoriPengabdian) => {
 const getStatusColor = (status: StatusPengabdian) => {
   switch (status) {
     case StatusPengabdian.REVIEW:
-      return "bg-yellow-100 text-yellow-800";
+      return "Review Proposal";
     case StatusPengabdian.ACC_PROPOSAL:
-      return "bg-blue-100 text-blue-800";
+      return "Proposal Disetujui";
     case StatusPengabdian.REVIEW_LAPORAN_KEMAJUAN_60:
-      return "bg-orange-100 text-orange-800";
+      return "Review Laporan 60%";
     case StatusPengabdian.ACC_LAPORAN_KEMAJUAN_60:
-      return "bg-blue-100 text-blue-800";
+      return "Laporan 60% Disetujui";
     case StatusPengabdian.REVIEW_LAPORAN_KEMAJUAN_100:
-      return "bg-purple-100 text-purple-800";
-    case StatusPengabdian.ACC_LAPORAN_KEMAJUAN_100:
-      return "bg-blue-100 text-blue-800";
+      return "Review Laporan 100%";
     case StatusPengabdian.SELESAI:
-      return "bg-green-100 text-green-800";
+      return "Selesai";
     case StatusPengabdian.DITOLAK:
-      return "bg-red-100 text-red-800";
+      return "Ditolak";
     default:
-      return "bg-gray-100 text-gray-800";
+      return status;
   }
 };
 
 const getStatusLabel = (status: StatusPengabdian) => {
   switch (status) {
     case StatusPengabdian.REVIEW:
-      return "Review";
+      return "Review Proposal";
     case StatusPengabdian.ACC_PROPOSAL:
       return "Proposal Disetujui";
     case StatusPengabdian.REVIEW_LAPORAN_KEMAJUAN_60:
-      return "Review Laporan Kemajuan 60%";
+      return "Review Laporan 60%";
     case StatusPengabdian.ACC_LAPORAN_KEMAJUAN_60:
-      return "Laporan Kemajuan 60% Disetujui";
+      return "Laporan 60% Disetujui";
     case StatusPengabdian.REVIEW_LAPORAN_KEMAJUAN_100:
-      return "Review Laporan Kemajuan 100%";
-    case StatusPengabdian.ACC_LAPORAN_KEMAJUAN_100:
-      return "Laporan Kemajuan 100% Disetujui";
+      return "Review Laporan 100%";
     case StatusPengabdian.SELESAI:
       return "Selesai";
     case StatusPengabdian.DITOLAK:
@@ -107,9 +103,58 @@ export default function PengabdianReviewModal({
   pengabdian,
   onSubmit,
 }: PengabdianReviewModalProps) {
-  const [status, setStatus] = useState<StatusPengabdian>(pengabdian.statusPengabdian);
+  const [status, setStatus] = useState<StatusPengabdian>(
+    getNextStatus(pengabdian.statusPengabdian)
+  );
   const [reviewNotes, setReviewNotes] = useState("");
   const [approvalNotes, setApprovalNotes] = useState("");
+
+  // Menentukan status berikutnya berdasarkan status saat ini
+  function getNextStatus(currentStatus: StatusPengabdian): StatusPengabdian {
+    switch (currentStatus) {
+      case StatusPengabdian.REVIEW:
+        return StatusPengabdian.ACC_PROPOSAL;
+      case StatusPengabdian.ACC_PROPOSAL:
+        return StatusPengabdian.ACC_PROPOSAL;
+      case StatusPengabdian.REVIEW_LAPORAN_KEMAJUAN_60:
+        return StatusPengabdian.ACC_LAPORAN_KEMAJUAN_60;
+      case StatusPengabdian.ACC_LAPORAN_KEMAJUAN_60:
+        return StatusPengabdian.ACC_LAPORAN_KEMAJUAN_60;
+      case StatusPengabdian.REVIEW_LAPORAN_KEMAJUAN_100:
+        return StatusPengabdian.SELESAI; // Langsung ke SELESAI tanpa ACC_LAPORAN_KEMAJUAN_100
+      default:
+        return currentStatus;
+    }
+  }
+
+  // Mendapatkan opsi status yang tersedia berdasarkan status saat ini
+  const getAvailableStatusOptions = () => {
+    const options: StatusPengabdian[] = [StatusPengabdian.DITOLAK]; // Selalu bisa menolak
+
+    switch (pengabdian.statusPengabdian) {
+      case StatusPengabdian.REVIEW:
+        options.push(StatusPengabdian.ACC_PROPOSAL);
+        break;
+      case StatusPengabdian.ACC_PROPOSAL:
+        break;
+      case StatusPengabdian.REVIEW_LAPORAN_KEMAJUAN_60:
+        options.push(StatusPengabdian.ACC_LAPORAN_KEMAJUAN_60);
+        break;
+      case StatusPengabdian.ACC_LAPORAN_KEMAJUAN_60:
+        break;
+      case StatusPengabdian.REVIEW_LAPORAN_KEMAJUAN_100:
+        options.push(StatusPengabdian.REVIEW_LAPORAN_KEMAJUAN_100);
+        break;
+      case StatusPengabdian.SELESAI:
+        break;
+      case StatusPengabdian.DITOLAK:
+        break;
+      default:
+        break;
+    }
+
+    return options;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,6 +169,10 @@ export default function PengabdianReviewModal({
       reviewNotes: reviewNotes.trim(),
       approvalNotes: approvalNotes.trim() || undefined,
     });
+
+    toast.success(
+      `Status pengabdian berhasil diperbarui menjadi ${getStatusLabel(status)}`
+    );
   };
 
   const ketua = pengabdian.dosenPengabdian.find(
@@ -134,7 +183,9 @@ export default function PengabdianReviewModal({
   );
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
@@ -142,7 +193,9 @@ export default function PengabdianReviewModal({
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6">
           {/* Header Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -160,7 +213,9 @@ export default function PengabdianReviewModal({
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <h3 className="text-lg font-semibold mb-2">Kategori Pengabdian</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                Kategori Pengabdian
+              </h3>
               <p className="text-gray-700">
                 {getKategoriLabel(pengabdian.kategoriPengabdian)}
               </p>
@@ -195,7 +250,9 @@ export default function PengabdianReviewModal({
               <h3 className="text-lg font-semibold mb-2">Luaran</h3>
               <div className="flex flex-wrap gap-2">
                 {pengabdian.luaran.map((luaran, index) => (
-                  <Badge key={index} variant="outline">
+                  <Badge
+                    key={index}
+                    variant="outline">
                     {luaran.replace(/_/g, " ")}
                   </Badge>
                 ))}
@@ -210,11 +267,21 @@ export default function PengabdianReviewModal({
               {/* Ketua */}
               {ketua && (
                 <div className="border rounded-lg p-4">
-                  <h4 className="font-medium text-blue-600 mb-2">Ketua Pengabdian</h4>
+                  <h4 className="font-medium text-blue-600 mb-2">
+                    Ketua Pengabdian
+                  </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <p><span className="font-medium">Nama:</span> {ketua.namaDosen}</p>
-                    <p><span className="font-medium">NIDN:</span> {ketua.NIDN}</p>
-                    <p><span className="font-medium">Program Studi:</span> {ketua.programStudiDosenPengabdian.replace(/_/g, " ")}</p>
+                    <p>
+                      <span className="font-medium">Nama:</span>{" "}
+                      {ketua.namaDosen}
+                    </p>
+                    <p>
+                      <span className="font-medium">NIDN:</span> {ketua.NIDN}
+                    </p>
+                    <p>
+                      <span className="font-medium">Program Studi:</span>{" "}
+                      {ketua.programStudiDosenPengabdian.replace(/_/g, " ")}
+                    </p>
                   </div>
                 </div>
               )}
@@ -222,13 +289,26 @@ export default function PengabdianReviewModal({
               {/* Anggota */}
               {anggota.length > 0 && (
                 <div className="border rounded-lg p-4">
-                  <h4 className="font-medium text-green-600 mb-2">Anggota Pengabdian</h4>
+                  <h4 className="font-medium text-green-600 mb-2">
+                    Anggota Pengabdian
+                  </h4>
                   <div className="space-y-2">
                     {anggota.map((dosen, index) => (
-                      <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <p><span className="font-medium">Nama:</span> {dosen.namaDosen}</p>
-                        <p><span className="font-medium">NIDN:</span> {dosen.NIDN}</p>
-                        <p><span className="font-medium">Program Studi:</span> {dosen.programStudiDosenPengabdian.replace(/_/g, " ")}</p>
+                      <div
+                        key={index}
+                        className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <p>
+                          <span className="font-medium">Nama:</span>{" "}
+                          {dosen.namaDosen}
+                        </p>
+                        <p>
+                          <span className="font-medium">NIDN:</span>{" "}
+                          {dosen.NIDN}
+                        </p>
+                        <p>
+                          <span className="font-medium">Program Studi:</span>{" "}
+                          {dosen.programStudiDosenPengabdian.replace(/_/g, " ")}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -240,7 +320,7 @@ export default function PengabdianReviewModal({
           {/* Links */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Dokumen</h3>
-            
+
             {/* Link Proposal */}
             <div>
               <Label className="text-sm font-medium">Link Proposal</Label>
@@ -252,8 +332,9 @@ export default function PengabdianReviewModal({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => window.open(pengabdian.linkProposal, "_blank")}
-                >
+                  onClick={() =>
+                    window.open(pengabdian.linkProposal, "_blank")
+                  }>
                   <ExternalLink className="h-4 w-4" />
                 </Button>
               </div>
@@ -262,7 +343,9 @@ export default function PengabdianReviewModal({
             {/* Link Laporan Kemajuan */}
             {pengabdian.linkLaporanKemajuan && (
               <div>
-                <Label className="text-sm font-medium">Link Laporan Kemajuan</Label>
+                <Label className="text-sm font-medium">
+                  Link Laporan Kemajuan
+                </Label>
                 <div className="flex items-center space-x-2 mt-1">
                   <p className="text-sm text-gray-600 flex-1 truncate">
                     {pengabdian.linkLaporanKemajuan}
@@ -271,18 +354,33 @@ export default function PengabdianReviewModal({
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(pengabdian.linkLaporanKemajuan, "_blank")}
-                  >
+                    onClick={() =>
+                      window.open(pengabdian.linkLaporanKemajuan, "_blank")
+                    }>
                     <ExternalLink className="h-4 w-4" />
                   </Button>
                 </div>
+
+                {/* Status Luaran 60% */}
+                {pengabdian.statusLuaran && (
+                  <div className="mt-2">
+                    <Label className="text-sm font-medium">
+                      Status Luaran 60%
+                    </Label>
+                    <p className="text-sm text-gray-600 mt-1 p-2 bg-gray-50 rounded-md">
+                      {pengabdian.statusLuaran}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
             {/* Link Laporan Akhir */}
             {pengabdian.linkLaporanAkhir && (
               <div>
-                <Label className="text-sm font-medium">Link Laporan Akhir</Label>
+                <Label className="text-sm font-medium">
+                  Link Laporan Akhir
+                </Label>
                 <div className="flex items-center space-x-2 mt-1">
                   <p className="text-sm text-gray-600 flex-1 truncate">
                     {pengabdian.linkLaporanAkhir}
@@ -291,8 +389,9 @@ export default function PengabdianReviewModal({
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(pengabdian.linkLaporanAkhir, "_blank")}
-                  >
+                    onClick={() =>
+                      window.open(pengabdian.linkLaporanAkhir, "_blank")
+                    }>
                     <ExternalLink className="h-4 w-4" />
                   </Button>
                 </div>
@@ -303,22 +402,34 @@ export default function PengabdianReviewModal({
           {/* Review Form */}
           <div className="space-y-4 border-t pt-6">
             <h3 className="text-lg font-semibold">Form Review</h3>
-            
+
             {/* Status */}
             <div className="space-y-2">
               <Label htmlFor="status">Status *</Label>
-              <Select value={status} onValueChange={(value) => setStatus(value as StatusPengabdian)}>
+              <Select
+                value={status}
+                onValueChange={(value) => setStatus(value as StatusPengabdian)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih status" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.values(StatusPengabdian).map((statusOption) => (
-                    <SelectItem key={statusOption} value={statusOption}>
+                  {getAvailableStatusOptions().map((statusOption) => (
+                    <SelectItem
+                      key={statusOption}
+                      value={statusOption}>
                       {getStatusLabel(statusOption)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-sm text-gray-500 mt-1">
+                Status akan berubah dari{" "}
+                <span className="font-medium">
+                  {getStatusLabel(pengabdian.statusPengabdian)}
+                </span>{" "}
+                menjadi{" "}
+                <span className="font-medium">{getStatusLabel(status)}</span>
+              </p>
             </div>
 
             {/* Review Notes */}
@@ -349,12 +460,13 @@ export default function PengabdianReviewModal({
 
           {/* Action Buttons */}
           <div className="flex justify-end space-x-2 pt-4 border-t">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}>
               Batal
             </Button>
-            <Button type="submit">
-              Simpan Review
-            </Button>
+            <Button type="submit">Simpan Review</Button>
           </div>
         </form>
       </DialogContent>

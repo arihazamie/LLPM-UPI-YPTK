@@ -1,25 +1,4 @@
-// PKM and related types based on Prisma schema
-export enum KategoriJurnal {
-  OJS = "OJS",
-  SINTA = "SINTA",
-  INTERNASIONAL = "INTERNASIONAL",
-  WOS = "WOS",
-  SCOPUS = "SCOPUS",
-}
-
-export enum JenisBuku {
-  BUKU_AJAR = "BUKU_AJAR",
-  REFERENSI = "REFERENSI",
-}
-
-export enum JenisPrototype {
-  ALAT = "ALAT",
-  APLIKASI = "APLIKASI",
-  ALGORITMA = "ALGORITMA",
-  MODUL = "MODUL",
-  PSEUDOCODE = "PSEUDOCODE",
-  METODE = "METODE",
-}
+// ==================== COMMON ENUMS ====================
 
 export enum Role {
   PIMPINAN = "PIMPINAN",
@@ -33,49 +12,6 @@ export enum PostType {
   BERITA = "BERITA",
   PENGUMUMAN = "PENGUMUMAN",
   WEBINAR = "WEBINAR",
-}
-
-// Enum untuk Penelitian
-export enum StatusPenelitian {
-  REVIEW = "REVIEW",
-  ACC_PROPOSAL = "ACC_PROPOSAL",
-  REVIEW_LAPORAN_KEMAJUAN_60 = "REVIEW_LAPORAN_KEMAJUAN_60",
-  ACC_LAPORAN_KEMAJUAN_60 = "ACC_LAPORAN_KEMAJUAN_60",
-  REVIEW_LAPORAN_KEMAJUAN_100 = "REVIEW_LAPORAN_KEMAJUAN_100",
-  ACC_LAPORAN_KEMAJUAN_100 = "ACC_LAPORAN_KEMAJUAN_100",
-  SELESAI = "SELESAI",
-  DITOLAK = "DITOLAK",
-}
-
-export enum LuaranPenelitian {
-  SEMINAR_INTERNASIONAL_SCOPUS_ATLANTIS_WOS = "SEMINAR_INTERNASIONAL_SCOPUS_ATLANTIS_WOS",
-  ARTIKEL_JURNAL_NASIONAL_SINTA_5 = "ARTIKEL_JURNAL_NASIONAL_SINTA_5",
-  ARTIKEL_JURNAL_NASIONAL_SINTA_4 = "ARTIKEL_JURNAL_NASIONAL_SINTA_4",
-  ARTIKEL_JURNAL_NASIONAL_SINTA_3 = "ARTIKEL_JURNAL_NASIONAL_SINTA_3",
-  ARTIKEL_JURNAL_NASIONAL_SINTA_2 = "ARTIKEL_JURNAL_NASIONAL_SINTA_2",
-  PUBLIKASI_JURNAL_INTERNATIONAL_BEREPUTASI_SCOPUS_WOS = "PUBLIKASI_JURNAL_INTERNATIONAL_BEREPUTASI_SCOPUS_WOS",
-  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q4_WOS = "PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q4_WOS",
-  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q3_WOS = "PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q3_WOS",
-  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q2_WOS = "PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q2_WOS",
-  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q1_WOS = "PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q1_WOS",
-  HKI_PATEN = "HKI_PATEN",
-  BUKU_ISBN = "BUKU_ISBN",
-  PROTOTYPE = "PROTOTYPE",
-}
-
-export enum KategoriPenelitian {
-  PENELITIAN_DOSEN_PEMULA = "PENELITIAN_DOSEN_PEMULA",
-  PENELITIAN_TERAPAN = "PENELITIAN_TERAPAN",
-  PENELITIAN_PENGEMBANGAN = "PENELITIAN_PENGEMBANGAN",
-  PENELITIAN_UNGGULAN_PERGURUAN_TINGGI = "PENELITIAN_UNGGULAN_PERGURUAN_TINGGI",
-  PENELITIAN_GURU_BESAR_PERCEPATAN_PROFESOR = "PENELITIAN_GURU_BESAR_PERCEPATAN_PROFESOR",
-  PENELITIAN_BEKERJASAMA_MITRA_NASIONAL = "PENELITIAN_BEKERJASAMA_MITRA_NASIONAL",
-  PENELITIAN_BEKERJASAMA_MITRA_INTERNASIONAL = "PENELITIAN_BEKERJASAMA_MITRA_INTERNASIONAL",
-}
-
-export enum RoleDosenPenelitian {
-  KETUA = "KETUA",
-  ANGGOTA = "ANGGOTA",
 }
 
 export enum ProgramStudiDosenPenelitian {
@@ -96,6 +32,8 @@ export enum ProgramStudiDosenPenelitian {
   S2_MANAJEMEN = "S2_MANAJEMEN",
   S3_TEKNOLOGI_INFORMASI = "S3_TEKNOLOGI_INFORMASI",
 }
+
+// ==================== COMMON INTERFACES ====================
 
 export interface User {
   id: string;
@@ -122,15 +60,39 @@ export interface Post {
   updatedAt: Date;
 }
 
-export interface Jurnal {
+// ==================== PKM RELATED ====================
+
+export enum KategoriArtikel {
+  OJS = "OJS",
+  SINTA = "SINTA",
+  INTERNASIONAL = "INTERNASIONAL",
+  WOS = "WOS",
+  SCOPUS = "SCOPUS",
+}
+
+export enum JenisBuku {
+  BUKU_AJAR = "BUKU_AJAR",
+  REFERENSI = "REFERENSI",
+}
+
+export enum JenisPrototype {
+  ALAT = "ALAT",
+  APLIKASI = "APLIKASI",
+  ALGORITMA = "ALGORITMA",
+  MODUL = "MODUL",
+  PSEUDOCODE = "PSEUDOCODE",
+  METODE = "METODE",
+}
+
+export interface PkmArtikel {
   id: string;
   author: string[];
   judul: string;
-  namaJurnal: string;
+  namaArtikel: string;
   publisher: string;
-  kategori: KategoriJurnal;
+  kategori: KategoriArtikel;
   level?: string;
-  linkJurnal: string;
+  linkArtikel: string;
   tanggalPublisher: Date;
   pkmId?: string;
   pkm?: PKM;
@@ -186,6 +148,21 @@ export interface Prototype {
   createdAt: Date;
   updatedAt: Date;
 }
+export interface Artikel {
+  id: string;
+  author: string[];
+  judul: string;
+  namaArtikel: string;
+  publisher: string;
+  kategori: KategoriArtikel;
+  level?: string;
+  linkArtikel: string;
+  tanggalPublisher: Date;
+  createdById: string;
+  createdBy: User;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export interface PKM {
   id: string;
@@ -193,14 +170,16 @@ export interface PKM {
   proposal: string;
   laporan: string;
   tanggalPelaksanaan: Date;
-  jurnal?: Jurnal;
-  hki?: HKI;
-  buku?: Buku;
+  artikel?: PkmArtikel[];
+  hki?: HKI[];
+  buku?: Buku[];
   createdById: string;
   createdBy: User;
   createdAt: Date;
   updatedAt: Date;
 }
+
+// ==================== PRESTASI ====================
 
 export interface Prestasi {
   id: string;
@@ -217,6 +196,52 @@ export interface Prestasi {
   updatedAt: Date;
 }
 
+// ==================== PENELITIAN ====================
+
+// ==================== PENELITIAN ====================
+
+export enum StatusPenelitian {
+  REVIEW = "REVIEW",
+  ACC_PROPOSAL = "ACC_PROPOSAL",
+  REVIEW_LAPORAN_KEMAJUAN_60 = "REVIEW_LAPORAN_KEMAJUAN_60",
+  ACC_LAPORAN_KEMAJUAN_60 = "ACC_LAPORAN_KEMAJUAN_60",
+  REVIEW_LAPORAN_KEMAJUAN_100 = "REVIEW_LAPORAN_KEMAJUAN_100",
+  REVIEW_LAPORAN_AKHIR = "REVIEW_LAPORAN_AKHIR",
+  SELESAI = "SELESAI",
+  DITOLAK = "DITOLAK",
+}
+
+export enum LuaranPenelitian {
+  SEMINAR_INTERNASIONAL_SCOPUS_ATLANTIS_WOS = "SEMINAR_INTERNASIONAL_SCOPUS_ATLANTIS_WOS",
+  ARTIKEL_JURNAL_NASIONAL_SINTA_5 = "ARTIKEL_JURNAL_NASIONAL_SINTA_5",
+  ARTIKEL_JURNAL_NASIONAL_SINTA_4 = "ARTIKEL_JURNAL_NASIONAL_SINTA_4",
+  ARTIKEL_JURNAL_NASIONAL_SINTA_3 = "ARTIKEL_JURNAL_NASIONAL_SINTA_3",
+  ARTIKEL_JURNAL_NASIONAL_SINTA_2 = "ARTIKEL_JURNAL_NASIONAL_SINTA_2",
+  PUBLIKASI_JURNAL_INTERNATIONAL_BEREPUTASI_SCOPUS_WOS = "PUBLIKASI_JURNAL_INTERNATIONAL_BEREPUTASI_SCOPUS_WOS",
+  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q4_WOS = "PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q4_WOS",
+  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q3_WOS = "PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q3_WOS",
+  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q2_WOS = "PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q2_WOS",
+  PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q1_WOS = "PUBLIKASI_JURNAL_INTERNATIONAL_SCOPUS_Q1_WOS",
+  HKI_PATEN = "HKI_PATEN",
+  BUKU_ISBN = "BUKU_ISBN",
+  PROTOTYPE = "PROTOTYPE",
+}
+
+export enum KategoriPenelitian {
+  PENELITIAN_DOSEN_PEMULA = "PENELITIAN_DOSEN_PEMULA",
+  PENELITIAN_TERAPAN = "PENELITIAN_TERAPAN",
+  PENELITIAN_PENGEMBANGAN = "PENELITIAN_PENGEMBANGAN",
+  PENELITIAN_UNGGULAN_PERGURUAN_TINGGI = "PENELITIAN_UNGGULAN_PERGURUAN_TINGGI",
+  PENELITIAN_GURU_BESAR_PERCEPATAN_PROFESOR = "PENELITIAN_GURU_BESAR_PERCEPATAN_PROFESOR",
+  PENELITIAN_BEKERJASAMA_MITRA_NASIONAL = "PENELITIAN_BEKERJASAMA_MITRA_NASIONAL",
+  PENELITIAN_BEKERJASAMA_MITRA_INTERNASIONAL = "PENELITIAN_BEKERJASAMA_MITRA_INTERNASIONAL",
+}
+
+export enum RoleDosenPenelitian {
+  KETUA = "KETUA",
+  ANGGOTA = "ANGGOTA",
+}
+
 export interface Penelitian {
   id: string;
   judulPenelitian: string;
@@ -227,6 +252,7 @@ export interface Penelitian {
   sumberAnggaran?: string;
   luaran: LuaranPenelitian[];
   statusPenelitian: StatusPenelitian;
+  statusLuaran?: string;
 
   // Review dan approval fields
   reviewedById?: string;
@@ -239,10 +265,16 @@ export interface Penelitian {
   approvedAt?: Date;
   approvalNotes?: string;
 
+  // Relations
   dosenPenelitian: DosenPenelitian[];
+
+  // Documents
   linkProposal: string;
   linkLaporanKemajuan?: string;
   linkLaporanAkhir?: string;
+  linkLuaran?: string | Record<string, string>; // disamakan seperti Pengabdian
+
+  // Metadata
   createdById: string;
   createdBy: User;
   createdAt: Date;
@@ -255,6 +287,7 @@ export interface DosenPenelitian {
   dosen: User;
   namaDosen: string;
   NIDN: string;
+  noHp?: string; // disamakan dengan DosenPengabdian
   roleDosenPenelitian: RoleDosenPenelitian;
   programStudiDosenPenelitian: ProgramStudiDosenPenelitian;
   penelitianId: string;
@@ -263,14 +296,15 @@ export interface DosenPenelitian {
   updatedAt: Date;
 }
 
-// Enum untuk Pengabdian
+// ==================== PENGABDIAN ====================
+
 export enum StatusPengabdian {
   REVIEW = "REVIEW",
   ACC_PROPOSAL = "ACC_PROPOSAL",
   REVIEW_LAPORAN_KEMAJUAN_60 = "REVIEW_LAPORAN_KEMAJUAN_60",
   ACC_LAPORAN_KEMAJUAN_60 = "ACC_LAPORAN_KEMAJUAN_60",
   REVIEW_LAPORAN_KEMAJUAN_100 = "REVIEW_LAPORAN_KEMAJUAN_100",
-  ACC_LAPORAN_KEMAJUAN_100 = "ACC_LAPORAN_KEMAJUAN_100",
+  REVIEW_LAPORAN_AKHIR = "REVIEW_LAPORAN_AKHIR",
   SELESAI = "SELESAI",
   DITOLAK = "DITOLAK",
 }
@@ -318,6 +352,7 @@ export interface Pengabdian {
   sumberAnggaran?: string;
   luaran: LuaranPengabdian[];
   statusPengabdian: StatusPengabdian;
+  statusLuaran?: string;
 
   // Review dan approval fields
   reviewedById?: string;
@@ -330,10 +365,16 @@ export interface Pengabdian {
   approvedAt?: Date;
   approvalNotes?: string;
 
+  // Relations
   dosenPengabdian: DosenPengabdian[];
+
+  // Documents
   linkProposal: string;
   linkLaporanKemajuan?: string;
   linkLaporanAkhir?: string;
+  linkLuaran?: string | Record<string, string>;
+
+  // Metadata
   createdById: string;
   createdBy: User;
   createdAt: Date;
@@ -346,6 +387,7 @@ export interface DosenPengabdian {
   dosen: User;
   namaDosen: string;
   NIDN: string;
+  noHp?: string;
   roleDosenPengabdian: RoleDosenPengabdian;
   programStudiDosenPengabdian: ProgramStudiDosenPenelitian;
   pengabdianId: string;

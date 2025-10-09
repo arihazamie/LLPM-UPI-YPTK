@@ -34,10 +34,6 @@ const getStatusColor = (status: StatusPenelitian) => {
       return "bg-orange-100 text-orange-800";
     case StatusPenelitian.ACC_LAPORAN_KEMAJUAN_60:
       return "bg-blue-100 text-blue-800";
-    case StatusPenelitian.REVIEW_LAPORAN_KEMAJUAN_100:
-      return "bg-purple-100 text-purple-800";
-    case StatusPenelitian.ACC_LAPORAN_KEMAJUAN_100:
-      return "bg-blue-100 text-blue-800";
     case StatusPenelitian.SELESAI:
       return "bg-green-100 text-green-800";
     case StatusPenelitian.DITOLAK:
@@ -59,14 +55,34 @@ const getStatusLabel = (status: StatusPenelitian) => {
       return "✅ Laporan 60% Disetujui";
     case StatusPenelitian.REVIEW_LAPORAN_KEMAJUAN_100:
       return "📊 Review Laporan 100%";
-    case StatusPenelitian.ACC_LAPORAN_KEMAJUAN_100:
-      return "✅ Laporan 100% Disetujui";
     case StatusPenelitian.SELESAI:
       return "🎉 Selesai";
     case StatusPenelitian.DITOLAK:
       return "❌ Ditolak";
     default:
       return status;
+  }
+};
+
+// Fungsi untuk mendapatkan persentase kemajuan berdasarkan status
+const getProgressPercentage = (status: StatusPenelitian) => {
+  switch (status) {
+    case StatusPenelitian.REVIEW:
+      return 10;
+    case StatusPenelitian.ACC_PROPOSAL:
+      return 20;
+    case StatusPenelitian.REVIEW_LAPORAN_KEMAJUAN_60:
+      return 40;
+    case StatusPenelitian.ACC_LAPORAN_KEMAJUAN_60:
+      return 60;
+    case StatusPenelitian.REVIEW_LAPORAN_KEMAJUAN_100:
+      return 90;
+    case StatusPenelitian.SELESAI:
+      return 100;
+    case StatusPenelitian.DITOLAK:
+      return 0;
+    default:
+      return 0;
   }
 };
 
@@ -207,7 +223,7 @@ export function PenelitianGenericDataTable({
                         <p className="text-gray-500">
                           {searchTerm
                             ? "Tidak ada hasil yang ditemukan"
-                            : "Belum ada data penelitian"}
+                            : "Belum ada data Penelitian"}
                         </p>
                       </div>
                     </TableCell>
@@ -233,16 +249,34 @@ export function PenelitianGenericDataTable({
                         </span>
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          className={getStatusColor(
-                            penelitian.statusPenelitian
-                          )}>
-                          {getStatusLabel(penelitian.statusPenelitian)}
-                        </Badge>
+                        <div className="space-y-1">
+                          <Badge
+                            className={getStatusColor(
+                              penelitian.statusPenelitian
+                            )}>
+                            {getStatusLabel(penelitian.statusPenelitian)}
+                          </Badge>
+                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div
+                              className="bg-blue-600 h-2.5 rounded-full"
+                              style={{
+                                width: `${getProgressPercentage(
+                                  penelitian.statusPenelitian
+                                )}%`,
+                              }}
+                              title={`Progress: ${getProgressPercentage(
+                                penelitian.statusPenelitian
+                              )}%`}></div>
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Progress:{" "}
+                            {getProgressPercentage(penelitian.statusPenelitian)}
+                            %
+                          </div>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2 justify-center">
-                          {/* Tombol 60% */}
                           <Button
                             variant="outline"
                             size="sm"
@@ -251,7 +285,6 @@ export function PenelitianGenericDataTable({
                             60%
                           </Button>
 
-                          {/* Tombol 100% */}
                           <Button
                             variant="outline"
                             size="sm"
@@ -261,6 +294,41 @@ export function PenelitianGenericDataTable({
                             className="h-8 bg-green-50 hover:bg-green-100 text-green-700 border-green-200">
                             100%
                           </Button>
+
+                          {/* Tampilkan dua tombol cetak setelah proposal ACC hingga seterusnya */}
+                          {[
+                            StatusPenelitian.ACC_PROPOSAL,
+                            StatusPenelitian.REVIEW_LAPORAN_KEMAJUAN_60,
+                            StatusPenelitian.ACC_LAPORAN_KEMAJUAN_60,
+                            StatusPenelitian.SELESAI,
+                          ].includes(penelitian.statusPenelitian) && (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  window.open(
+                                    `/simlit/penelitian/surat-tugas?id=${penelitian.id}`,
+                                    "_blank"
+                                  )
+                                }
+                                className="h-8 bg-white hover:bg-gray-100 text-gray-700 border-gray-200">
+                                Cetak Surat Tugas
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  window.open(
+                                    `/simlit/penelitian/surat-pengambilan-data?id=${penelitian.id}`,
+                                    "_blank"
+                                  )
+                                }
+                                className="h-8 bg-white hover:bg-gray-100 text-gray-700 border-gray-200">
+                                Cetak Surat Pengambilan Data
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>

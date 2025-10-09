@@ -1,25 +1,27 @@
+
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { KategoriJurnal, JenisBuku } from "@prisma/client";
+import { KategoriArtikel, JenisBuku } from "@prisma/client";
 import {
   generatePkmId,
-  generateHkiId,
-  generateBukuId,
-  generateJurnalId,
+  generateArtikelIds,
+  generateHkiIds,
+  generateBukuIds,
 } from "@/lib/utils";
 import { withRoleAuth } from "@/lib/auth-helpers";
 
 // --- Schemas ---
-const JurnalInputSchema = z
+const ArtikelInputSchema = z
   .object({
     author: z.array(z.string()).min(1),
     judul: z.string().min(1),
-    namaJurnal: z.string().min(1),
+    namaArtikel: z.string().min(1),
     publisher: z.string().min(1),
-    kategori: z.nativeEnum(KategoriJurnal),
+    kategori: z.nativeEnum(KategoriArtikel),
     level: z.string().optional(),
-    linkJurnal: z.string().min(1),
+    linkArtikel: z.string().min(1),
     tanggalPublisher: z.coerce.date().optional(),
   })
   .strict();
@@ -53,9 +55,9 @@ const PkmCreateSchema = z
     proposal: z.string().min(1),
     laporan: z.string().min(1),
     tanggalPelaksanaan: z.coerce.date().optional(),
-    jurnal: JurnalInputSchema.optional(),
-    hki: HkiInputSchema.optional(),
-    buku: BukuInputSchema.optional(),
+    artikel: z.array(ArtikelInputSchema).optional(),
+    hki: z.array(HkiInputSchema).optional(),
+    buku: z.array(BukuInputSchema).optional(),
   })
   .strict();
 
@@ -75,10 +77,51 @@ export const POST = withRoleAuth(
       // Generate custom IDs
       const pkmId = await generatePkmId(prisma);
 
-      // Generate IDs for related records if they exist
-      const jurnalId = body.jurnal ? await generateJurnalId(prisma) : undefined;
-      const hkiId = body.hki ? await generateHkiId(prisma) : undefined;
-      const bukuId = body.buku ? await generateBukuId(prisma) : undefined;
+      // Siapkan payload nested create untuk banyak item
+      const artikelCreate =
+        body.artikel && body.artikel.length > 0
+          ? (async () => {
+              const ids = await generateArtikelIds(
+                prisma,
+                body.artikel!.length
+              );
+              return {
+                create: body.artikel!.map((a, idx) => ({
+                  id: ids[idx],
+                  ...a,
+                  createdById: user.id,
+                })),
+              };
+            })()
+          : undefined;
+
+      const hkiCreate =
+        body.hki && body.hki.length > 0
+          ? (async () => {
+              const ids = await generateHkiIds(prisma, body.hki!.length);
+              return {
+                create: body.hki!.map((h, idx) => ({
+                  id: ids[idx],
+                  ...h,
+                  createdById: user.id,
+                })),
+              };
+            })()
+          : undefined;
+
+      const bukuCreate =
+        body.buku && body.buku.length > 0
+          ? (async () => {
+              const ids = await generateBukuIds(prisma, body.buku!.length);
+              return {
+                create: body.buku!.map((b, idx) => ({
+                  id: ids[idx],
+                  ...b,
+                  createdById: user.id,
+                })),
+              };
+            })()
+          : undefined;
 
       const created = await prisma.pKM.create({
         data: {
@@ -88,38 +131,12 @@ export const POST = withRoleAuth(
           laporan: body.laporan,
           tanggalPelaksanaan: body.tanggalPelaksanaan,
           createdById: user.id,
-          ...(body.jurnal && {
-            jurnal: {
-              create: {
-                id: jurnalId!,
-                ...body.jurnal,
-                createdById: user.id,
-                linkJurnal: body.jurnal.linkJurnal,
-                tanggalPublisher: body.jurnal.tanggalPublisher,
-              },
-            },
-          }),
-          ...(body.hki && {
-            hki: {
-              create: {
-                id: hkiId!,
-                ...body.hki,
-                createdById: user.id,
-              },
-            },
-          }),
-          ...(body.buku && {
-            buku: {
-              create: {
-                id: bukuId!,
-                ...body.buku,
-                createdById: user.id,
-              },
-            },
-          }),
+          ...(artikelCreate && { artikel: await artikelCreate }),
+          ...(hkiCreate && { hki: await hkiCreate }),
+          ...(bukuCreate && { buku: await bukuCreate }),
         },
         include: {
-          jurnal: true,
+          artikel: true,
           hki: true,
           buku: true,
           createdBy: {
@@ -168,7 +185,7 @@ export const GET = withRoleAuth(
           createdById: user.id, // Hanya ambil PKM yang dibuat oleh user yang login
         },
         include: {
-          jurnal: true,
+          artikel: true,
           hki: true,
           buku: true,
           createdBy: {

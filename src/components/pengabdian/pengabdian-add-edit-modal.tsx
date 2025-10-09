@@ -38,6 +38,7 @@ interface PengabdianFormData {
   dosenPengabdian: Array<{
     namaDosen: string;
     NIDN: string;
+    noHp?: string;
     roleDosenPengabdian: RoleDosenPengabdian;
     programStudiDosenPengabdian: ProgramStudiDosenPenelitian;
   }>;
@@ -147,6 +148,7 @@ export function PengabdianAddEditModal({
     dosenPengabdian: Array<{
       namaDosen: string;
       NIDN: string;
+      noHp?: string;
       roleDosenPengabdian: string;
       programStudiDosenPengabdian: string;
     }>;
@@ -656,6 +658,25 @@ export function PengabdianAddEditModal({
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {/* Field No HP khusus untuk Ketua */}
+                    {dosen.roleDosenPengabdian ===
+                      RoleDosenPengabdian.KETUA && (
+                      <div className="space-y-1">
+                        <Label className="text-xs font-medium text-gray-600">
+                          No HP (Ketua) *
+                        </Label>
+                        <Input
+                          value={dosen.noHp || ""}
+                          onChange={(e) =>
+                            updateDosenPengabdian(index, "noHp", e.target.value)
+                          }
+                          placeholder="Contoh: 08123456789"
+                          className="text-sm"
+                          required
+                        />
+                      </div>
+                    )}
 
                     <div className="space-y-1">
                       <Label className="text-xs font-medium text-gray-600">

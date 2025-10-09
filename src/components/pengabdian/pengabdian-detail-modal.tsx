@@ -66,8 +66,6 @@ const getStatusLabel = (status: StatusPengabdian) => {
       return "Laporan 60% Disetujui";
     case StatusPengabdian.REVIEW_LAPORAN_KEMAJUAN_100:
       return "Review Laporan 100%";
-    case StatusPengabdian.ACC_LAPORAN_KEMAJUAN_100:
-      return "Laporan 100% Disetujui";
     case StatusPengabdian.SELESAI:
       return "Selesai";
     case StatusPengabdian.DITOLAK:
@@ -92,7 +90,16 @@ export default function PengabdianDetailModal({
 
   // Form states untuk modal 100%
   const [linkLaporanAkhir, setLinkLaporanAkhir] = useState("");
-  const [linkLuaran, setLinkLuaran] = useState("");
+  const [linkLuaran, setLinkLuaran] = useState<Record<string, string>>({});
+
+  // Status pengabdian akan otomatis diubah berdasarkan jenis laporan yang diupload
+  const getUpdatedStatus = () => {
+    if (modalType === "60%") {
+      return StatusPengabdian.REVIEW_LAPORAN_KEMAJUAN_60;
+    } else {
+      return StatusPengabdian.REVIEW_LAPORAN_KEMAJUAN_100;
+    }
+  };
 
   if (!pengabdian) return null;
 
@@ -126,37 +133,82 @@ export default function PengabdianDetailModal({
   const handleSave = async () => {
     setIsSubmitting(true);
     try {
-      const updateData =
-        modalType === "60%"
-          ? {
-              linkLaporanKemajuan:
-                linkLaporanKemajuan || pengabdian.linkLaporanKemajuan,
-            }
-          : {
-              linkLaporanAkhir: linkLaporanAkhir || pengabdian.linkLaporanAkhir,
-            };
+      // Tambahkan status baru berdasarkan jenis laporan yang diupload
+      const newStatus = getUpdatedStatus();
 
-      const response = await fetch(`/api/admin/pengabdian/${pengabdian.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updateData),
-      });
+      // Definir updateData fuera de los bloques condicionales
+      let updateData;
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update pengabdian");
+      if (modalType === "60%") {
+        updateData = {
+          linkLaporanKemajuan:
+            linkLaporanKemajuan || pengabdian.linkLaporanKemajuan,
+          statusLuaran,
+          statusPengabdian: newStatus,
+        };
+
+        const response = await fetch(`/api/dosen/pengabdian/${pengabdian.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updateData),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Server error:", errorData);
+          toast.error(errorData.message || "Gagal memperbarui pengabdian");
+          return;
+        }
+      } else {
+        // Konversi object linkLuaran menjadi string JSON
+        const linkLuaranJSON =
+          Object.keys(linkLuaran).length > 0
+            ? JSON.stringify(linkLuaran)
+            : pengabdian.linkLuaran;
+
+        updateData = {
+          linkLaporanAkhir: linkLaporanAkhir || pengabdian.linkLaporanAkhir,
+          linkLuaran: linkLuaranJSON,
+          statusPengabdian: newStatus,
+        };
+
+        const response = await fetch(`/api/dosen/pengabdian/${pengabdian.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updateData),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Server error:", errorData);
+          toast.error(errorData.message || "Gagal memperbarui pengabdian");
+          return;
+        }
       }
 
       toast.success(
         `${
           modalType === "60%" ? "Laporan kemajuan" : "Laporan akhir"
-        } berhasil disimpan`
+        } berhasil disimpan dan status diperbarui menjadi ${getStatusLabel(
+          newStatus
+        )}`
       );
 
       if (onUpdate) {
-        onUpdate(updateData);
+        // Solo pasar las propiedades que coinciden con la interfaz
+        const onUpdateData = {
+          ...(modalType === "60%"
+            ? { linkLaporanKemajuan: updateData.linkLaporanKemajuan }
+            : {}),
+          ...(modalType === "100%"
+            ? { linkLaporanAkhir: updateData.linkLaporanAkhir }
+            : {}),
+        };
+        onUpdate(onUpdateData);
       }
 
       // Reset form
@@ -165,8 +217,11 @@ export default function PengabdianDetailModal({
         setStatusLuaran("");
       } else {
         setLinkLaporanAkhir("");
-        setLinkLuaran("");
+        setLinkLuaran({});
       }
+
+      // Tutup modal setelah berhasil menyimpan
+      onClose();
     } catch (error) {
       console.error("Error updating pengabdian:", error);
       toast.error("Gagal menyimpan data");
@@ -303,21 +358,40 @@ export default function PengabdianDetailModal({
             )}
 
             {modalType === "100%" && (
-              <div>
-                <Label
-                  htmlFor="linkLuaran"
-                  className="text-sm font-medium">
-                  Link Luaran
-                </Label>
-                <Input
-                  id="linkLuaran"
-                  type="url"
-                  placeholder="Masukkan link luaran pengabdian"
-                  value={linkLuaran}
-                  onChange={(e) => setLinkLuaran(e.target.value)}
-                  disabled={!isInputEnabled() || isSubmitting}
-                  className="mt-1"
-                />
+              <div className="space-y-4">
+                <Label className="text-sm font-medium">Link Luaran</Label>
+
+                {pengabdian.luaran && pengabdian.luaran.length > 0 ? (
+                  pengabdian.luaran.map((luaran, index) => (
+                    <div
+                      key={index}
+                      className="space-y-2">
+                      <Label
+                        htmlFor={`linkLuaran-${index}`}
+                        className="text-sm">
+                        {luaran}
+                      </Label>
+                      <Input
+                        id={`linkLuaran-${index}`}
+                        type="url"
+                        placeholder={`Masukkan link luaran untuk ${luaran}`}
+                        value={linkLuaran[luaran] || ""}
+                        onChange={(e) => {
+                          setLinkLuaran((prev) => ({
+                            ...prev,
+                            [luaran]: e.target.value,
+                          }));
+                        }}
+                        disabled={!isInputEnabled() || isSubmitting}
+                        className="mt-1"
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-sm text-gray-500">
+                    Tidak ada luaran yang ditentukan
+                  </div>
+                )}
               </div>
             )}
           </div>

@@ -119,12 +119,13 @@ export async function POST(request: NextRequest) {
         !dosen.namaDosen ||
         !dosen.NIDN ||
         !dosen.roleDosenPengabdian ||
-        !dosen.programStudiDosenPengabdian
+        !dosen.programStudiDosenPengabdian ||
+        (dosen.roleDosenPengabdian === "KETUA" && !dosen.noHp)
       ) {
         return NextResponse.json(
           {
             message:
-              "Semua field dosen pengabdian wajib diisi: namaDosen, NIDN, roleDosenPengabdian, programStudiDosenPengabdian",
+              "Semua field dosen pengabdian wajib diisi: namaDosen, NIDN, roleDosenPengabdian, programStudiDosenPengabdian, dan noHp untuk ketua",
           },
           { status: 400 }
         );
@@ -151,6 +152,7 @@ export async function POST(request: NextRequest) {
               id?: string;
               namaDosen: string;
               NIDN: string;
+              noHp?: string;
               roleDosenPengabdian: string;
               programStudiDosenPengabdian: string;
             }) => ({
@@ -158,6 +160,7 @@ export async function POST(request: NextRequest) {
                 dosen.id || `${session.user.id}-${Date.now()}-${Math.random()}`,
               namaDosen: dosen.namaDosen,
               NIDN: dosen.NIDN,
+              noHp: dosen.noHp || null,
               roleDosenPengabdian:
                 dosen.roleDosenPengabdian as RoleDosenPengabdian,
               programStudiDosenPengabdian:

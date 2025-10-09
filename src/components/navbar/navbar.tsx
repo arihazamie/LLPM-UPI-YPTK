@@ -23,9 +23,7 @@ import {
   FileText,
   Calendar,
   Heart,
-  Layers,
   BookOpenCheck,
-  FileBarChart,
   Microscope,
   Settings,
   Home,
@@ -56,48 +54,41 @@ const beritaLinks = [
   { title: "Agenda LPPM", href: "/berita/agenda", icon: Calendar },
 ];
 
-const pengabdianLinks = [
+const simlitLinks = [
   {
     title: "Pengabdian",
-    href: "/pengabdian/pengabdian",
+    href: "/simlit/pengabdian",
     icon: Heart,
   },
   {
-    title: "Status Pengabdian",
-    href: "/pengabdian/status-pengabdian",
-    icon: Layers,
-  },
-  {
-    title: "Laporan Akhir",
-    href: "/pengabdian/laporan-akhir",
-    icon: FileBarChart,
-  },
-];
-
-const penelitianLinks = [
-  {
     title: "Penelitian",
-    href: "/penelitian/penelitian",
+    href: "/simlit/penelitian",
     icon: BookOpenCheck,
-  },
-  {
-    title: "Status Penelitian",
-    href: "/penelitian/status-penelitian",
-    icon: BookOpenCheck,
-  },
-  {
-    title: "Laporan Akhir",
-    href: "/pengabdian/laporan-akhir",
-    icon: FileBarChart,
   },
 ];
 
 const layananLinks = [
   { title: "PLP", href: "/layanan/plp", icon: Microscope },
   { title: "PPJS", href: "/layanan/ppjs", icon: Settings },
-  { title: "PKM", href: "/pkm", icon: BookOpen, dosenOnly: true },
-  { title: "Prototype", href: "/prototype", icon: Lightbulb, dosenOnly: true },
-  { title: "Prestasi", href: "/prestasi", icon: Trophy, dosenOnly: true },
+  { title: "PKM", href: "/layanan/pkm", icon: BookOpen, dosenOnly: true },
+  {
+    title: "Prototype",
+    href: "/layanan/prototype",
+    icon: Lightbulb,
+    dosenOnly: true,
+  },
+  {
+    title: "Prestasi",
+    href: "/layanan/prestasi",
+    icon: Trophy,
+    dosenOnly: true,
+  },
+  {
+    title: "Artikel",
+    href: "/layanan/artikel",
+    icon: FileText,
+    dosenOnly: true,
+  },
 ];
 
 // Custom Dropdown Component (without shadcn/ui)
@@ -327,38 +318,6 @@ export function Navbar() {
           })}
         </CustomDropdown>
         <CustomDropdown
-          title="Penelitian"
-          triggerOnHover={true}>
-          {penelitianLinks.map((link) => {
-            const IconComponent = link.icon;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="flex items-center gap-3 px-4 py-3 text-sm text-gray-800 hover:bg-gray-100/80 rounded-lg transition-colors duration-200 font-medium">
-                <IconComponent className="h-4 w-4" />
-                {link.title}
-              </Link>
-            );
-          })}
-        </CustomDropdown>
-        <CustomDropdown
-          title="Pengabdian"
-          triggerOnHover={true}>
-          {pengabdianLinks.map((link) => {
-            const IconComponent = link.icon;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="flex items-center gap-3 px-4 py-3 text-sm text-gray-800 hover:bg-gray-100/80 rounded-lg transition-colors duration-200 font-medium">
-                <IconComponent className="h-4 w-4" />
-                {link.title}
-              </Link>
-            );
-          })}
-        </CustomDropdown>
-        <CustomDropdown
           title="Layanan"
           triggerOnHover={true}>
           {getFilteredLayananLinks().map((link) => {
@@ -369,6 +328,22 @@ export function Navbar() {
                 href={link.href}
                 className="flex items-center gap-3 px-4 py-3 text-sm text-gray-800 hover:bg-gray-100/80 rounded-lg transition-colors duration-200 font-medium">
                 {IconComponent && <IconComponent className="h-4 w-4" />}
+                {link.title}
+              </Link>
+            );
+          })}
+        </CustomDropdown>
+        <CustomDropdown
+          title="SIMLIT"
+          triggerOnHover={true}>
+          {simlitLinks.map((link) => {
+            const IconComponent = link.icon;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="flex items-center gap-3 px-4 py-3 text-sm text-gray-800 hover:bg-gray-100/80 rounded-lg transition-colors duration-200 font-medium">
+                <IconComponent className="h-4 w-4" />
                 {link.title}
               </Link>
             );
@@ -467,42 +442,6 @@ export function Navbar() {
               className="w-full justify-center text-lg py-2 text-gray-800"
               onLinkClick={handleMobileLinkClick}>
               {beritaLinks.map((link) => {
-                const IconComponent = link.icon;
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="flex items-center gap-3 px-4 py-3 text-sm text-gray-800 hover:bg-gray-100/80 rounded-lg transition-all duration-200 font-medium">
-                    <IconComponent className="h-4 w-4" />
-                    {link.title}
-                  </Link>
-                );
-              })}
-            </CustomDropdown>
-            <CustomDropdown
-              title="Penelitian"
-              mobileMode={true}
-              className="w-full justify-center text-lg py-2 text-gray-800"
-              onLinkClick={handleMobileLinkClick}>
-              {penelitianLinks.map((link) => {
-                const IconComponent = link.icon;
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="flex items-center gap-3 px-4 py-3 text-sm text-gray-800 hover:bg-gray-100/80 rounded-lg transition-all duration-200 font-medium">
-                    <IconComponent className="h-4 w-4" />
-                    {link.title}
-                  </Link>
-                );
-              })}
-            </CustomDropdown>
-            <CustomDropdown
-              title="Pengabdian"
-              mobileMode={true}
-              className="w-full justify-center text-lg py-2 text-gray-800"
-              onLinkClick={handleMobileLinkClick}>
-              {pengabdianLinks.map((link) => {
                 const IconComponent = link.icon;
                 return (
                   <Link

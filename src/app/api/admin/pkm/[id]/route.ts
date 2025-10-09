@@ -6,7 +6,7 @@ import { withRoleAuth } from "@/lib/auth-helpers";
 export const GET = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
   try {
     const url = new URL(req.url);
-    const id = url.pathname.split('/').pop();
+    const id = url.pathname.split("/").pop();
 
     if (!id) {
       return NextResponse.json(
@@ -21,7 +21,7 @@ export const GET = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
     const pkm = await prisma.pKM.findUnique({
       where: { id },
       include: {
-        jurnal: true,
+        artikel: true,
         hki: true,
         buku: true,
         createdBy: {
@@ -55,4 +55,4 @@ export const GET = withRoleAuth(["ADMIN", "PIMPINAN"], async (req) => {
       { status: 500 }
     );
   }
-}); 
+});

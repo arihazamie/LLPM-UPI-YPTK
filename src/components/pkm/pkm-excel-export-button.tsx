@@ -17,7 +17,7 @@ interface PKMExcelExportButtonProps {
   className?: string;
 }
 
-export function PKMExcelButton({
+export function PKMExcelExportButton({
   disabled = false,
   className = "bg-black drop-shadow-2xl transition-all duration-200",
 }: PKMExcelExportButtonProps) {
@@ -60,7 +60,7 @@ export function PKMExcelButton({
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = filename;
+      link.download = filename;   
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

@@ -9,8 +9,8 @@ export async function GET() {
 
     // Fetch all data without user filtering for public stats
     const [
-      jurnalAll,
-      jurnalThisYear,
+      artikelAll,
+      artikelThisYear,
       bukuAll,
       bukuThisYear,
       hkiAll,
@@ -24,9 +24,9 @@ export async function GET() {
       sintaAll,
       sintaThisYear,
     ] = await Promise.all([
-      // Total jurnal
-      prisma.jurnal.count(),
-      prisma.jurnal.count({
+      // Total Artikel
+      prisma.artikel.count(),
+      prisma.artikel.count({
         where: {
           createdAt: {
             gte: startOfYear,
@@ -75,12 +75,12 @@ export async function GET() {
         },
       }),
       // Scopus
-      prisma.jurnal.count({
+      prisma.artikel.count({
         where: {
           kategori: "SCOPUS",
         },
       }),
-      prisma.jurnal.count({
+      prisma.artikel.count({
         where: {
           kategori: "SCOPUS",
           createdAt: {
@@ -90,12 +90,12 @@ export async function GET() {
         },
       }),
       // Sinta
-      prisma.jurnal.count({
+      prisma.artikel.count({
         where: {
           kategori: "SINTA",
         },
       }),
-      prisma.jurnal.count({
+      prisma.artikel.count({
         where: {
           kategori: "SINTA",
           createdAt: {
@@ -107,9 +107,9 @@ export async function GET() {
     ]);
 
     const totals = {
-      jurnal: {
-        all: jurnalAll,
-        thisYear: jurnalThisYear,
+      artikel: {
+        all: artikelAll,
+        thisYear: artikelThisYear,
         byKategori: {
           scopus: { all: scopusAll, thisYear: scopusThisYear },
           sinta: { all: sintaAll, thisYear: sintaThisYear },
@@ -120,9 +120,9 @@ export async function GET() {
       pkm: { all: pkmAll, thisYear: pkmThisYear },
       prestasi: { all: prestasiAll, thisYear: prestasiThisYear },
       all: {
-        totalAll: jurnalAll + bukuAll + hkiAll + pkmAll + prestasiAll,
+        totalAll: artikelAll + bukuAll + hkiAll + pkmAll + prestasiAll,
         totalThisYear:
-          jurnalThisYear +
+          artikelThisYear +
           bukuThisYear +
           hkiThisYear +
           pkmThisYear +
@@ -137,7 +137,7 @@ export async function GET() {
       {
         error: "Failed to fetch statistics",
         totals: {
-          jurnal: {
+          artikel: {
             all: 0,
             thisYear: 0,
             byKategori: {

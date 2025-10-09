@@ -8,7 +8,7 @@ import {
   KategoriPengabdian,
   LuaranPengabdian,
 } from "@/types/pkm-types";
-import { Prisma } from "@prisma/client";
+import { Prisma, StatusPengabdian } from "@prisma/client";
 
 // PUT - Update pengabdian
 export async function PUT(
@@ -65,17 +65,36 @@ export async function PUT(
       const updateData: {
         linkLaporanKemajuan?: string;
         linkLaporanAkhir?: string;
-        // statusPengabdian?: StatusPengabdian; // jika ada status
+        statusPengabdian?: StatusPengabdian;
+        statusLuaran?: string;
+        linkLuaran?: string;
       } = {};
 
       if (linkLaporanKemajuan !== undefined) {
         updateData.linkLaporanKemajuan = linkLaporanKemajuan;
-        // Logic status jika diperlukan
+        // Update status jika ada perubahan status
+        if (body.statusPengabdian) {
+          updateData.statusPengabdian =
+            body.statusPengabdian as StatusPengabdian;
+        }
+        // Update status luaran jika ada
+        if (body.statusLuaran) {
+          updateData.statusLuaran = body.statusLuaran;
+        }
       }
 
       if (linkLaporanAkhir !== undefined) {
         updateData.linkLaporanAkhir = linkLaporanAkhir;
-        // Logic status jika diperlukan
+        // Update status jika ada perubahan status
+        if (body.statusPengabdian) {
+          updateData.statusPengabdian =
+            body.statusPengabdian as StatusPengabdian;
+        }
+      }
+      
+      // Update linkLuaran jika ada
+      if (body.linkLuaran !== undefined) {
+        updateData.linkLuaran = body.linkLuaran;
       }
 
       const updatedPengabdian = await prisma.pengabdian.update({

@@ -38,6 +38,7 @@ interface PenelitianFormData {
   dosenPenelitian: Array<{
     namaDosen: string;
     NIDN: string;
+    noHp?: string;
     roleDosenPenelitian: RoleDosenPenelitian;
     programStudiDosenPenelitian: ProgramStudiDosenPenelitian;
   }>;
@@ -48,9 +49,9 @@ interface PenelitianFormData {
 
 interface PenelitianAddEditModalProps {
   isOpen: boolean;
-  onClose: () => void;
-  onSave: (data: PenelitianFormData) => Promise<boolean>;
-  penelitian?: Penelitian;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (data: PenelitianFormData) => void;
+  initialData?: Penelitian;
 }
 
 // Helper functions to get display labels
@@ -130,9 +131,9 @@ const getProgramStudiLabel = (value: string) => {
 
 export function PenelitianAddEditModal({
   isOpen,
-  onClose,
-  onSave,
-  penelitian,
+  onOpenChange,
+  onSubmit,
+  initialData,
 }: PenelitianAddEditModalProps) {
   const [formData, setFormData] = useState<{
     judulPenelitian: string;
@@ -145,6 +146,7 @@ export function PenelitianAddEditModal({
     dosenPenelitian: Array<{
       namaDosen: string;
       NIDN: string;
+      noHp?: string;
       roleDosenPenelitian: string;
       programStudiDosenPenelitian: string;
     }>;
@@ -170,18 +172,18 @@ export function PenelitianAddEditModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (penelitian) {
+    if (initialData) {
       setFormData({
-        judulPenelitian: penelitian.judulPenelitian,
-        kategoriPenelitian: penelitian.kategoriPenelitian,
-        lamaKegiatan: penelitian.lamaKegiatan,
-        tahunKegiatan: penelitian.tahunKegiatan,
-        anggaran: penelitian.anggaran?.toString() || "",
-        sumberAnggaran: penelitian.sumberAnggaran || "",
-        luaran: penelitian.luaran || [],
+        judulPenelitian: initialData.judulPenelitian,
+        kategoriPenelitian: initialData.kategoriPenelitian,
+        lamaKegiatan: initialData.lamaKegiatan,
+        tahunKegiatan: initialData.tahunKegiatan,
+        anggaran: initialData.anggaran?.toString() || "",
+        sumberAnggaran: initialData.sumberAnggaran || "",
+        luaran: initialData.luaran || [],
         dosenPenelitian:
-          penelitian.dosenPenelitian.length > 0
-            ? penelitian.dosenPenelitian.map((dp) => ({
+          initialData.dosenPenelitian.length > 0
+            ? initialData.dosenPenelitian.map((dp) => ({
                 namaDosen: dp.namaDosen,
                 NIDN: dp.NIDN,
                 roleDosenPenelitian: dp.roleDosenPenelitian,
@@ -195,7 +197,7 @@ export function PenelitianAddEditModal({
                   programStudiDosenPenelitian: "",
                 },
               ],
-        linkProposal: penelitian.linkProposal,
+        linkProposal: initialData.linkProposal,
       });
     } else {
       setFormData({
@@ -217,7 +219,7 @@ export function PenelitianAddEditModal({
         linkProposal: "",
       });
     }
-  }, [penelitian, isOpen]);
+  }, [initialData, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -263,10 +265,7 @@ export function PenelitianAddEditModal({
         })),
       };
 
-      const success = await onSave(submitData);
-      if (success) {
-        onClose();
-      }
+      onSubmit(submitData);
     } catch (error) {
       console.error("Error saving penelitian:", error);
     } finally {
@@ -323,11 +322,11 @@ export function PenelitianAddEditModal({
   return (
     <Dialog
       open={isOpen}
-      onOpenChange={onClose}>
+      onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-gray-900">
-            {penelitian ? "Edit Penelitian" : "Tambah Penelitian Baru"}
+            {initialData ? "Edit Penelitian" : "Tambah Penelitian Baru"}
           </DialogTitle>
         </DialogHeader>
 
@@ -555,14 +554,14 @@ export function PenelitianAddEditModal({
             </div>
           </div>
 
-          {/* Tim Peneliti */}
+          {/* Tim Penelitian */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
-              👥 Tim Peneliti
+              👥 Tim Penelitian
             </h3>
             <div className="flex items-center justify-between">
               <Label className="text-sm font-medium text-gray-700">
-                Anggota Tim Peneliti *
+                Anggota Tim Penelitian *
               </Label>
               <Button
                 type="button"
@@ -582,7 +581,7 @@ export function PenelitianAddEditModal({
                   className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="text-sm font-medium text-gray-800">
-                      👨‍🎓 Peneliti #{index + 1}
+                      👨‍🔬 Peneliti #{index + 1}
                     </h4>
                     {formData.dosenPenelitian.length > 1 && (
                       <Button
@@ -658,6 +657,25 @@ export function PenelitianAddEditModal({
                       </Select>
                     </div>
 
+                    {/* Field No HP khusus untuk Ketua */}
+                    {dosen.roleDosenPenelitian ===
+                      RoleDosenPenelitian.KETUA && (
+                      <div className="space-y-1">
+                        <Label className="text-xs font-medium text-gray-600">
+                          No HP (Ketua) *
+                        </Label>
+                        <Input
+                          value={dosen.noHp || ""}
+                          onChange={(e) =>
+                            updateDosenPenelitian(index, "noHp", e.target.value)
+                          }
+                          placeholder="Contoh: 08123456789"
+                          className="text-sm"
+                          required
+                        />
+                      </div>
+                    )}
+
                     <div className="space-y-1">
                       <Label className="text-xs font-medium text-gray-600">
                         Program Studi *
@@ -699,7 +717,7 @@ export function PenelitianAddEditModal({
             <Button
               type="button"
               variant="outline"
-              onClick={onClose}
+              onClick={() => onOpenChange(false)}
               className="px-6">
               ❌ Batal
             </Button>
@@ -709,7 +727,7 @@ export function PenelitianAddEditModal({
               className="px-6 bg-blue-600 hover:bg-blue-700">
               {isSubmitting
                 ? "⏳ Menyimpan..."
-                : penelitian
+                : initialData
                 ? "✏️ Update Penelitian"
                 : "💾 Simpan Penelitian"}
             </Button>
