@@ -98,7 +98,7 @@ export default function SuratTugasPage() {
           }),
           penandaTangan: {
             jabatan: "Ka. LPPM, UPI-YPTK Padang",
-            nama: "Assoc. Prof. Dr. Agung Ramadhanu, S.Kom., M.Kom.",
+            nama: "Assoc. Prof. Dr. Agung Ramadhanu, S.Kom., M.Kom",
             nidn: "1015049102",
           },
         };
@@ -108,7 +108,11 @@ export default function SuratTugasPage() {
         }
       } catch (e) {
         if (isMounted) {
-          setError(e instanceof Error ? e.message : "Terjadi kesalahan saat mengambil data.");
+          setError(
+            e instanceof Error
+              ? e.message
+              : "Terjadi kesalahan saat mengambil data."
+          );
         }
       } finally {
         if (isMounted) {
@@ -181,7 +185,7 @@ export default function SuratTugasPage() {
             id="nomor-urut"
             type="text"
             value={nomorUrut}
-            onChange={(e) => setNomorUrut(e.target.value.padStart(3, "0"))}
+            onChange={(e) => setNomorUrut(e.target.value.padStart(0, "0"))}
             className="px-2 py-1 border rounded w-24"
             placeholder="cth: 027"
           />
@@ -218,17 +222,17 @@ export default function SuratTugasPage() {
           <header className="flex flex-col items-center">
             <div className="flex items-center gap-4 w-full">
               <Image
-                src="logo.png"
+                src="/logo.png"
                 alt="Logo UPI YPTK"
                 width={80}
                 height={80}
                 className="h-20 w-20"
               />
               <div className="text-center flex-1">
-                <p className="text-sm font-bold">
+                <p className="text-md font-bold">
                   Yayasan Perguruan Tinggi Komputer (YPTK) Padang
                 </p>
-                <p className="font-semibold text-blue-700">
+                <p className="font-semibold text-lg text-blue-700">
                   LEMBAGA PENELITIAN DAN PENGABDIAN MASYARAKAT
                 </p>
                 <p className="font-semibold text-red-700 text-lg">
@@ -319,12 +323,12 @@ export default function SuratTugasPage() {
 
           {/* Signature Section */}
           <section className="mt-12">
-            <div className="inline-block float-right text-sm text-center">
+            <div className="inline-block float-right text-base text-center">
               <p className="text-left">Padang, {data.tanggalSurat}</p>
               <p className="mt-1 text-left">{data.penandaTangan.jabatan}</p>
               <div className="h-24" />
-              <div className="text-left">
-                <p className="font-bold underline">{data.penandaTangan.nama}</p>
+              <div className="font-bold text-left">
+                <p className="underline">{data.penandaTangan.nama}</p>
                 <p>NIDN: {data.penandaTangan.nidn}</p>
               </div>
             </div>

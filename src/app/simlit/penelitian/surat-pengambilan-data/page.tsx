@@ -1,212 +1,217 @@
 "use client";
 
-import { useEffect, useMemo, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
 import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
 
-type Dosen = {
+// ===== Type Definitions =====
+type DosenItem = {
   namaDosen: string;
   NIDN: string;
+  prodiFakultas?: string;
 };
 
 type SuratData = {
   judulPenelitian: string;
-  dosen: Dosen[];
+  dosen: DosenItem[];
+  noHpKetua?: string;
+  tanggalSurat: string;
+  penandaTangan: {
+    jabatan: string;
+    nama: string;
+    nidn: string;
+  };
 };
 
-// Helper function to convert month index to Roman numeral
-const getBulanRomawi = (monthIndex: number) => {
-  const romawiMap = [
-    "I",
-    "II",
-    "III",
-    "IV",
-    "V",
-    "VI",
-    "VII",
-    "VIII",
-    "IX",
-    "X",
-    "XI",
-    "XII",
-  ];
-  return romawiMap[monthIndex];
+type DosenPenelitian = {
+  namaDosen: string;
+  NIDN: string;
+  noHp?: string;
+  roleDosenPenelitian: "KETUA" | "ANGGOTA";
+  programStudiDosenPenelitian?: string;
 };
 
-export default function SuratPengambilanDataPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="text-center p-8">Loading letter preview...</div>
-      }>
-      <SuratContent />
-    </Suspense>
-  );
-}
+type Penelitian = {
+  id: string;
+  judulPenelitian: string;
+  dosenPenelitian: DosenPenelitian[];
+};
 
-function SuratContent() {
-  const params = useSearchParams();
-  const id = params.get("id");
+// ===== Component =====
+export default function SuratTugasPage() {
+  const [id, setId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<SuratData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [nomorUrut, setNomorUrut] = useState("027");
 
+  // ===== Input Manual =====
+  const [nomorUrut, setNomorUrut] = useState("026");
+  const [lampiran, setLampiran] = useState("-");
+  const [hal, setHal] = useState("Permohonan Kesediaan Pengambilan Data");
+  const [tujuan, setTujuan] = useState(
+    "Kelompok Kerja Pemuda Daerah Simpang Anduring Kecamatan Kuranji Kota Padang"
+  );
+
+  // Ambil ID dari URL
   useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    setId(searchParams.get("id"));
+  }, []);
+
+  // Fetch data penelitian
+  useEffect(() => {
+    if (!id) return;
     let isMounted = true;
-    const run = async () => {
-      if (!id) {
-        setError("ID Penelitian tidak ditemukan di URL.");
-        setLoading(false);
-        return;
-      }
+
+    const fetchData = async () => {
       try {
-        // Fetch the specific research data by ID
-        const res = await fetch(`/api/dosen/penelitian/${id}`);
+        setLoading(true);
+        const res = await fetch(`/api/dosen/penelitian`);
         const json = await res.json();
+        if (!res.ok) throw new Error(json?.message || "Gagal memuat data.");
 
-        if (!res.ok) {
-          throw new Error(json?.message || "Gagal memuat data penelitian");
-        }
+        const list: Penelitian[] = json?.data || [];
+        const penelitian = list.find((p) => p.id === id);
+        if (!penelitian) throw new Error("Data penelitian tidak ditemukan.");
 
-        const item = json.data;
-        if (!item) {
-          throw new Error("Data penelitian tidak ditemukan.");
-        }
+        // Mapping dosen penelitian
+        const dosenList = penelitian.dosenPenelitian.map((d) => ({
+          namaDosen: d.namaDosen ?? "-",
+          NIDN: d.NIDN ?? "-",
+          prodiFakultas: d.programStudiDosenPenelitian ?? "-",
+          role: d.roleDosenPenelitian,
+          noHp: d.noHp ?? "-",
+        }));
 
-        // Map the fetched data to the structure needed for the letter
-        const surat: SuratData = {
-          judulPenelitian: item.judulPenelitian,
-          dosen: item.dosenPenelitian.map((d: any) => ({
-            namaDosen: d.namaDosen,
-            NIDN: d.NIDN,
-          })),
+        // Urutkan ketua di atas
+        const sorted = [...dosenList].sort((a) =>
+          a.role === "KETUA" ? -1 : 1
+        );
+        const ketua = dosenList.find((d) => d.role === "KETUA");
+
+        // Bangun data surat
+        const suratData: SuratData = {
+          judulPenelitian: penelitian.judulPenelitian ?? "-",
+          dosen: sorted.map(({ role, noHp, ...rest }) => rest),
+          noHpKetua: ketua?.noHp ?? "-",
+          tanggalSurat: new Date().toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          }),
+          penandaTangan: {
+            jabatan: "Kepala LPPM UPI-YPTK Padang",
+            nama: "Assoc. Prof. Dr. Agung Ramadhanu, S.Kom., M.Kom., MTA",
+            nidn: "1015049102",
+          },
         };
 
-        if (isMounted) {
-          setData(surat);
-        }
+        if (isMounted) setData(suratData);
       } catch (e) {
-        if (isMounted) {
-          setError(
-            e instanceof Error
-              ? e.message
-              : "Terjadi kesalahan yang tidak diketahui"
-          );
-        }
+        if (isMounted)
+          setError(e instanceof Error ? e.message : "Gagal mengambil data.");
       } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        if (isMounted) setLoading(false);
       }
     };
-    run();
+
+    fetchData();
     return () => {
       isMounted = false;
     };
   }, [id]);
 
-  // Auto-print when data is ready
-  useEffect(() => {
-    if (!loading && !error && data) {
-      const timer = setTimeout(() => window.print(), 500);
-      return () => clearTimeout(timer);
-    }
-  }, [loading, error, data]);
+  // ===== Generate Nomor Surat =====
+  const getBulanRomawi = (monthIndex: number) =>
+    ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][
+      monthIndex
+    ];
 
-  const { nomorSuratLengkap, tanggalSurat } = useMemo(() => {
-    const today = new Date();
-    const bulanRomawi = getBulanRomawi(today.getMonth());
-    const tahun = today.getFullYear();
-    const tgl = today.toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-
-    return {
-      nomorSuratLengkap: `${nomorUrut.padStart(
-        3,
-        "0"
-      )}/LPPM.UPI-YPTK/SPD.P/HS.V/${bulanRomawi}/${tahun}`,
-      tanggalSurat: tgl,
-    };
+  const nomorSuratLengkap = useMemo(() => {
+    const bulan = getBulanRomawi(new Date().getMonth());
+    const tahun = new Date().getFullYear();
+    return `${nomorUrut}/LPPM.UPI-YPTK/SPD.PENELITIAN/HS.V/${bulan}/${tahun}`;
   }, [nomorUrut]);
 
+  // ===== RENDER =====
   return (
     <div className="bg-gray-100 p-4 md:p-8 print:bg-white print:p-0">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
-        @page {
-          size: A4;
-          margin: 1.5cm;
-        }
-        @media print {
-          .no-print { display: none !important; }
-          body { background: white; -webkit-print-color-adjust: exact; }
-          .a4-paper { box-shadow: none !important; }
-        }
-        .document-body {
-          font-family: 'Times New Roman', Times, serif;
-          line-height: 1.5;
-        }
+        @page { size: A4; margin: 18mm; }
+        @media print { .no-print { display:none } body{background:white} .a4-shadow{box-shadow:none} }
+        .document-body { font-family: 'Times New Roman', Times, serif; }
       `}</style>
 
-      <div className="no-print mb-6 flex justify-center items-center gap-4">
-        <div className="flex items-center gap-2">
-          <label
-            htmlFor="nomor-urut"
-            className="text-sm font-medium">
-            No. Urut:
-          </label>
+      {/* Input Manual */}
+      <div className="no-print mb-4 flex flex-col gap-2 items-center">
+        <div className="flex gap-2">
+          <label>No. Urut:</label>
           <input
-            id="nomor-urut"
-            type="text"
             value={nomorUrut}
             onChange={(e) => setNomorUrut(e.target.value)}
-            className="px-2 py-1 border rounded w-24"
+            className="border px-2 py-1 rounded w-20"
+          />
+          <label>Lampiran:</label>
+          <input
+            value={lampiran}
+            onChange={(e) => setLampiran(e.target.value)}
+            className="border px-2 py-1 rounded w-32"
+          />
+        </div>
+        <div className="flex gap-2">
+          <label>Hal:</label>
+          <input
+            value={hal}
+            onChange={(e) => setHal(e.target.value)}
+            className="border px-2 py-1 rounded w-96"
+          />
+        </div>
+        <div className="flex gap-2">
+          <label>Kepada:</label>
+          <input
+            value={tujuan}
+            onChange={(e) => setTujuan(e.target.value)}
+            className="border px-2 py-1 rounded w-[600px]"
           />
         </div>
         <button
           onClick={() => window.print()}
-          className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors">
-          Cetak
-        </button>
-        <button
-          onClick={() => window.close()}
-          className="px-4 py-2 rounded border bg-white hover:bg-gray-50 transition-colors">
-          Tutup
+          className="px-4 py-2 bg-blue-600 text-white rounded mt-2">
+          Cetak Surat
         </button>
       </div>
 
+      {/* Konten Surat */}
       {loading ? (
         <div className="text-center py-10">Memuat data surat...</div>
       ) : error ? (
-        <div className="text-center py-10 text-red-600 font-semibold">
-          {error}
-        </div>
+        <div className="text-center text-red-600">{error}</div>
       ) : data ? (
         <main
-          className="a4-paper mx-auto bg-white text-black text-sm document-body shadow-lg"
-          style={{ width: "210mm", minHeight: "297mm", padding: "1.5cm" }}>
-          {/* Header */}
-          <header className="flex items-start gap-4 border-b-2 border-black pb-2">
+          className="a4-shadow mx-auto bg-white text-black document-body"
+          style={{
+            width: "216mm",
+            minHeight: "279mm",
+            padding: "18mm",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+          }}>
+          {/* HEADER */}
+          <header className="flex items-center border-b-4 border-black pb-2">
             <Image
               src="/logo.png"
-              alt="Logo UPI YPTK"
-              width={80}
-              height={80}
-              className="h-20 w-auto"
+              alt="Logo"
+              width={90}
+              height={90}
             />
-            <div className="text-center w-full">
-              <p className="text-sm font-bold">
+            <div className="flex-1 text-center leading-tight">
+              <p className="font-bold text-sm">
                 Yayasan Perguruan Tinggi Komputer (YPTK) Padang
               </p>
               <p className="font-semibold text-blue-700">
                 LEMBAGA PENELITIAN DAN PENGABDIAN MASYARAKAT
               </p>
               <p className="font-semibold text-red-700 text-lg">
-                UNIVERSITAS PUTRA INDONESIA "YPTK"
+                UNIVERSITAS PUTRA INDONESIA “YPTK” PADANG
               </p>
               <p className="text-xs italic">
                 Jalan Raya Lubuk Begalung Padang. Telp. (0751) 776666. Faks.
@@ -215,124 +220,117 @@ function SuratContent() {
             </div>
           </header>
 
-          <div className="mt-4 flex justify-end">
-            <p>Padang, {tanggalSurat}</p>
-          </div>
-
-          {/* Letter Details */}
-          <section className="mt-4">
+          {/* Nomor Surat */}
+          <section className="text-sm mt-4">
+            <p className="text-right">Padang, {data.tanggalSurat}</p>
             <table>
               <tbody>
                 <tr>
-                  <td className="pr-2">Nomor</td>
+                  <td className="align-top w-24">Nomor</td>
                   <td>: {nomorSuratLengkap}</td>
                 </tr>
                 <tr>
                   <td>Lampiran</td>
-                  <td>: -</td>
+                  <td>: {lampiran}</td>
                 </tr>
                 <tr>
-                  <td className="font-bold">Hal</td>
-                  <td className="font-bold">
-                    : Permohonan Kesediaan Pengambilan Data
-                  </td>
+                  <td>Hal</td>
+                  <td className="font-semibold italic">: {hal}</td>
                 </tr>
               </tbody>
             </table>
           </section>
 
-          {/* Recipient */}
-          <section className="mt-4">
-            <p>Kepada Yth. Bapak/Ibu</p>
-            <p className="font-bold">
-              Kepala Koordinator Pendidikan dan Penelitian RSUP DR. M. DJAMIL
-              Padang
+          {/* Tujuan Surat */}
+          <section className="text-sm mt-6">
+            <p>
+              Kepada Yth. Bapak/Ibu
+              <br />
+              {tujuan}
+              <br />
+              Di Tempat
             </p>
-            <p className="mt-2">Di</p>
-            <p className="ml-4">Tempat</p>
           </section>
 
-          <section className="mt-6 text-justify space-y-4">
-            <p className="italic">
-              Assalamu'alaikum Warahmatullahi Wabarakatuh
+          {/* Pembuka */}
+          <section className="text-sm text-justify mt-6">
+            <p className="font-bold">
+              Assalaamu’alaikum Warahmatullaahi Wabarakaatuh
             </p>
-            <p>Dengan Hormat,</p>
+            <p className="mt-2">Dengan hormat</p>
             <p>
               Segala puji hanya milik Allah SWT, shalawat dan salam atas nabi
               besar Muhammad SAW. Mudah-mudahan kita semua senantiasa diberi
-              rahmat dan hidayahNya dalam menjalankan aktivitas sehari-hari,
+              rahmat dan hidayahnya dalam menjalankan aktivitas sehari-hari,
               Amin.
             </p>
             <p>
               Bersama ini Ketua Lembaga Penelitian dan Pengabdian Masyarakat
-              (LPPM) Universitas Putra Indonesia YPTK Padang, memohon kepada
+              (LPPM) Universitas Putra Indonesia YPTK Padang memohon kepada
               Bapak/Ibu untuk berkenan memberikan izin dalam melaksanakan
-              penelitian kepada dosen kami berikut ini:
+              Penelitian kepada dosen kami berikut ini:
             </p>
           </section>
 
-          {/* Lecturers Table */}
-          <section className="my-4 px-8">
-            <table className="w-full border-collapse border border-black">
+          {/* TABEL DOSEN */}
+          <section className="mt-4 mb-4">
+            <table
+              className="w-full text-sm border border-black"
+              style={{ borderCollapse: "collapse" }}>
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="border border-black p-2 text-center">Nama</th>
-                  <th className="border border-black p-2 text-center">
-                    NIDN/NUPTK
-                  </th>
+                  <th className="border border-black px-2 py-1 w-10">No</th>
+                  <th className="border border-black px-2 py-1">Nama</th>
+                  <th className="border border-black px-2 py-1">NIDN</th>
                 </tr>
               </thead>
               <tbody>
                 {data.dosen.map((d, i) => (
                   <tr key={i}>
-                    <td className="border border-black p-2">{d.namaDosen}</td>
-                    <td className="border border-black p-2 text-center">
-                      {d.NIDN}
+                    <td className="border border-black px-2 py-1 text-center">
+                      {i + 1}
                     </td>
+                    <td className="border border-black px-2 py-1">
+                      {d.namaDosen}
+                    </td>
+                    <td className="border border-black px-2 py-1">{d.NIDN}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </section>
 
-          <section className="my-4 text-justify">
+          {/* Isi Surat */}
+          <section className="text-sm text-justify mb-4">
             <p>
-              <span className="font-bold">Judul Penelitian:</span>{" "}
-              <span className="italic">{data.judulPenelitian}</span>
+              Judul Penelitian :{" "}
+              <span className="italic font-semibold">
+                {data.judulPenelitian}
+              </span>
+            </p>
+            <p className="mt-2">
+              Demikian surat ini disampaikan, besar harapan kami agar Bapak/Ibu
+              dapat memberikan izin kepada yang bersangkutan dalam melaksanakan
+              kegiatan penelitian di instansi yang Bapak/Ibu pimpin. Ketua dapat
+              dihubungi di nomor <strong>{data.noHpKetua}</strong>.
+            </p>
+            <p className="mt-2">
+              Atas perhatian dan kerja sama Bapak/Ibu kami ucapkan terima kasih.
             </p>
           </section>
 
-          <section className="mt-4 text-justify space-y-4">
-            <p>
-              Demikian surat ini disampaikan dan besar harapan kami untuk dapat
-              memberikan izin kepada yang bersangkutan dalam melakukan
-              penelitian di instansi yang Ibu/Bapak Pimpin. Adapun kontak yang
-              dapat dihubungi No. HP: 085272432232, atas perhatian dan kerjasama
-              dari Bapak/Ibu kami haturkan banyak terima kasih, semoga hidayah
-              dan inayah Allah SWT senantiasa tercurah kepada kita semua, Amin.
-            </p>
-            <p className="italic">
-              Wassalamu'alaikum Warahmatullahi Wabarakatuh
-            </p>
+          {/* Penutup */}
+          <section className="text-sm text-justify mb-4 font-bold">
+            <p>Wassalaamu’alaikum Warahmatullaahi Wabarakaatuh</p>
           </section>
 
-          {/* Signature */}
-          <section className="mt-8 flex justify-end">
-            <div className="text-center">
-              <p>Kepala LPPM UPI YPTK Padang</p>
-              <div className="relative h-24 w-48">
-                {/* Placeholder for signature and stamp */}
-                <Image
-                  src="/ttd-agung.png"
-                  alt="Signature and Stamp"
-                  layout="fill"
-                  objectFit="contain"
-                />
-              </div>
-              <p className="font-bold underline">
-                (Assoc. Prof. Dr. Agung Ramadhanu, S.Kom, M.Kom, MTA)
-              </p>
-              <p>NIDN. 1015049102</p>
+          {/* Tanda Tangan */}
+          <section className="mt-8">
+            <div className="float-right text-sm text-center">
+              <p className="text-left">{data.penandaTangan.jabatan}</p>
+              <div className="h-24" />
+              <p className="font-bold underline">{data.penandaTangan.nama}</p>
+              <p>NIDN: {data.penandaTangan.nidn}</p>
             </div>
           </section>
         </main>

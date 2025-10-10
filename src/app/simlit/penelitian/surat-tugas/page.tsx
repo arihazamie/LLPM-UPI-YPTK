@@ -38,11 +38,9 @@ export default function SuratTugasPage() {
   }, []);
 
   useEffect(() => {
-    // Prevent fetching if ID hasn't been determined yet
-    if (id === null) {
-      return;
-    }
-
+    // Jangan fetch sebelum ID ada
+    if (id === null) return;
+  
     let isMounted = true;
     const fetchData = async () => {
       if (!id) {
@@ -50,49 +48,44 @@ export default function SuratTugasPage() {
         setLoading(false);
         return;
       }
-
+  
       try {
         setLoading(true);
-        // Fetching all data and then finding the specific item
-        const res = await fetch(`/api/dosen/penelitian`); // Changed to penelitian endpoint
+        // Fetch data dari endpoint penelitian
+        const res = await fetch(`/api/dosen/penelitian`);
         const json = await res.json();
-
+  
         if (!res.ok) {
           throw new Error(json?.message || "Gagal memuat data dari server.");
         }
-
+  
         interface PenelitianItem {
           id: string;
-          judulPenelitian: string; // Changed from judulPengabdian
+          judulPenelitian: string;
           lamaKegiatan: string;
-          tahunKegiatan: string;
+          tahunKegiatan: number;
           dosenPenelitian?: Array<{
-            // Changed from dosenPengabdian
             namaDosen: string;
             NIDN: string;
-            programStudiDosenPenelitian: string; // Changed field
+            programStudiDosenPenelitian: string;
           }>;
         }
-
+  
         const item = (json?.data as PenelitianItem[]).find((p) => p.id === id);
-
+  
         if (!item) {
-          throw new Error(
-            "Data penelitian dengan ID yang diberikan tidak ditemukan."
-          );
+          throw new Error("Data penelitian dengan ID yang diberikan tidak ditemukan.");
         }
-
-        // Mapping fetched data to the structure needed by the component
+  
+        // Mapping data hasil fetch ke struktur surat
         const suratData: SuratData = {
-          judulKegiatan: item.judulPenelitian, // Changed to judulPenelitian
-          deskripsiPelaksanaan: `dilaksanakan selama ${item.lamaKegiatan} pada tahun ${item.tahunKegiatan}`,
+          judulKegiatan: item.judulPenelitian,
+          deskripsiPelaksanaan: `dilaksanakan selama ${item.lamaKegiatan} bulan pada tahun ${item.tahunKegiatan}`,
           dosen: (item?.dosenPenelitian || []).map((d) => ({
-            // Changed to dosenPenelitian
             namaDosen: d.namaDosen,
             NIDN: d.NIDN,
-            prodiFakultas: d.programStudiDosenPenelitian || "N/A", // Changed field
+            prodiFakultas: d.programStudiDosenPenelitian || "N/A",
           })),
-          // Static data can be kept here
           tanggalSurat: new Date().toLocaleDateString("id-ID", {
             day: "numeric",
             month: "long",
@@ -100,11 +93,11 @@ export default function SuratTugasPage() {
           }),
           penandaTangan: {
             jabatan: "Ka. LPPM, UPI-YPTK Padang",
-            nama: "Assoc. Prof. Dr. Agung Ramadhanu, S.Kom., M.Kom.",
+            nama: "Assoc. Prof. Dr. Agung Ramadhanu, S.Kom., M.Kom",
             nidn: "1015049102",
           },
         };
-
+  
         if (isMounted) {
           setData(suratData);
         }
@@ -117,18 +110,16 @@ export default function SuratTugasPage() {
           );
         }
       } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        if (isMounted) setLoading(false);
       }
     };
-
+  
     fetchData();
-
     return () => {
       isMounted = false;
     };
   }, [id]);
+  
 
   // Helper function to convert month index to Roman numeral
   const getBulanRomawi = (monthIndex: number) => {
@@ -154,8 +145,7 @@ export default function SuratTugasPage() {
     const bulanSaatIni = new Date().getMonth(); // 0-11
     const tahunSaatIni = new Date().getFullYear();
     const bulanRomawi = getBulanRomawi(bulanSaatIni);
-    // Changed "ST.P" (Pengabdian) to "ST.PN" (Penelitian)
-    return `${nomorUrut}/LPPM-UPI-YPTK/ST.PN/HS-V/${bulanRomawi}/${tahunSaatIni}`;
+    return `${nomorUrut}/LPPM-UPI-YPTK/ST.P/HS-V/${bulanRomawi}/${tahunSaatIni}`;
   }, [nomorUrut]);
 
   return (
@@ -188,7 +178,7 @@ export default function SuratTugasPage() {
             id="nomor-urut"
             type="text"
             value={nomorUrut}
-            onChange={(e) => setNomorUrut(e.target.value.padStart(3, "0"))}
+            onChange={(e) => setNomorUrut(e.target.value.padStart(0, "0"))}
             className="px-2 py-1 border rounded w-24"
             placeholder="cth: 027"
           />
@@ -225,17 +215,17 @@ export default function SuratTugasPage() {
           <header className="flex flex-col items-center">
             <div className="flex items-center gap-4 w-full">
               <Image
-                src="/logo.png" // Ensure logo is in the public folder
+                src="/logo.png"
                 alt="Logo UPI YPTK"
                 width={80}
                 height={80}
                 className="h-20 w-20"
               />
               <div className="text-center flex-1">
-                <p className="text-sm font-bold">
+                <p className="text-md font-bold">
                   Yayasan Perguruan Tinggi Komputer (YPTK) Padang
                 </p>
-                <p className="font-semibold text-blue-700">
+                <p className="font-semibold text-lg text-blue-700">
                   LEMBAGA PENELITIAN DAN PENGABDIAN MASYARAKAT
                 </p>
                 <p className="font-semibold text-red-700 text-lg">
@@ -326,12 +316,12 @@ export default function SuratTugasPage() {
 
           {/* Signature Section */}
           <section className="mt-12">
-            <div className="inline-block float-right text-sm text-center">
+            <div className="inline-block float-right text-base text-center">
               <p className="text-left">Padang, {data.tanggalSurat}</p>
               <p className="mt-1 text-left">{data.penandaTangan.jabatan}</p>
               <div className="h-24" />
-              <div className="text-left">
-                <p className="font-bold underline">{data.penandaTangan.nama}</p>
+              <div className="font-bold text-left">
+                <p className="underline">{data.penandaTangan.nama}</p>
                 <p>NIDN: {data.penandaTangan.nidn}</p>
               </div>
             </div>
