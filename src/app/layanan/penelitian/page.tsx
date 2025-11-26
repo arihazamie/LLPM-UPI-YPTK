@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, FileText } from "lucide-react";
 import type { PKM } from "@/types/pkm-types";
-import { PKMAddEditModal } from "@/components/layananPenelitian/pkm-add-edit-modal";
-import { PKMDeleteModal } from "@/components/layananPenelitian/pkm-delete-modal";
-import { PKMGenericDataTable } from "@/components/layananPenelitian/pkm-generic-datatable";
-import { DetailModal } from "@/components/layananPenelitian/detail-modal";
-import { PKMExcelExportButton } from "@/components/layananPenelitian/pkm-excel-export-button";
+import { PKMAddEditModal } from "@/components/pkm/pkm-add-edit-modal";
+import { PKMDeleteModal } from "@/components/pkm/pkm-delete-modal";
+import { PKMGenericDataTable } from "@/components/pkm/pkm-generic-datatable";
+import { DetailModal } from "@/components/pkm/detail-modal";
+import { PKMExcelExportButton } from "@/components/pkm/pkm-excel-export-button";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import DosenOnly from "@/components/auth/DosenOnly";
@@ -40,7 +40,7 @@ export default function PKMPage() {
   const fetchPkms = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/dosen/pkm", {
+      const response = await fetch("/api/layanan/penelitian", {
         headers: {
           "Cache-Control": "no-cache",
           Pragma: "no-cache",
@@ -114,7 +114,7 @@ export default function PKMPage() {
           : {}),
       };
 
-      const response = await fetch("/api/dosen/pkm", {
+      const response = await fetch("/api/layanan/penelitian", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -131,14 +131,14 @@ export default function PKMPage() {
         await fetchPkms();
         setShowAddModal(false);
         toast.success(result.message, {
-          description: `ID PKM baru: ${result.data.id}`,
+          description: `ID Penelitian baru: ${result.data.id}`,
         });
       } else {
-        throw new Error(result.message || "Gagal menambahkan PKM");
+        throw new Error(result.message || "Gagal menambahkan Penelitian");
       }
     } catch (error) {
-      console.error("Error creating PKM:", error);
-      toast.error("Gagal menambahkan PKM", {
+      console.error("Error creating Penelitian:", error);
+      toast.error("Gagal menambahkan Penelitian", {
         description: error instanceof Error ? error.message : undefined,
       });
     } finally {
@@ -199,7 +199,7 @@ export default function PKMPage() {
           : {}),
       };
 
-      const response = await fetch(`/api/dosen/pkm/${editingPkm.id}`, {
+      const response = await fetch(`/api/layanan/penelitian/${editingPkm.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -216,14 +216,14 @@ export default function PKMPage() {
         await fetchPkms();
         setEditingPkm(undefined);
         toast.success(result.message, {
-          description: `PKM ID: ${result.data.id}`,
+          description: `Penelitian ID: ${result.data.id}`,
         });
       } else {
-        throw new Error(result.message || "Gagal memperbarui PKM");
+        throw new Error(result.message || "Gagal memperbarui Penelitian");
       }
     } catch (error) {
-      console.error("Error updating PKM:", error);
-      toast.error("Gagal memperbarui PKM", {
+      console.error("Error updating Penelitian:", error);
+      toast.error("Gagal memperbarui Penelitian", {
         description: error instanceof Error ? error.message : undefined,
       });
     } finally {
@@ -234,7 +234,7 @@ export default function PKMPage() {
   const handleDeletePkm = async (id: string) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/dosen/pkm/${id}`, {
+      const response = await fetch(`/api/layanan/penelitian/${id}`, {
         method: "DELETE",
       });
       const result = await response.json();
@@ -245,13 +245,13 @@ export default function PKMPage() {
         // Refresh data dari server untuk memastikan konsistensi
         await fetchPkms();
         setDeletingPkm(undefined);
-        toast.success(result.message, { description: `ID PKM: ${id}` });
+        toast.success(result.message, { description: `ID Penelitian: ${id}` });
       } else {
-        throw new Error(result.message || "Gagal menghapus PKM");
+        throw new Error(result.message || "Gagal menghapus Penelitian");
       }
     } catch (error) {
-      console.error("Error deleting PKM:", error);
-      toast.error("Gagal menghapus PKM", {
+      console.error("Error deleting Penelitian:", error);
+      toast.error("Gagal menghapus Penelitian", {
         description: error instanceof Error ? error.message : undefined,
       });
     } finally {
@@ -289,7 +289,7 @@ export default function PKMPage() {
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <h1 className="text-4xl font-bold tracking-tight bg-white bg-clip-text text-transparent drop-shadow-2xl">
-                Manajemen PKM - {session?.user?.name}
+                Manajemen Penelitian - {session?.user?.name}
               </h1>
               <p className="text-lg text-white font-medium drop-shadow-sm">
                 Kelola data Pengabdian Kepada Masyarakat UPI YPTK Padang
@@ -302,7 +302,7 @@ export default function PKMPage() {
                 disabled={isLoading}
                 className="bg-white text-black px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 border-0">
                 <Plus className="w-4 h-4 mr-2" />
-                Tambah PKM
+                Tambah Penelitian
               </Button>
             </div>
           </div>
@@ -315,7 +315,7 @@ export default function PKMPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-slate-600">
-                        Total PKM
+                        Total Penelitian
                       </p>
                       <p className="text-2xl font-bold text-slate-900">
                         {pkms.length}
@@ -401,11 +401,11 @@ export default function PKMPage() {
                     <FileText className="w-8 h-8 text-red-600" />
                   </div>
                   <h3 className="text-lg font-semibold text-slate-800 mb-2">
-                    Belum ada data PKM
+                    Belum ada data Penelitian
                   </h3>
                   <p className="text-slate-500 text-center mb-6 max-w-sm">
-                    Mulai dengan menambahkan PKM pertama Anda untuk UPI YPTK
-                    Padang
+                    Mulai dengan menambahkan Penelitian pertama Anda untuk UPI
+                    YPTK Padang
                   </p>
                   <div className="flex items-center gap-3">
                     <PKMExcelExportButton
@@ -415,7 +415,7 @@ export default function PKMPage() {
                       onClick={() => setShowAddModal(true)}
                       className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 shadow-lg">
                       <Plus className="w-4 h-4 mr-2" />
-                      Tambah PKM
+                      Tambah Penelitian
                     </Button>
                   </div>
                 </div>

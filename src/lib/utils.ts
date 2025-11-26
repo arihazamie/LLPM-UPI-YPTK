@@ -59,6 +59,10 @@ export async function generatePkmId(prisma: unknown): Promise<string> {
   return generateCustomId("LPPM-PKM", prisma, "pKM");
 }
 
+export async function generatePId(prisma: unknown): Promise<string> {
+  return generateCustomId("LPPM-PENELITIAN", prisma, "Penelitian");
+}
+
 export async function generateHkiId(prisma: unknown): Promise<string> {
   return generateCustomId("LPPM-HKI", prisma, "hKI");
 }

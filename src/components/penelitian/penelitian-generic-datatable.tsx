@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, FileText, BookOpen } from "lucide-react";
+import { Search, FileText, BookOpen, Pencil, Trash2 } from "lucide-react";
 import type { Penelitian } from "@/types/pkm-types";
 import { StatusPenelitian } from "@/types/pkm-types";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,6 +22,8 @@ import PenelitianDetailModal from "./penelitian-detail-modal";
 interface PenelitianGenericDataTableProps {
   data: Penelitian[];
   isLoading?: boolean;
+  onEdit?: (penelitian: Penelitian) => void;
+  onDelete?: (penelitian: Penelitian) => void;
 }
 
 const getStatusColor = (status: StatusPenelitian) => {
@@ -89,6 +91,8 @@ const getProgressPercentage = (status: StatusPenelitian) => {
 export function PenelitianGenericDataTable({
   data,
   isLoading = false,
+  onEdit,
+  onDelete,
 }: PenelitianGenericDataTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -210,13 +214,16 @@ export function PenelitianGenericDataTable({
                   <TableHead>Tahun</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-center">Aksi</TableHead>
+                  {onEdit || onDelete ? (
+                    <TableHead className="text-center">Kelola</TableHead>
+                  ) : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {paginatedData.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={5}
+                      colSpan={onEdit || onDelete ? 6 : 5}
                       className="text-center py-8">
                       <div className="flex flex-col items-center gap-2">
                         <FileText className="h-8 w-8 text-gray-400" />
@@ -295,7 +302,6 @@ export function PenelitianGenericDataTable({
                             100%
                           </Button>
 
-                          {/* Tampilkan dua tombol cetak setelah proposal ACC hingga seterusnya */}
                           {[
                             StatusPenelitian.ACC_PROPOSAL,
                             StatusPenelitian.REVIEW_LAPORAN_KEMAJUAN_60,
@@ -331,6 +337,54 @@ export function PenelitianGenericDataTable({
                           )}
                         </div>
                       </TableCell>
+                      {(onEdit || onDelete) && (
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            {onEdit && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                onClick={() => onEdit(penelitian)}>
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                            )}
+                            {onDelete && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                onClick={() => onDelete(penelitian)}>
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      )}
+                      {(onEdit || onDelete) && (
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            {onEdit && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                onClick={() => onEdit(penelitian)}>
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                            )}
+                            {onDelete && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                onClick={() => onDelete(penelitian)}>
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))
                 )}

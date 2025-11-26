@@ -10,16 +10,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { EditIcon } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { EditIcon, Loader2 } from "lucide-react";
 import { usePosts } from "@/hooks/use-posts";
 import { PostType } from "@/types/post-type";
-import { useMemo } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 export default function ProfileTab() {
   const { posts: allPosts } = usePosts();
 
   const { data: session } = useSession();
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { articles, news, webinars } = useMemo(() => {
     return {
@@ -59,6 +68,60 @@ export default function ProfileTab() {
         allPosts.length > 0 ? `${allPosts.length} konten` : "Belum ada konten",
     },
   ];
+
+  const handlePasswordChange = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (
+      !passwordForm.currentPassword ||
+      !passwordForm.newPassword ||
+      !passwordForm.confirmPassword
+    ) {
+      toast.error("Semua kolom password wajib diisi.");
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error("Konfirmasi password baru tidak cocok.");
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 8) {
+      toast.error("Password baru minimal 8 karakter.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/profile/password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(passwordForm),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast.error(result.message || "Gagal memperbarui password.");
+        return;
+      }
+
+      toast.success(result.message || "Password berhasil diperbarui.");
+      setPasswordForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error) {
+      console.error("Error changing password:", error);
+      toast.error("Terjadi kesalahan saat memperbarui password.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -141,65 +204,79 @@ export default function ProfileTab() {
             </CardContent>
           </Card>
 
-          {/* Settings
           <Card>
             <CardHeader>
-              <CardTitle>Pengaturan Akun</CardTitle>
-              <CardDescription>Kelola preferensi dan keamanan</CardDescription>
+              <CardTitle>Keamanan Akun</CardTitle>
+              <CardDescription>
+                Ganti password secara berkala untuk menjaga keamanan akun.
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <SettingsIcon className="w-5 h-5 text-gray-500" />
-                  <div>
-                    <p className="font-medium">Pengaturan Umum</p>
-                    <p className="text-sm text-gray-600 ">
-                      Bahasa, zona waktu, dan preferensi
-                    </p>
-                  </div>
+            <CardContent>
+              <form
+                className="space-y-4"
+                onSubmit={handlePasswordChange}>
+                <div className="grid gap-2">
+                  <Label htmlFor="current-password">Password Saat Ini</Label>
+                  <Input
+                    id="current-password"
+                    type="password"
+                    value={passwordForm.currentPassword}
+                    onChange={(event) =>
+                      setPasswordForm((prev) => ({
+                        ...prev,
+                        currentPassword: event.target.value,
+                      }))
+                    }
+                    placeholder="Masukkan password saat ini"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="new-password">Password Baru</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    value={passwordForm.newPassword}
+                    onChange={(event) =>
+                      setPasswordForm((prev) => ({
+                        ...prev,
+                        newPassword: event.target.value,
+                      }))
+                    }
+                    placeholder="Minimal 8 karakter"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="confirm-password">
+                    Konfirmasi Password Baru
+                  </Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    value={passwordForm.confirmPassword}
+                    onChange={(event) =>
+                      setPasswordForm((prev) => ({
+                        ...prev,
+                        confirmPassword: event.target.value,
+                      }))
+                    }
+                    placeholder="Ulangi password baru"
+                    required
+                  />
                 </div>
                 <Button
-                  variant="outline"
-                  size="sm">
-                  Kelola
+                  type="submit"
+                  className="bg-red-500 hover:bg-red-600 text-white"
+                  disabled={isSubmitting}>
+                  {isSubmitting && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Simpan Password
                 </Button>
-              </div>
-
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <ShieldIcon className="w-5 h-5 text-gray-500" />
-                  <div>
-                    <p className="font-medium">Keamanan</p>
-                    <p className="text-sm text-gray-600 ">
-                      Password, 2FA, dan sesi login
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm">
-                  Kelola
-                </Button>
-              </div>
-
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <BellIcon className="w-5 h-5 text-gray-500" />
-                  <div>
-                    <p className="font-medium">Notifikasi</p>
-                    <p className="text-sm text-gray-600 ">
-                      Email dan push notifications
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm">
-                  Kelola
-                </Button>
-              </div>
+              </form>
             </CardContent>
-          </Card> */}
+          </Card>
         </div>
       </div>
     </div>

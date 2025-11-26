@@ -160,16 +160,11 @@ export default function PenelitianPage() {
   };
 
   // Handle delete penelitian
-  const handleDeletePenelitian = async () => {
-    if (!deletingPenelitian) return;
-
+  const handleDeletePenelitian = async (id: string) => {
     try {
-      const response = await fetch(
-        `/api/dosen/penelitian/${deletingPenelitian.id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const response = await fetch(`/api/dosen/penelitian/${id}`, {
+        method: "DELETE",
+      });
 
       const result = await response.json();
 
@@ -248,6 +243,11 @@ export default function PenelitianPage() {
                 <PenelitianGenericDataTable
                   data={penelitians}
                   isLoading={isLoading}
+                  onEdit={(penelitian) => {
+                    setEditingPenelitian(penelitian);
+                    setShowAddModal(true);
+                  }}
+                  onDelete={(penelitian) => setDeletingPenelitian(penelitian)}
                 />
               )}
             </CardContent>
@@ -270,11 +270,7 @@ export default function PenelitianPage() {
           <PenelitianDeleteModal
             isOpen={!!deletingPenelitian}
             onClose={() => setDeletingPenelitian(undefined)}
-            onDelete={async () => {
-              if (deletingPenelitian) {
-                await handleDeletePenelitian();
-              }
-            }}
+            onDelete={handleDeletePenelitian}
             penelitian={deletingPenelitian || null}
           />
         </div>

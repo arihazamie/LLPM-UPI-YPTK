@@ -72,6 +72,12 @@ const layananLinks = [
   { title: "PPJS", href: "/layanan/ppjs", icon: Settings },
   { title: "PKM", href: "/layanan/pkm", icon: BookOpen, dosenOnly: true },
   {
+    title: "Penelitian",
+    href: "/layanan/penelitian",
+    icon: BookOpenCheck,
+    dosenOnly: true,
+  },
+  {
     title: "Prototype",
     href: "/layanan/prototype",
     icon: Lightbulb,

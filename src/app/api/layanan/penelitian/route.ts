@@ -3,23 +3,23 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { KategoriArtikel, JenisBuku } from "@prisma/client";
 import {
-  generatePkmId,
+  generatePId,
   generateArtikelIds,
   generateHkiIds,
   generateBukuIds,
 } from "@/lib/utils";
 import { withRoleAuth } from "@/lib/auth-helpers";
 
-// --- Schemas ---
+// ---------- Schemas ----------
 const ArtikelInputSchema = z
   .object({
     author: z.array(z.string()).min(1),
-    judul: z.string().min(1),
-    namaArtikel: z.string().min(1),
-    publisher: z.string().min(1),
+    judul: z.string(),
+    namaArtikel: z.string(),
+    publisher: z.string(),
     kategori: z.nativeEnum(KategoriArtikel),
     level: z.string().optional(),
-    linkArtikel: z.string().min(1),
+    linkArtikel: z.string(),
     tanggalPublisher: z.coerce.date().optional(),
   })
   .strict();
@@ -27,31 +27,31 @@ const ArtikelInputSchema = z
 const HkiInputSchema = z
   .object({
     author: z.array(z.string()).min(1),
-    nomorPenciptaan: z.string().min(1),
+    nomorPenciptaan: z.string(),
     tanggalPermohonan: z.coerce.date(),
-    jenisCiptaan: z.string().min(1),
-    judulCiptaan: z.string().min(1),
-    linkSertifikat: z.string().min(1),
+    jenisCiptaan: z.string(),
+    judulCiptaan: z.string(),
+    linkSertifikat: z.string(),
   })
   .strict();
 
 const BukuInputSchema = z
   .object({
     author: z.array(z.string()).min(1),
-    judulBuku: z.string().min(1),
-    penerbit: z.string().min(1),
-    isbn: z.string().min(1),
+    judulBuku: z.string(),
+    penerbit: z.string(),
+    isbn: z.string(),
     tahun: z.number().int(),
     jenisBuku: z.nativeEnum(JenisBuku),
-    linkBuku: z.string().min(1),
+    linkBuku: z.string(),
   })
   .strict();
 
-const PkmCreateSchema = z
+const LayananSchema = z
   .object({
-    judul: z.string().min(1),
-    proposal: z.string().min(1),
-    laporan: z.string().min(1),
+    judul: z.string(),
+    proposal: z.string(),
+    laporan: z.string(),
     tanggalPelaksanaan: z.coerce.date().optional(),
     artikel: z.array(ArtikelInputSchema).optional(),
     hki: z.array(HkiInputSchema).optional(),
@@ -59,23 +59,17 @@ const PkmCreateSchema = z
   })
   .strict();
 
-type PkmCreateBody = z.infer<typeof PkmCreateSchema>;
-
-// --- Handler ---
+// ---------- CREATE ----------
 export const POST = withRoleAuth(
   ["DOSEN", "ADMIN", "PIMPINAN"],
   async (req, user) => {
     try {
       const json = await req.json();
-      console.log("Received JSON data:", JSON.stringify(json, null, 2));
+      const body = LayananSchema.parse(json);
 
-      const body: PkmCreateBody = PkmCreateSchema.parse(json);
-      console.log("Parsed body:", JSON.stringify(body, null, 2));
+      const layananId = await generatePId(prisma);
 
-      // Generate custom IDs
-      const pkmId = await generatePkmId(prisma);
-
-      // Siapkan payload nested create untuk banyak item
+      // -------- Artikel --------
       const artikelCreate =
         body.artikel && body.artikel.length > 0
           ? (async () => {
@@ -93,6 +87,7 @@ export const POST = withRoleAuth(
             })()
           : undefined;
 
+      // -------- HKI --------
       const hkiCreate =
         body.hki && body.hki.length > 0
           ? (async () => {
@@ -107,6 +102,7 @@ export const POST = withRoleAuth(
             })()
           : undefined;
 
+      // -------- Buku --------
       const bukuCreate =
         body.buku && body.buku.length > 0
           ? (async () => {
@@ -121,14 +117,16 @@ export const POST = withRoleAuth(
             })()
           : undefined;
 
-      const created = await prisma.pKM.create({
+      // ---------- CREATE ----------
+      const created = await prisma.layananPenelitian.create({
         data: {
-          id: pkmId,
+          id: layananId,
           judul: body.judul,
           proposal: body.proposal,
           laporan: body.laporan,
           tanggalPelaksanaan: body.tanggalPelaksanaan,
           createdById: user.id,
+
           ...(artikelCreate && { artikel: await artikelCreate }),
           ...(hkiCreate && { hki: await hkiCreate }),
           ...(bukuCreate && { buku: await bukuCreate }),
@@ -145,7 +143,7 @@ export const POST = withRoleAuth(
 
       return NextResponse.json({
         success: true,
-        message: "PKM berhasil dibuat",
+        message: "Layanan Penelitian berhasil dibuat",
         data: created,
       });
     } catch (err) {
@@ -153,7 +151,7 @@ export const POST = withRoleAuth(
         return NextResponse.json(
           {
             success: false,
-            message: "Validasi data gagal",
+            message: "Validasi gagal",
             errors: err.issues.map((issue) => ({
               field: issue.path.join("."),
               message: issue.message,
@@ -162,11 +160,12 @@ export const POST = withRoleAuth(
           { status: 400 }
         );
       }
-      console.error("Error create PKM:", err);
+
+      console.error("Error create layanan:", err);
       return NextResponse.json(
         {
           success: false,
-          message: "Terjadi kesalahan pada server saat membuat PKM",
+          message: "Server error saat membuat layanan penelitian",
         },
         { status: 500 }
       );
@@ -174,14 +173,13 @@ export const POST = withRoleAuth(
   }
 );
 
+// ---------- GET DATA ----------
 export const GET = withRoleAuth(
   ["DOSEN", "ADMIN", "PIMPINAN"],
   async (req, user) => {
     try {
-      const pkms = await prisma.pKM.findMany({
-        where: {
-          createdById: user.id, // Hanya ambil PKM yang dibuat oleh user yang login
-        },
+      const data = await prisma.layananPenelitian.findMany({
+        where: { createdById: user.id },
         include: {
           artikel: true,
           hki: true,
@@ -195,15 +193,15 @@ export const GET = withRoleAuth(
 
       return NextResponse.json({
         success: true,
-        message: "Data PKM berhasil diambil",
-        data: pkms,
+        message: "Data berhasil diambil",
+        data,
       });
     } catch (error) {
-      console.error("Error fetching PKMs:", error);
       return NextResponse.json(
         {
           success: false,
-          message: "Gagal mengambil data PKM",
+          message: "Gagal mengambil data layanan penelitian",
+          error,
         },
         { status: 500 }
       );

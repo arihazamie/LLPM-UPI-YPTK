@@ -13,10 +13,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { User, Mail, Shield, LogOut } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { User, Mail, Shield, LogOut, Loader2 } from "lucide-react";
 import { DialogClose } from "@/components/ui/dialog";
 import { signOut } from "next-auth/react";
 import { toast } from "sonner";
+import { useState } from "react";
 
 interface UserProfileModalProps {
   user: {
@@ -28,6 +31,13 @@ interface UserProfileModalProps {
 }
 
 export function UserProfileModal({ user }: UserProfileModalProps) {
+  const [passwordForm, setPasswordForm] = useState({
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPasswordFormVisible, setIsPasswordFormVisible] = useState(false);
+
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -50,6 +60,61 @@ export function UserProfileModal({ user }: UserProfileModalProps) {
     }
   };
 
+  const handlePasswordUpdate = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
+
+    if (!passwordForm.newPassword || !passwordForm.confirmPassword) {
+      toast.error("Password baru dan konfirmasi wajib diisi.");
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 8) {
+      toast.error("Password minimal 8 karakter.");
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error("Konfirmasi password tidak cocok.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/profile/password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          currentPassword: "",
+          newPassword: passwordForm.newPassword,
+          confirmPassword: passwordForm.confirmPassword,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast.error(result.message || "Gagal memperbarui password.");
+        return;
+      }
+
+      toast.success(result.message || "Password berhasil diperbarui.");
+      setPasswordForm({ newPassword: "", confirmPassword: "" });
+      setIsPasswordFormVisible(false);
+    } catch (error) {
+      console.error("Dosen change password error:", error);
+      toast.error("Terjadi kesalahan saat memperbarui password.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const isDosen = user.role?.toLowerCase() === "dosen";
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -63,7 +128,7 @@ export function UserProfileModal({ user }: UserProfileModalProps) {
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-md">
-        <DialogHeader className="text-center pb-2">
+        <DialogHeader className="text-center">
           <DialogTitle className="text-xl font-semibold">
             Profil Pengguna
           </DialogTitle>
@@ -72,7 +137,7 @@ export function UserProfileModal({ user }: UserProfileModalProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col items-center space-y-4 py-6">
+        <div className="flex flex-col items-center space-y-4">
           <Avatar className="h-20 w-20 border-4 border-background shadow-lg">
             <AvatarImage
               src="/placeholder.svg"
@@ -89,16 +154,16 @@ export function UserProfileModal({ user }: UserProfileModalProps) {
             </h3>
             <Badge
               variant="secondary"
-              className={`${getRoleColor(user.role)} font-medium px-3 py-1`}>
+              className={`${getRoleColor(user.role)} font-medium px-3`}>
               <Shield className="h-3 w-3 mr-1" />
               {user.role}
             </Badge>
           </div>
         </div>
 
-        <Separator className="my-4" />
+        <Separator className="my-1" />
 
-        <div className="space-y-4">
+        <div className="space-y-1">
           <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/50">
             <div className="flex-shrink-0">
               <User className="h-5 w-5 text-muted-foreground" />
@@ -125,6 +190,82 @@ export function UserProfileModal({ user }: UserProfileModalProps) {
             </div>
           </div>
         </div>
+
+        {isDosen && (
+          <>
+            <Separator className="my-1" />
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-base font-semibold">Ganti Password</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Dosen dapat mengganti password tanpa verifikasi email atau
+                    password lama.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="whitespace-nowrap"
+                  onClick={() =>
+                    setIsPasswordFormVisible((prevState) => !prevState)
+                  }>
+                  {isPasswordFormVisible ? "Tutup" : "Ganti Password"}
+                </Button>
+              </div>
+
+              {isPasswordFormVisible && (
+                <form
+                  className="space-y-4 rounded-lg border border-dashed border-gray-200 p-4"
+                  onSubmit={handlePasswordUpdate}>
+                  <div className="space-y-2">
+                    <Label htmlFor="dosen-new-password">Password Baru</Label>
+                    <Input
+                      id="dosen-new-password"
+                      type="password"
+                      value={passwordForm.newPassword}
+                      onChange={(event) =>
+                        setPasswordForm((prev) => ({
+                          ...prev,
+                          newPassword: event.target.value,
+                        }))
+                      }
+                      placeholder="Minimal 8 karakter"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="dosen-confirm-password">
+                      Konfirmasi Password Baru
+                    </Label>
+                    <Input
+                      id="dosen-confirm-password"
+                      type="password"
+                      value={passwordForm.confirmPassword}
+                      onChange={(event) =>
+                        setPasswordForm((prev) => ({
+                          ...prev,
+                          confirmPassword: event.target.value,
+                        }))
+                      }
+                      placeholder="Ulangi password baru"
+                      required
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full bg-red-500 text-white hover:bg-red-600"
+                    disabled={isSubmitting}>
+                    {isSubmitting && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Simpan Password
+                  </Button>
+                </form>
+              )}
+            </div>
+          </>
+        )}
 
         <DialogFooter className="flex flex-col sm:flex-row gap-2 pt-6">
           <DialogClose asChild>

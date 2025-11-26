@@ -180,6 +180,13 @@ model User {
   dosenPenelitian dosenPenelitian[]
   pengabdian    Pengabdian[]
   dosenPengabdian dosenPengabdian[]
+  layananPenelitian LayananPenelitian[]
+  penelitianartikel       PenelitianArtikel[]
+  penelitianbuku          PenelitianBuku[]
+  penelitianhki           PenelitianHKI[]
+
+
+
 
   // Relasi untuk review & approval
   penelitianReviewed  Penelitian[] @relation("PenelitianReviewer")
@@ -427,4 +434,76 @@ model Artikel1 {
   createdBy       User     @relation(fields: [createdById], references: [id])
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+model LayananPenelitian {
+  id                  String   @id
+  judul               String
+  proposal            String
+  laporan             String
+  tanggalPelaksanaan  DateTime?
+  artikel             PenelitianArtikel[]
+  hki                 PenelitianHKI[]
+  buku                PenelitianBuku[]
+  createdById         String
+  createdBy           User     @relation(fields: [createdById], references: [id])
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+
+/* ---------- BUKU ---------- */
+model PenelitianBuku {
+  id          String   @id
+  author      String[]
+  judulBuku   String
+  penerbit    String
+  isbn        String
+  tahun       Int
+  jenisBuku   JenisBuku
+  linkBuku    String
+layananPenelitianId String?
+layananPenelitian   LayananPenelitian? @relation(fields: [layananPenelitianId], references: [id], onDelete: Cascade)
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/* ---------- HKI ---------- */
+model PenelitianHKI {
+  id                String   @id
+  author            String[]
+  nomorPenciptaan   String
+  tanggalPermohonan DateTime
+  jenisCiptaan      String
+  judulCiptaan      String
+  linkSertifikat    String
+
+  layananPenelitianId String?
+layananPenelitian   LayananPenelitian? @relation(fields: [layananPenelitianId], references: [id], onDelete: Cascade)
+
+  createdById       String
+  createdBy         User     @relation(fields: [createdById], references: [id])
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+/* ---------- ARTIKEL ---------- */
+model PenelitianArtikel {
+  id               String   @id
+  author           String[]
+  judul            String
+  namaArtikel      String
+  publisher        String
+  kategori         KategoriArtikel
+  level            String?
+  linkArtikel      String
+  tanggalPublisher DateTime?
+  layananPenelitianId String?
+layananPenelitian   LayananPenelitian? @relation(fields: [layananPenelitianId], references: [id], onDelete: Cascade)
+  createdById      String
+  createdBy        User     @relation(fields: [createdById], references: [id])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
