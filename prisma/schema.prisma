@@ -171,6 +171,7 @@ model User {
   posts         Post[]
   prototypes    Prototype[]
   buku          Buku[]
+  books         Book[]
   prestasi      Prestasi[]
   artikel       Artikel[]
   artikel1      Artikel1[]
@@ -506,4 +507,28 @@ layananPenelitian   LayananPenelitian? @relation(fields: [layananPenelitianId], 
   createdBy        User     @relation(fields: [createdById], references: [id])
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+}
+
+/* ---------- BOOK ---------- */
+model Book {
+  id          String   @id @default(cuid())
+
+  title       String          // Judul
+  author      String          // Penulis
+  isbn        String?         // ISBN (opsional)
+  pages       Int?            // Tebal halaman
+  size        String?         // Ukuran buku
+  year        Int?            // Tahun terbit
+
+  shortDesc   String?         // Deskripsi singkat
+  synopsis    String?         // Sinopsis
+
+  price       Int?            // Harga (opsional)
+
+  coverBook    String?        
+
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

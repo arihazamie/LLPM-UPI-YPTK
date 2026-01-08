@@ -6,10 +6,19 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  output: 'standalone',
+  output: "standalone",
   experimental: {
-    missingSuspenseWithCSRBailout: true
-  }
-}
+    missingSuspenseWithCSRBailout: true,
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/**",
+      },
+    ],
+  },
+};
 
 export default nextConfig;

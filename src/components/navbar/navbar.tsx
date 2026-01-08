@@ -52,6 +52,7 @@ const beritaLinks = [
   { title: "Pengumuman", href: "/berita/pengumuman", icon: Megaphone },
   { title: "Artikel", href: "/berita/artikel", icon: FileText },
   { title: "Agenda LPPM", href: "/berita/agenda", icon: Calendar },
+  { title: "Katalog Buku", href: "/katalog-buku", icon: BookOpen },
 ];
 
 const simlitLinks = [
@@ -75,6 +76,12 @@ const layananLinks = [
     title: "Penelitian",
     href: "/layanan/penelitian",
     icon: BookOpenCheck,
+    dosenOnly: true,
+  },
+  {
+    title: "Buku",
+    href: "/layanan/buku",
+    icon: BookOpen,
     dosenOnly: true,
   },
   {
