@@ -77,7 +77,7 @@ export default withAuth(
   }
 );
 
-export const config = {
+export const proxyConfig  = {
   matcher: [
     // Proteksi semua API routes kecuali auth dan public
     "/api/((?!auth|public).*)",
