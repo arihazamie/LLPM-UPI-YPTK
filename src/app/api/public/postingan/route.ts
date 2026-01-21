@@ -1,9 +1,7 @@
 // src/app/api/postingan/route.ts
 import { NextResponse } from "next/server";
-import { prismaEdge } from "@/lib/prisma-edge";
+import { prisma as prismaEdge } from "@/lib/prisma-edge";
 import { PostType } from "@/types/post-type";
-
-const prisma = prismaEdge;
 
 export async function GET(req: Request) {
   try {
@@ -19,7 +17,7 @@ export async function GET(req: Request) {
 
     // Jika ada ID → ambil single post
     if (idParam) {
-      const post = await prisma.post.findUnique({
+      const post = await prismaEdge.post.findUnique({
         where: { id: idParam },
         include: {
           author: { select: { id: true, name: true, email: true } },
@@ -41,7 +39,7 @@ export async function GET(req: Request) {
         : {};
 
     const [posts, total] = await Promise.all([
-      prisma.post.findMany({
+      prismaEdge.post.findMany({
         where,
         take,
         skip,
@@ -52,7 +50,7 @@ export async function GET(req: Request) {
           },
         },
       }),
-      prisma.post.count({ where }),
+      prismaEdge.post.count({ where }),
     ]);
 
     return NextResponse.json(

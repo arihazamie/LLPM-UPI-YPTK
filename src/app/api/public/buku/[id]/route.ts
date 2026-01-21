@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma as prismaEdge } from "@/lib/prisma-edge";
 
 /**
  * @handler GET /api/public/buku/[id]
@@ -11,7 +11,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const book = await prisma.book.findUnique({
+    const book = await prismaEdge.book.findUnique({
       where: { id },
       include: {
         createdBy: {

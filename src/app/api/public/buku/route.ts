@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma as prismaEdge } from "@/lib/prisma-edge";
 
 /**
  * GET /api/public/buku
@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
  */
 export async function GET() {
   try {
-    const books = await prisma.book.findMany({
+    const books = await prismaEdge.book.findMany({
       include: {
         createdBy: {
           select: { id: true, name: true, email: true },

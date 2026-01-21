@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import { prisma } from "@/lib/prisma";
+import { prisma as prismaEdge } from "@/lib/prisma-edge";
 import {
   RoleDosenPenelitian,
   ProgramStudiDosenPenelitian,
@@ -16,7 +16,7 @@ export async function GET() {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const penelitian = await prisma.penelitian.findMany({
+    const penelitian = await prismaEdge.penelitian.findMany({
       where: {
         createdById: session.user.id,
       },
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const penelitian = await prisma.penelitian.create({
+    const penelitian = await prismaEdge.penelitian.create({
       data: {
         judulPenelitian,
         kategoriPenelitian,

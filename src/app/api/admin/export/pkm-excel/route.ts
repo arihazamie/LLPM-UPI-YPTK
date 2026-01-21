@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma-edge";
 import * as XLSX from "xlsx";
 import { withRoleAuth } from "@/lib/auth-helpers";
 

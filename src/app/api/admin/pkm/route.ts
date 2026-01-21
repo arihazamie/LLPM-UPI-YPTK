@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma-edge";
 import { z } from "zod";
 import { KategoriArtikel, JenisBuku } from "@prisma/client";
 import {

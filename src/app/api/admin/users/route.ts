@@ -1,6 +1,6 @@
 // api/admin/users/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { prismaEdge } from "@/lib/prisma-edge";
+import { prisma as prismaEdge } from "@/lib/prisma-edge";
 import * as bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
 import { getServerSession } from "next-auth";

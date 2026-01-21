@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma as prismaEdge } from "@/lib/prisma-edge";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { v2 as cloudinary } from "cloudinary";
@@ -22,7 +22,7 @@ export async function GET(
     }
 
     const { id } = await params;
-    const book = await prisma.book.findFirst({
+    const book = await prismaEdge.book.findFirst({
       where: {
         id: id,
         createdById: session.user.id,
@@ -83,7 +83,7 @@ export async function PUT(
     const price = formData.get("price") as string | null;
 
     // Pastikan buku ada dan milik user yang login
-    const existing = await prisma.book.findFirst({
+    const existing = await prismaEdge.book.findFirst({
       where: {
         id: id,
         createdById: session.user.id,
@@ -123,7 +123,7 @@ export async function PUT(
       coverBookUrl = uploadResult.secure_url;
     }
 
-    const updatedBook = await prisma.book.update({
+    const updatedBook = await prismaEdge.book.update({
       where: { id },
       data: {
         title: title ?? existing.title,
@@ -174,7 +174,7 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const existing = await prisma.book.findFirst({
+    const existing = await prismaEdge.book.findFirst({
       where: {
         id: id,
         createdById: session.user.id,
@@ -188,7 +188,7 @@ export async function DELETE(
       );
     }
 
-    await prisma.book.delete({
+    await prismaEdge.book.delete({
       where: { id },
     });
 

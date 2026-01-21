@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import { prisma } from "@/lib/prisma";
+import { prisma as prismaEdge } from "@/lib/prisma-edge";
 import * as XLSX from "xlsx";
 
 export async function GET() {
@@ -12,7 +12,7 @@ export async function GET() {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const pengabdian = await prisma.pengabdian.findMany({
+    const pengabdian = await prismaEdge.pengabdian.findMany({
       where: {
         createdById: session.user.id,
       },

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import { prismaEdge } from "@/lib/prisma-edge";
 import * as bcrypt from "bcryptjs";
+import { prisma as prismaEdge } from "@/lib/prisma-edge";
 
 function validatePassword(password: unknown): string | null {
   if (typeof password !== "string") {

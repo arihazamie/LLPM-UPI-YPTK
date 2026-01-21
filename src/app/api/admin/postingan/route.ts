@@ -1,7 +1,7 @@
 // src/app/api/admin/postingan/route.ts
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
-import { prismaEdge as prisma } from "@/lib/prisma-edge";
+import { prisma } from "@/lib/prisma-edge";
 import { PostType } from "@prisma/client";
 import { withRoleAuth } from "@/lib/auth-helpers";
 

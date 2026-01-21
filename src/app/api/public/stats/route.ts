@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma as prismaEdge } from "@/lib/prisma-edge";
 
 export async function GET() {
   try {
@@ -25,8 +25,8 @@ export async function GET() {
       sintaThisYear,
     ] = await Promise.all([
       // Total Artikel
-      prisma.artikel.count(),
-      prisma.artikel.count({
+      prismaEdge.artikel.count(),
+      prismaEdge.artikel.count({
         where: {
           createdAt: {
             gte: startOfYear,
@@ -35,8 +35,8 @@ export async function GET() {
         },
       }),
       // Total buku
-      prisma.buku.count(),
-      prisma.buku.count({
+      prismaEdge.buku.count(),
+      prismaEdge.buku.count({
         where: {
           createdAt: {
             gte: startOfYear,
@@ -45,8 +45,8 @@ export async function GET() {
         },
       }),
       // Total HKI
-      prisma.hKI.count(),
-      prisma.hKI.count({
+      prismaEdge.hKI.count(),
+      prismaEdge.hKI.count({
         where: {
           createdAt: {
             gte: startOfYear,
@@ -55,8 +55,8 @@ export async function GET() {
         },
       }),
       // Total PKM
-      prisma.pKM.count(),
-      prisma.pKM.count({
+      prismaEdge.pKM.count(),
+      prismaEdge.pKM.count({
         where: {
           createdAt: {
             gte: startOfYear,
@@ -65,8 +65,8 @@ export async function GET() {
         },
       }),
       // Total prestasi
-      prisma.prestasi.count(),
-      prisma.prestasi.count({
+      prismaEdge.prestasi.count(),
+      prismaEdge.prestasi.count({
         where: {
           createdAt: {
             gte: startOfYear,
@@ -75,12 +75,12 @@ export async function GET() {
         },
       }),
       // Scopus
-      prisma.artikel.count({
+      prismaEdge.artikel.count({
         where: {
           kategori: "SCOPUS",
         },
       }),
-      prisma.artikel.count({
+      prismaEdge.artikel.count({
         where: {
           kategori: "SCOPUS",
           createdAt: {
@@ -90,12 +90,12 @@ export async function GET() {
         },
       }),
       // Sinta
-      prisma.artikel.count({
+      prismaEdge.artikel.count({
         where: {
           kategori: "SINTA",
         },
       }),
-      prisma.artikel.count({
+      prismaEdge.artikel.count({
         where: {
           kategori: "SINTA",
           createdAt: {

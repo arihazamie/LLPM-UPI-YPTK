@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma-edge";
 import * as XLSX from "xlsx";
 
 export async function GET() {
@@ -84,9 +84,9 @@ export async function GET() {
         .join(", "),
       "Lama Kegiatan": item.lamaKegiatan,
       "Tahun Kegiatan": item.tahunKegiatan,
-      "Anggaran": item.anggaran || 0,
+      Anggaran: item.anggaran || 0,
       "Sumber Anggaran": item.sumberAnggaran || "N/A",
-      "Luaran": item.luaran.join(", "),
+      Luaran: item.luaran.join(", "),
       "Status Pengabdian": item.statusPengabdian,
       "Link Proposal": item.linkProposal,
       "Link Laporan Kemajuan": item.linkLaporanKemajuan || "N/A",
@@ -106,7 +106,9 @@ export async function GET() {
         : "N/A",
       "Catatan Approval": item.approvalNotes || "N/A",
       "Tanggal Dibuat": new Date(item.createdAt).toLocaleDateString("id-ID"),
-      "Tanggal Diperbarui": new Date(item.updatedAt).toLocaleDateString("id-ID"),
+      "Tanggal Diperbarui": new Date(item.updatedAt).toLocaleDateString(
+        "id-ID"
+      ),
     }));
 
     // Create workbook and worksheet
@@ -161,9 +163,9 @@ export async function GET() {
       headers: {
         "Content-Type":
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "Content-Disposition": `attachment; filename="pengabdian-admin-${new Date()
-          .toISOString()
-          .split("T")[0]}.xlsx"`,
+        "Content-Disposition": `attachment; filename="pengabdian-admin-${
+          new Date().toISOString().split("T")[0]
+        }.xlsx"`,
       },
     });
   } catch (error) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prismaEdge } from "@/lib/prisma-edge";
+import { prisma as prismaEdge } from "@/lib/prisma-edge";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import * as bcrypt from "bcryptjs";
@@ -13,19 +13,16 @@ function validatePassword(password: unknown): string | null {
 // GET - Get user by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "ADMIN") {
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = await params;
+    const { id } = params;
 
     if (!id) {
       return NextResponse.json(
@@ -67,19 +64,16 @@ export async function GET(
 // PUT - Update user by ID
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "ADMIN") {
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = await params;
+    const { id } = params;
     const body = await request.json();
     const { name, email, nohp, password, role } = body;
 
@@ -202,7 +196,7 @@ export async function PUT(
 
     // Prepare update data
     const updateData: Record<string, unknown> = {};
-    
+
     if (name !== undefined) {
       updateData.name = name.trim();
     }
@@ -249,19 +243,16 @@ export async function PUT(
 // DELETE - Delete user by ID
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "ADMIN") {
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = await params;
+    const { id } = params;
 
     if (!id) {
       return NextResponse.json(
@@ -306,4 +297,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-} 
+}

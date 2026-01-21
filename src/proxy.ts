@@ -1,14 +1,20 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export default withAuth(
-  function middleware(req) {
-    const token = req.nextauth.token;
+  function middleware(req: NextRequest & { nextauth?: { token?: any } }) {
+    const token = req.nextauth?.token;
     const { pathname } = req.nextUrl;
 
-    // Jika user tidak terautentikasi, redirect ke login
+    // ⛔️ jangan proteksi halaman login & route auth
+    if (pathname.startsWith("/login") || pathname.startsWith("/api/auth")) {
+      return NextResponse.next();
+    }
+
+    // jika belum login, biarkan withAuth yang urus
     if (!token) {
-      return NextResponse.redirect(new URL("/login", req.url));
+      return NextResponse.next();
     }
 
     // Proteksi API routes berdasarkan role
@@ -22,7 +28,11 @@ export default withAuth(
     }
 
     if (pathname.startsWith("/api/dosen")) {
-      if (token.role !== "DOSEN" && token.role !== "ADMIN" && token.role !== "PIMPINAN") {
+      if (
+        token.role !== "DOSEN" &&
+        token.role !== "ADMIN" &&
+        token.role !== "PIMPINAN"
+      ) {
         return NextResponse.json(
           { error: "Unauthorized: Dosen access required" },
           { status: 403 }
@@ -61,8 +71,12 @@ export default withAuth(
       }
     }
 
-    // Proteksi halaman dosen (hanya DOSEN yang bisa akses)
-    if (pathname === "/pkm" || pathname === "/prestasi" || pathname === "/prototype") {
+    // halaman khusus dosen
+    if (
+      pathname === "/pkm" ||
+      pathname === "/prestasi" ||
+      pathname === "/prototype"
+    ) {
       if (token.role !== "DOSEN") {
         return NextResponse.redirect(new URL("/dashboard", req.url));
       }
@@ -77,16 +91,13 @@ export default withAuth(
   }
 );
 
-export const proxyConfig  = {
+export const config = {
   matcher: [
-    // Proteksi semua API routes kecuali auth dan public
     "/api/((?!auth|public).*)",
-    // Proteksi halaman dashboard
     "/dashboard/:path*",
-    // Proteksi halaman yang memerlukan login
     "/admin/:path*",
     "/pkm",
     "/prestasi",
     "/prototype",
   ],
-}; 
+};

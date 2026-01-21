@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma as prismaEdge } from "@/lib/prisma-edge";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { v2 as cloudinary } from "cloudinary";
@@ -18,7 +18,7 @@ export async function GET() {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const books = await prisma.book.findMany({
+    const books = await prismaEdge.book.findMany({
       where: {
         createdById: session.user.id,
       },
@@ -86,7 +86,7 @@ export async function POST(request: Request) {
       coverBookUrl = uploadResult.secure_url;
     }
 
-    const newBook = await prisma.book.create({
+    const newBook = await prismaEdge.book.create({
       data: {
         title,
         author,
